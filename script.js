@@ -1,4 +1,5 @@
 const PASSAGES_DATA_URL = "./data/kjv/passages.json";
+const VERSES_DATA_URL = "./data/kjv/verses.json";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -11,28 +12,66 @@ const promptDetails = document.getElementById("promptDetails");
 const imagePrompt = document.getElementById("imagePrompt");
 
 let passages = [];
+let versesById = new Map();
 let lastIndex = -1;
 let currentPassage = null;
 let isGeneratingImage = false;
 
-async function loadPassages() {
-  const response = await fetch(PASSAGES_DATA_URL, { cache: "no-cache" });
+async function fetchJson(url, label) {
+  const response = await fetch(url, { cache: "no-cache" });
 
   if (!response.ok) {
-    throw new Error(`Could not load passage data: ${response.status}`);
+    throw new Error(`Could not load ${label}: ${response.status}`);
   }
 
-  const data = await response.json();
+  return response.json();
+}
 
-  if (!Array.isArray(data) || data.length === 0) {
+function buildVerseIndex(verses) {
+  if (!Array.isArray(verses) || verses.length === 0) {
+    throw new Error("Verse data is empty or invalid.");
+  }
+
+  return new Map(verses.map((verse) => [verse.id, verse]));
+}
+
+function validatePassages(nextPassages, nextVersesById) {
+  if (!Array.isArray(nextPassages) || nextPassages.length === 0) {
     throw new Error("Passage data is empty or invalid.");
   }
 
-  passages = data;
+  for (const passage of nextPassages) {
+    if (!Array.isArray(passage.verse_ids) || passage.verse_ids.length === 0) {
+      throw new Error(`Passage ${passage.id || passage.reference} has no verse IDs.`);
+    }
+
+    const missingVerseIds = passage.verse_ids.filter((verseId) => !nextVersesById.has(verseId));
+    if (missingVerseIds.length > 0) {
+      throw new Error(`Passage ${passage.id || passage.reference} references missing verses: ${missingVerseIds.join(", ")}`);
+    }
+  }
+}
+
+async function loadScriptureData() {
+  const [nextPassages, nextVerses] = await Promise.all([
+    fetchJson(PASSAGES_DATA_URL, "passage data"),
+    fetchJson(VERSES_DATA_URL, "KJV verse data"),
+  ]);
+
+  const nextVersesById = buildVerseIndex(nextVerses);
+  validatePassages(nextPassages, nextVersesById);
+
+  passages = nextPassages;
+  versesById = nextVersesById;
 }
 
 function getPassageText(passage) {
-  return passage?.display_text || passage?.text || "";
+  if (!passage || !Array.isArray(passage.verse_ids)) return "";
+
+  return passage.verse_ids
+    .map((verseId) => versesById.get(verseId)?.text || "")
+    .filter(Boolean)
+    .join(" ");
 }
 
 function getRandomPassage() {
@@ -149,15 +188,15 @@ async function pictureThisMessage() {
 async function initializeApp() {
   enlightenButton.disabled = true;
   pictureButton.disabled = true;
-  passageElement.textContent = "Loading KJV passages…";
+  passageElement.textContent = "Loading local KJV scripture…";
   referenceElement.textContent = "—";
 
   try {
-    await loadPassages();
+    await loadScriptureData();
     enlightenButton.disabled = false;
     enlighten();
   } catch (error) {
-    passageElement.textContent = "Unable to load passage data. Please refresh and try again.";
+    passageElement.textContent = "Unable to load scripture data. Please refresh and try again.";
     referenceElement.textContent = "—";
     console.error(error);
   }

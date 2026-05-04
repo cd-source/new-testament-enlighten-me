@@ -3,11 +3,23 @@
     "id": "psalm-23-1",
     "reference": "Psalm 23:1",
     "translation": "KJV",
-    "verse_ids": ["psalm-23-1"],
-    "display_text": "The Lord is my shepherd; I shall not want.",
-    "themes": ["comfort", "peace", "trust"],
-    "tone": ["peaceful", "reassuring"],
-    "visual_motifs": ["shepherd", "green pastures", "still waters"],
+    "verse_ids": [
+      "psalm-23-1"
+    ],
+    "themes": [
+      "comfort",
+      "peace",
+      "trust"
+    ],
+    "tone": [
+      "peaceful",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "shepherd",
+      "green pastures",
+      "still waters"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -19,11 +31,23 @@
     "id": "psalm-119-105",
     "reference": "Psalm 119:105",
     "translation": "KJV",
-    "verse_ids": ["psalm-119-105"],
-    "display_text": "Thy word is a lamp unto my feet, and a light unto my path.",
-    "themes": ["guidance", "wisdom", "faith"],
-    "tone": ["hopeful", "steady"],
-    "visual_motifs": ["lamp", "path", "night"],
+    "verse_ids": [
+      "psalm-119-105"
+    ],
+    "themes": [
+      "guidance",
+      "wisdom",
+      "faith"
+    ],
+    "tone": [
+      "hopeful",
+      "steady"
+    ],
+    "visual_motifs": [
+      "lamp",
+      "path",
+      "night"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -35,11 +59,23 @@
     "id": "isaiah-40-31",
     "reference": "Isaiah 40:31",
     "translation": "KJV",
-    "verse_ids": ["isaiah-40-31"],
-    "display_text": "They that wait upon the Lord shall renew their strength; they shall mount up with wings as eagles.",
-    "themes": ["strength", "patience", "hope"],
-    "tone": ["uplifting", "encouraging"],
-    "visual_motifs": ["eagles", "sky", "renewed strength"],
+    "verse_ids": [
+      "isaiah-40-31"
+    ],
+    "themes": [
+      "strength",
+      "patience",
+      "hope"
+    ],
+    "tone": [
+      "uplifting",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "eagles",
+      "sky",
+      "renewed strength"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -51,11 +87,23 @@
     "id": "joshua-1-9",
     "reference": "Joshua 1:9",
     "translation": "KJV",
-    "verse_ids": ["joshua-1-9"],
-    "display_text": "Be strong and of a good courage; be not afraid, neither be thou dismayed: for the Lord thy God is with thee whithersoever thou goest.",
-    "themes": ["courage", "fear", "presence"],
-    "tone": ["bold", "reassuring"],
-    "visual_motifs": ["journey", "wilderness", "divine presence"],
+    "verse_ids": [
+      "joshua-1-9"
+    ],
+    "themes": [
+      "courage",
+      "fear",
+      "presence"
+    ],
+    "tone": [
+      "bold",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "journey",
+      "wilderness",
+      "divine presence"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -67,11 +115,23 @@
     "id": "proverbs-3-5",
     "reference": "Proverbs 3:5",
     "translation": "KJV",
-    "verse_ids": ["proverbs-3-5"],
-    "display_text": "Trust in the Lord with all thine heart; and lean not unto thine own understanding.",
-    "themes": ["trust", "wisdom", "surrender"],
-    "tone": ["steady", "instructive"],
-    "visual_motifs": ["path", "open hands", "morning light"],
+    "verse_ids": [
+      "proverbs-3-5"
+    ],
+    "themes": [
+      "trust",
+      "wisdom",
+      "surrender"
+    ],
+    "tone": [
+      "steady",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "path",
+      "open hands",
+      "morning light"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -83,11 +143,23 @@
     "id": "micah-6-8",
     "reference": "Micah 6:8",
     "translation": "KJV",
-    "verse_ids": ["micah-6-8"],
-    "display_text": "He hath shewed thee, O man, what is good; and what doth the Lord require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?",
-    "themes": ["justice", "mercy", "humility"],
-    "tone": ["moral", "grounded"],
-    "visual_motifs": ["walking path", "humble journey", "open road"],
+    "verse_ids": [
+      "micah-6-8"
+    ],
+    "themes": [
+      "justice",
+      "mercy",
+      "humility"
+    ],
+    "tone": [
+      "moral",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "walking path",
+      "humble journey",
+      "open road"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -99,11 +171,23 @@
     "id": "psalm-27-1",
     "reference": "Psalm 27:1",
     "translation": "KJV",
-    "verse_ids": ["psalm-27-1"],
-    "display_text": "The Lord is my light and my salvation; whom shall I fear?",
-    "themes": ["fear", "salvation", "courage"],
-    "tone": ["confident", "luminous"],
-    "visual_motifs": ["light", "darkness", "refuge"],
+    "verse_ids": [
+      "psalm-27-1"
+    ],
+    "themes": [
+      "fear",
+      "salvation",
+      "courage"
+    ],
+    "tone": [
+      "confident",
+      "luminous"
+    ],
+    "visual_motifs": [
+      "light",
+      "darkness",
+      "refuge"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -115,11 +199,23 @@
     "id": "psalm-51-10",
     "reference": "Psalm 51:10",
     "translation": "KJV",
-    "verse_ids": ["psalm-51-10"],
-    "display_text": "Create in me a clean heart, O God; and renew a right spirit within me.",
-    "themes": ["renewal", "repentance", "prayer"],
-    "tone": ["humble", "reflective"],
-    "visual_motifs": ["clean heart", "water", "renewal"],
+    "verse_ids": [
+      "psalm-51-10"
+    ],
+    "themes": [
+      "renewal",
+      "repentance",
+      "prayer"
+    ],
+    "tone": [
+      "humble",
+      "reflective"
+    ],
+    "visual_motifs": [
+      "clean heart",
+      "water",
+      "renewal"
+    ],
     "familiarity": "anchor",
     "passage_type": "prayer",
     "context_complete": true,
@@ -131,11 +227,23 @@
     "id": "matthew-5-8",
     "reference": "Matthew 5:8",
     "translation": "KJV",
-    "verse_ids": ["matthew-5-8"],
-    "display_text": "Blessed are the pure in heart: for they shall see God.",
-    "themes": ["purity", "blessing", "faith"],
-    "tone": ["gentle", "sacred"],
-    "visual_motifs": ["mountain teaching", "pure heart", "light"],
+    "verse_ids": [
+      "matthew-5-8"
+    ],
+    "themes": [
+      "purity",
+      "blessing",
+      "faith"
+    ],
+    "tone": [
+      "gentle",
+      "sacred"
+    ],
+    "visual_motifs": [
+      "mountain teaching",
+      "pure heart",
+      "light"
+    ],
     "familiarity": "anchor",
     "passage_type": "beatitude",
     "context_complete": true,
@@ -147,11 +255,23 @@
     "id": "matthew-7-7",
     "reference": "Matthew 7:7",
     "translation": "KJV",
-    "verse_ids": ["matthew-7-7"],
-    "display_text": "Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you.",
-    "themes": ["prayer", "seeking", "faith"],
-    "tone": ["inviting", "hopeful"],
-    "visual_motifs": ["door", "path", "seeking"],
+    "verse_ids": [
+      "matthew-7-7"
+    ],
+    "themes": [
+      "prayer",
+      "seeking",
+      "faith"
+    ],
+    "tone": [
+      "inviting",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "door",
+      "path",
+      "seeking"
+    ],
     "familiarity": "anchor",
     "passage_type": "teaching_unit",
     "context_complete": true,
@@ -163,11 +283,23 @@
     "id": "matthew-11-28",
     "reference": "Matthew 11:28",
     "translation": "KJV",
-    "verse_ids": ["matthew-11-28"],
-    "display_text": "Come unto me, all ye that labour and are heavy laden, and I will give you rest.",
-    "themes": ["rest", "comfort", "burden"],
-    "tone": ["gentle", "reassuring"],
-    "visual_motifs": ["rest", "open arms", "burden lifted"],
+    "verse_ids": [
+      "matthew-11-28"
+    ],
+    "themes": [
+      "rest",
+      "comfort",
+      "burden"
+    ],
+    "tone": [
+      "gentle",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "rest",
+      "open arms",
+      "burden lifted"
+    ],
     "familiarity": "anchor",
     "passage_type": "promise",
     "context_complete": true,
@@ -179,11 +311,23 @@
     "id": "matthew-6-21",
     "reference": "Matthew 6:21",
     "translation": "KJV",
-    "verse_ids": ["matthew-6-21"],
-    "display_text": "For where your treasure is, there will your heart be also.",
-    "themes": ["priorities", "heart", "devotion"],
-    "tone": ["reflective", "wise"],
-    "visual_motifs": ["treasure", "heart", "lamp light"],
+    "verse_ids": [
+      "matthew-6-21"
+    ],
+    "themes": [
+      "priorities",
+      "heart",
+      "devotion"
+    ],
+    "tone": [
+      "reflective",
+      "wise"
+    ],
+    "visual_motifs": [
+      "treasure",
+      "heart",
+      "lamp light"
+    ],
     "familiarity": "anchor",
     "passage_type": "teaching_unit",
     "context_complete": true,
@@ -195,11 +339,23 @@
     "id": "john-14-27",
     "reference": "John 14:27",
     "translation": "KJV",
-    "verse_ids": ["john-14-27"],
-    "display_text": "Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you.",
-    "themes": ["peace", "comfort", "faith"],
-    "tone": ["calming", "reassuring"],
-    "visual_motifs": ["peace", "stillness", "upper room"],
+    "verse_ids": [
+      "john-14-27"
+    ],
+    "themes": [
+      "peace",
+      "comfort",
+      "faith"
+    ],
+    "tone": [
+      "calming",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "peace",
+      "stillness",
+      "upper room"
+    ],
     "familiarity": "anchor",
     "passage_type": "promise",
     "context_complete": true,
@@ -211,11 +367,23 @@
     "id": "john-8-12",
     "reference": "John 8:12",
     "translation": "KJV",
-    "verse_ids": ["john-8-12"],
-    "display_text": "I am the light of the world: he that followeth me shall not walk in darkness, but shall have the light of life.",
-    "themes": ["light", "guidance", "life"],
-    "tone": ["luminous", "hopeful"],
-    "visual_motifs": ["light", "darkness", "path"],
+    "verse_ids": [
+      "john-8-12"
+    ],
+    "themes": [
+      "light",
+      "guidance",
+      "life"
+    ],
+    "tone": [
+      "luminous",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "light",
+      "darkness",
+      "path"
+    ],
     "familiarity": "anchor",
     "passage_type": "promise",
     "context_complete": true,
@@ -227,11 +395,23 @@
     "id": "1-corinthians-13-13",
     "reference": "1 Corinthians 13:13",
     "translation": "KJV",
-    "verse_ids": ["1-corinthians-13-13"],
-    "display_text": "And now abideth faith, hope, charity, these three; but the greatest of these is charity.",
-    "themes": ["love", "faith", "hope"],
-    "tone": ["warm", "devotional"],
-    "visual_motifs": ["three virtues", "light", "community"],
+    "verse_ids": [
+      "1-corinthians-13-13"
+    ],
+    "themes": [
+      "love",
+      "faith",
+      "hope"
+    ],
+    "tone": [
+      "warm",
+      "devotional"
+    ],
+    "visual_motifs": [
+      "three virtues",
+      "light",
+      "community"
+    ],
     "familiarity": "anchor",
     "passage_type": "teaching_unit",
     "context_complete": true,
@@ -243,11 +423,25 @@
     "id": "1-thessalonians-5-16-18",
     "reference": "1 Thessalonians 5:16–18",
     "translation": "KJV",
-    "verse_ids": ["1-thessalonians-5-16", "1-thessalonians-5-17", "1-thessalonians-5-18"],
-    "display_text": "Rejoice evermore. Pray without ceasing. In every thing give thanks.",
-    "themes": ["gratitude", "prayer", "joy"],
-    "tone": ["bright", "encouraging"],
-    "visual_motifs": ["prayer", "thanksgiving", "dawn"],
+    "verse_ids": [
+      "1-thessalonians-5-16",
+      "1-thessalonians-5-17",
+      "1-thessalonians-5-18"
+    ],
+    "themes": [
+      "gratitude",
+      "prayer",
+      "joy"
+    ],
+    "tone": [
+      "bright",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "prayer",
+      "thanksgiving",
+      "dawn"
+    ],
     "familiarity": "anchor",
     "passage_type": "short_teaching_unit",
     "context_complete": true,
@@ -259,11 +453,23 @@
     "id": "romans-12-21",
     "reference": "Romans 12:21",
     "translation": "KJV",
-    "verse_ids": ["romans-12-21"],
-    "display_text": "Be not overcome of evil, but overcome evil with good.",
-    "themes": ["goodness", "perseverance", "character"],
-    "tone": ["resolute", "moral"],
-    "visual_motifs": ["light overcoming darkness", "path", "strength"],
+    "verse_ids": [
+      "romans-12-21"
+    ],
+    "themes": [
+      "goodness",
+      "perseverance",
+      "character"
+    ],
+    "tone": [
+      "resolute",
+      "moral"
+    ],
+    "visual_motifs": [
+      "light overcoming darkness",
+      "path",
+      "strength"
+    ],
     "familiarity": "anchor",
     "passage_type": "instruction",
     "context_complete": true,
@@ -275,11 +481,23 @@
     "id": "1-corinthians-16-14",
     "reference": "1 Corinthians 16:14",
     "translation": "KJV",
-    "verse_ids": ["1-corinthians-16-14"],
-    "display_text": "Let all your things be done with charity.",
-    "themes": ["love", "service", "character"],
-    "tone": ["simple", "direct"],
-    "visual_motifs": ["hands", "service", "warm light"],
+    "verse_ids": [
+      "1-corinthians-16-14"
+    ],
+    "themes": [
+      "love",
+      "service",
+      "character"
+    ],
+    "tone": [
+      "simple",
+      "direct"
+    ],
+    "visual_motifs": [
+      "hands",
+      "service",
+      "warm light"
+    ],
     "familiarity": "supporting",
     "passage_type": "instruction",
     "context_complete": true,
@@ -291,11 +509,23 @@
     "id": "2-corinthians-5-7",
     "reference": "2 Corinthians 5:7",
     "translation": "KJV",
-    "verse_ids": ["2-corinthians-5-7"],
-    "display_text": "For we walk by faith, not by sight.",
-    "themes": ["faith", "trust", "journey"],
-    "tone": ["steady", "encouraging"],
-    "visual_motifs": ["walking", "path", "mist"],
+    "verse_ids": [
+      "2-corinthians-5-7"
+    ],
+    "themes": [
+      "faith",
+      "trust",
+      "journey"
+    ],
+    "tone": [
+      "steady",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "walking",
+      "path",
+      "mist"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
@@ -307,11 +537,23 @@
     "id": "philippians-4-13",
     "reference": "Philippians 4:13",
     "translation": "KJV",
-    "verse_ids": ["philippians-4-13"],
-    "display_text": "I can do all things through Christ which strengtheneth me.",
-    "themes": ["strength", "endurance", "faith"],
-    "tone": ["encouraging", "resolute"],
-    "visual_motifs": ["strength", "mountain", "rising light"],
+    "verse_ids": [
+      "philippians-4-13"
+    ],
+    "themes": [
+      "strength",
+      "endurance",
+      "faith"
+    ],
+    "tone": [
+      "encouraging",
+      "resolute"
+    ],
+    "visual_motifs": [
+      "strength",
+      "mountain",
+      "rising light"
+    ],
     "familiarity": "anchor",
     "passage_type": "single_verse",
     "context_complete": true,
