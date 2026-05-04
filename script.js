@@ -1,3 +1,7 @@
+if (typeof window !== "undefined" && window.Capacitor?.Plugins?.EnlightenSubscriptions && !window.EnlightenSubscriptions) {
+  window.EnlightenSubscriptions = window.Capacitor.Plugins.EnlightenSubscriptions;
+}
+
 const BOOKS_DATA_URL = "./data/kjv/books.json";
 const PASSAGES_DATA_URL = "./data/kjv/passages.json";
 const VERSES_DATA_URL = "./data/kjv/verses.json";

@@ -1,0 +1,45 @@
+{
+  "identifier": "EE0E0001-0000-0000-0000-000000000001",
+  "nonRenewingSubscriptions": [],
+  "products": [],
+  "settings": {
+    "_compatibilityTimeRate": 24,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "EE0E0002-0000-0000-0000-000000000001",
+      "localizations": [],
+      "name": "Enlighten AI Imagery",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "2.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "EE0E0003-0000-0000-0000-000000000001",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "AI imagery for KJV scripture. Scripture, search, and share cards remain free.",
+              "displayName": "Enlighten AI Imagery (Monthly)",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "enlighten_ai_images_monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Enlighten AI Imagery Monthly",
+          "subscriptionGroupID": "EE0E0002-0000-0000-0000-000000000001",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}
