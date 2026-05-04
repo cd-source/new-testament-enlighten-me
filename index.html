@@ -28,12 +28,37 @@
         <button id="shareTextButton" class="button button-secondary" type="button" disabled>
           Share Text
         </button>
+        <button id="shareCardButton" class="button button-secondary" type="button" disabled>
+          Make Share Card
+        </button>
         <button id="pictureButton" class="button button-secondary" type="button" disabled>
           Picture this Message
         </button>
       </div>
 
       <p id="actionStatus" class="action-status" aria-live="polite"></p>
+
+      <section id="shareCardPanel" class="share-card-panel" aria-label="Branded scripture share card" hidden>
+        <div class="tool-heading share-card-heading">
+          <p class="tool-kicker">Share Card</p>
+          <h2>Visual scripture card</h2>
+          <p class="tool-meta">A branded image for saving, sending, or sharing from iOS later.</p>
+        </div>
+
+        <div class="share-card-stage">
+          <canvas id="shareCardCanvas" class="share-card-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
+          <img id="shareCardPreview" class="share-card-preview" alt="Branded Enlighten scripture share card preview" hidden />
+        </div>
+
+        <div class="share-card-actions">
+          <button id="downloadCardButton" class="button button-secondary button-compact" type="button" disabled>
+            Download Card
+          </button>
+          <button id="shareCardImageButton" class="button button-secondary button-compact" type="button" disabled>
+            Share Image
+          </button>
+        </div>
+      </section>
 
       <section class="scripture-tools" aria-label="Search and browse KJV scripture">
         <div class="tool-panel search-panel">
