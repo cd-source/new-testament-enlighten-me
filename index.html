@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enlighten Me</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page-shell">
+    <section class="card" aria-live="polite">
+      <p class="eyebrow">Old & New Testament Passage Generator</p>
+      <h1>Enlighten Me</h1>
+
+      <blockquote id="passage" class="passage">
+        Click the button to receive a passage from the Old or New Testament.
+      </blockquote>
+
+      <p id="reference" class="reference">—</p>
+
+      <div class="actions">
+        <button id="enlightenButton" class="button" type="button">
+          Enlighten Me
+        </button>
+        <button id="pictureButton" class="button button-secondary" type="button" disabled>
+          Picture this Message
+        </button>
+      </div>
+
+      <div id="imagePanel" class="image-panel" hidden>
+        <p id="imageStatus" class="image-status"></p>
+        <img id="messageImage" class="message-image" alt="" hidden />
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

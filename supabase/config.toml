@@ -1,0 +1,4 @@
+project_id = "foyctuwcadmlrdsgnsrn"
+
+[functions.enlighten-me]
+verify_jwt = false

@@ -1,0 +1,17 @@
+[
+  { "id": "comfort", "label": "Comfort", "description": "Passages for peace, grief, burden, and reassurance." },
+  { "id": "peace", "label": "Peace", "description": "Passages centered on calm, stillness, and spiritual rest." },
+  { "id": "trust", "label": "Trust", "description": "Passages about reliance on God rather than fear or self-sufficiency." },
+  { "id": "guidance", "label": "Guidance", "description": "Passages for direction, discernment, and the path ahead." },
+  { "id": "wisdom", "label": "Wisdom", "description": "Passages that teach judgment, priorities, and understanding." },
+  { "id": "faith", "label": "Faith", "description": "Passages about belief, confidence, and spiritual sight." },
+  { "id": "strength", "label": "Strength", "description": "Passages for courage, endurance, and renewal." },
+  { "id": "hope", "label": "Hope", "description": "Passages that lift the heart toward restoration and promise." },
+  { "id": "courage", "label": "Courage", "description": "Passages for fear, risk, and perseverance." },
+  { "id": "prayer", "label": "Prayer", "description": "Passages that invite asking, seeking, thanksgiving, and communion with God." },
+  { "id": "gratitude", "label": "Gratitude", "description": "Passages for thanksgiving and joy." },
+  { "id": "love", "label": "Love", "description": "Passages about charity, service, and devotion." },
+  { "id": "humility", "label": "Humility", "description": "Passages about walking humbly, repentance, and renewal." },
+  { "id": "justice", "label": "Justice", "description": "Passages about righteousness, mercy, and moral action." },
+  { "id": "light", "label": "Light", "description": "Passages using light as guidance, salvation, and life." }
+]
