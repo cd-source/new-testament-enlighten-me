@@ -1,5 +1,6 @@
 .vercel
 .gee
+.gee-code
 node_modules
 dist
 .DS_Store
