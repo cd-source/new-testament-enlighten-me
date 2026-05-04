@@ -9,11 +9,11 @@
 <body>
   <main class="page-shell">
     <section class="card" aria-live="polite">
-      <p class="eyebrow">Old & New Testament Passage Generator</p>
+      <p class="eyebrow">Free local KJV scripture</p>
       <h1>Enlighten Me</h1>
 
       <blockquote id="passage" class="passage">
-        Click the button to receive a passage from the Old or New Testament.
+        Loading local KJV scripture…
       </blockquote>
 
       <p id="reference" class="reference">—</p>
@@ -22,10 +22,61 @@
         <button id="enlightenButton" class="button" type="button">
           Enlighten Me
         </button>
+        <button id="copyButton" class="button button-secondary" type="button" disabled>
+          Copy Passage
+        </button>
+        <button id="shareTextButton" class="button button-secondary" type="button" disabled>
+          Share Text
+        </button>
         <button id="pictureButton" class="button button-secondary" type="button" disabled>
           Picture this Message
         </button>
       </div>
+
+      <p id="actionStatus" class="action-status" aria-live="polite"></p>
+
+      <section class="scripture-tools" aria-label="Search and browse KJV scripture">
+        <div class="tool-panel search-panel">
+          <div class="tool-heading">
+            <p class="tool-kicker">Search</p>
+            <h2>Find any KJV word or phrase</h2>
+          </div>
+
+          <form id="searchForm" class="search-form">
+            <label class="sr-only" for="searchInput">Search KJV scripture</label>
+            <input id="searchInput" class="text-input" type="search" placeholder="Try love, peace, fear not…" autocomplete="off" />
+            <button id="searchButton" class="button button-compact" type="submit">Search</button>
+          </form>
+
+          <p id="searchMeta" class="tool-meta">Search all 31,102 KJV verses locally.</p>
+          <div id="searchResults" class="results-list" aria-live="polite"></div>
+        </div>
+
+        <div class="tool-panel browse-panel">
+          <div class="tool-heading">
+            <p class="tool-kicker">Browse</p>
+            <h2>Book → chapter → verse</h2>
+          </div>
+
+          <div class="browse-controls">
+            <label>
+              <span>Book</span>
+              <select id="bookSelect" class="select-input"></select>
+            </label>
+            <label>
+              <span>Chapter</span>
+              <select id="chapterSelect" class="select-input"></select>
+            </label>
+            <label>
+              <span>Verse</span>
+              <select id="verseSelect" class="select-input"></select>
+            </label>
+          </div>
+
+          <p id="browseMeta" class="tool-meta">Select a verse or choose from the chapter list below.</p>
+          <div id="chapterVerses" class="chapter-list" aria-live="polite"></div>
+        </div>
+      </section>
 
       <div id="imagePanel" class="image-panel" hidden>
         <p id="imageStatus" class="image-status"></p>
