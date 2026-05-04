@@ -1,0 +1,12 @@
+{
+  "appId": "com.enlighten.daily",
+  "appName": "Enlighten",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "iosScheme": "enlighten"
+  },
+  "ios": {
+    "contentInset": "always"
+  }
+}

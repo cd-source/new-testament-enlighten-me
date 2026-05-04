@@ -32,11 +32,29 @@
           Make Share Card
         </button>
         <button id="pictureButton" class="button button-secondary" type="button" disabled>
-          Picture this Message
+          Unlock AI Imagery
         </button>
       </div>
 
       <p id="actionStatus" class="action-status" aria-live="polite"></p>
+
+      <section id="subscriptionPanel" class="subscription-panel" aria-label="AI imagery subscription">
+        <div class="subscription-copy">
+          <p class="tool-kicker">Paid imagery</p>
+          <h2>AI scripture imagery is $3/month</h2>
+          <p id="subscriptionStatus" class="tool-meta">
+            All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscription unlocks AI image generation only.
+          </p>
+        </div>
+        <div class="subscription-actions">
+          <button id="subscribeButton" class="button button-compact" type="button">
+            Subscribe — $3/month
+          </button>
+          <button id="restorePurchaseButton" class="button button-secondary button-compact" type="button">
+            Restore Purchase
+          </button>
+        </div>
+      </section>
 
       <section id="shareCardPanel" class="share-card-panel" aria-label="Branded scripture share card" hidden>
         <div class="tool-heading share-card-heading">

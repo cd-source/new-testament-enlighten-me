@@ -2,6 +2,9 @@ const BOOKS_DATA_URL = "./data/kjv/books.json";
 const PASSAGES_DATA_URL = "./data/kjv/passages.json";
 const VERSES_DATA_URL = "./data/kjv/verses.json";
 const MAX_SEARCH_RESULTS = 50;
+const AI_IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
+const AI_IMAGE_PRICE_LABEL = "$3/month";
+const WEB_PREVIEW_ENTITLEMENT_KEY = "enlighten.previewImageSubscription";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -11,6 +14,10 @@ const shareTextButton = document.getElementById("shareTextButton");
 const shareCardButton = document.getElementById("shareCardButton");
 const pictureButton = document.getElementById("pictureButton");
 const actionStatus = document.getElementById("actionStatus");
+const subscriptionPanel = document.getElementById("subscriptionPanel");
+const subscriptionStatus = document.getElementById("subscriptionStatus");
+const subscribeButton = document.getElementById("subscribeButton");
+const restorePurchaseButton = document.getElementById("restorePurchaseButton");
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
@@ -40,6 +47,12 @@ let versesByBookChapter = new Map();
 let lastIndex = -1;
 let currentPassage = null;
 let currentShareCardDataUrl = "";
+let imageSubscription = {
+  isActive: false,
+  productId: AI_IMAGE_PRODUCT_ID,
+  source: "unloaded",
+  entitlementToken: "",
+};
 let isGeneratingImage = false;
 let actionStatusTimer = null;
 
@@ -155,6 +168,103 @@ function getShareCardFileName() {
   return `enlighten-${referenceSlug || "scripture"}.png`;
 }
 
+function isNativeAppRuntime() {
+  return Boolean(window.Capacitor?.isNativePlatform?.());
+}
+
+function hasImageSubscription() {
+  return Boolean(imageSubscription.isActive);
+}
+
+function updateSubscriptionUi() {
+  const active = hasImageSubscription();
+  const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
+
+  subscriptionPanel.classList.toggle("is-subscribed", active);
+  subscriptionStatus.textContent = active
+    ? `AI imagery unlocked via ${imageSubscription.source || nativeLabel}. KJV scripture remains free for everyone.`
+    : `All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscribe for ${AI_IMAGE_PRICE_LABEL} to unlock AI image generation.`;
+  subscribeButton.textContent = active ? "AI Imagery Active" : `Subscribe — ${AI_IMAGE_PRICE_LABEL}`;
+  subscribeButton.disabled = active;
+  restorePurchaseButton.disabled = false;
+  pictureButton.textContent = active ? "Picture this Message" : "Unlock AI Imagery";
+}
+
+async function loadImageSubscription() {
+  try {
+    if (window.EnlightenSubscriptions?.getStatus) {
+      imageSubscription = {
+        ...imageSubscription,
+        ...(await window.EnlightenSubscriptions.getStatus({ productId: AI_IMAGE_PRODUCT_ID })),
+        source: "StoreKit",
+      };
+    } else {
+      imageSubscription = {
+        ...imageSubscription,
+        isActive: window.localStorage.getItem(WEB_PREVIEW_ENTITLEMENT_KEY) === "active",
+        source: "web preview",
+      };
+    }
+  } catch (error) {
+    console.error(error);
+    imageSubscription = { ...imageSubscription, isActive: false, source: "unavailable" };
+  }
+
+  updateSubscriptionUi();
+}
+
+async function subscribeToImagePlan() {
+  try {
+    if (window.EnlightenSubscriptions?.purchase) {
+      imageSubscription = {
+        ...imageSubscription,
+        ...(await window.EnlightenSubscriptions.purchase({ productId: AI_IMAGE_PRODUCT_ID })),
+        source: "StoreKit",
+      };
+    } else {
+      window.localStorage.setItem(WEB_PREVIEW_ENTITLEMENT_KEY, "active");
+      imageSubscription = { ...imageSubscription, isActive: true, source: "web preview" };
+    }
+
+    updateSubscriptionUi();
+    setActionStatus("AI imagery subscription is active.");
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      console.error(error);
+      setActionStatus("Subscription could not be completed. Please try again.");
+    }
+  }
+}
+
+async function restoreImagePlan() {
+  try {
+    if (window.EnlightenSubscriptions?.restorePurchases) {
+      imageSubscription = {
+        ...imageSubscription,
+        ...(await window.EnlightenSubscriptions.restorePurchases({ productId: AI_IMAGE_PRODUCT_ID })),
+        source: "StoreKit",
+      };
+    } else {
+      imageSubscription = {
+        ...imageSubscription,
+        isActive: window.localStorage.getItem(WEB_PREVIEW_ENTITLEMENT_KEY) === "active",
+        source: "web preview",
+      };
+    }
+
+    updateSubscriptionUi();
+    setActionStatus(hasImageSubscription() ? "Purchase restored." : "No active AI imagery subscription found.");
+  } catch (error) {
+    console.error(error);
+    setActionStatus("Restore failed. Please try again.");
+  }
+}
+
+function showImageSubscriptionPrompt() {
+  subscriptionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+  setActionStatus(`AI imagery requires the ${AI_IMAGE_PRICE_LABEL} subscription. Scripture features remain free.`);
+}
+
 function setActionStatus(message) {
   if (!actionStatus) return;
   actionStatus.textContent = message;
@@ -230,6 +340,7 @@ function setCurrentPassage(passage, options = {}) {
   shareTextButton.disabled = false;
   shareCardButton.disabled = false;
   pictureButton.disabled = false;
+  updateSubscriptionUi();
   resetShareCard();
 
   if (options.resetImage !== false) {
@@ -628,6 +739,11 @@ async function shareCardImage() {
 async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
+  if (!hasImageSubscription()) {
+    showImageSubscriptionPrompt();
+    return;
+  }
+
   setImageLoading(true);
   showPleaseWait();
   messageImage.hidden = true;
@@ -638,7 +754,11 @@ async function pictureThisMessage() {
   try {
     const response = await fetch("/api/picture", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Enlighten-Product": AI_IMAGE_PRODUCT_ID,
+        ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
+      },
       body: JSON.stringify({
         passage: getPassageText(currentPassage),
         reference: currentPassage.reference,
@@ -679,6 +799,8 @@ function bindEvents() {
   shareCardButton.addEventListener("click", showShareCard);
   downloadCardButton.addEventListener("click", downloadShareCard);
   shareCardImageButton.addEventListener("click", shareCardImage);
+  subscribeButton.addEventListener("click", subscribeToImagePlan);
+  restorePurchaseButton.addEventListener("click", restoreImagePlan);
   pictureButton.addEventListener("click", pictureThisMessage);
   searchForm.addEventListener("submit", handleSearch);
 
@@ -732,6 +854,8 @@ async function initializeApp() {
   downloadCardButton.disabled = true;
   shareCardImageButton.disabled = true;
   pictureButton.disabled = true;
+  subscribeButton.disabled = true;
+  restorePurchaseButton.disabled = true;
   searchButton.disabled = true;
   searchInput.disabled = true;
   bookSelect.disabled = true;
@@ -742,10 +866,13 @@ async function initializeApp() {
 
   try {
     await loadScriptureData();
+    await loadImageSubscription();
     initializeBrowseControls();
     bindEvents();
 
     enlightenButton.disabled = false;
+    subscribeButton.disabled = hasImageSubscription();
+    restorePurchaseButton.disabled = false;
     searchButton.disabled = false;
     searchInput.disabled = false;
     bookSelect.disabled = false;

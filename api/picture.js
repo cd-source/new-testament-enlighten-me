@@ -8,6 +8,8 @@ const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
     ]);
 const FREEPIK_MODEL = process.env.FREEPIK_MODEL || "mystic";
 const FREEPIK_BASE_URL = "https://api.freepik.com";
+const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
+const REQUIRE_IMAGE_ENTITLEMENT = process.env.ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT === "true";
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -22,6 +24,18 @@ function compact(value) {
 
 function missingEnv() {
   return ["ANTHROPIC_API_KEY", "FREEPIK_API_KEY"].filter((name) => !process.env[name]);
+}
+
+function hasImageEntitlement(req) {
+  if (!REQUIRE_IMAGE_ENTITLEMENT) return true;
+
+  const product = req.headers["x-enlighten-product"];
+  const entitlement = req.headers["x-enlighten-entitlement"];
+
+  // Scope E placeholder: the native iOS layer will exchange a StoreKit transaction
+  // for a short-lived server entitlement token. Until that verifier exists, production
+  // can keep ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT unset/false.
+  return product === IMAGE_PRODUCT_ID && Boolean(entitlement);
 }
 
 async function readBody(req) {
@@ -214,6 +228,10 @@ async function imageUrlToDataUrl(imageUrl) {
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return json(res, 405, { error: "Method not allowed" });
+  }
+
+  if (!hasImageEntitlement(req)) {
+    return json(res, 402, { error: "AI imagery requires an active Enlighten subscription." });
   }
 
   const missing = missingEnv();
