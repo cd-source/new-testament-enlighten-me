@@ -135,26 +135,43 @@ Browser preview still uses a local unlock in `localStorage` because `window.Enli
 
 ## Server-side entitlement path
 
-`api/picture.js` now has an optional entitlement check:
+The entitlement boundary is split into two layers:
+
+**Layer 1 — server-issued tokens (implemented).**
+
+1. iOS StoreKit purchase returns a `Transaction` with a `jwsRepresentation`.
+2. `EnlightenSubscriptionsPlugin.swift` POSTs `{ jws, productId }` to `/api/entitlement`.
+3. `/api/entitlement` decodes the JWS payload, validates structural claims (`bundleId`, `productId`, `expiresDate`, `revocationDate`), and signs a 24-hour HMAC JWT (`HS256`) over `{ product, otid, exp }`.
+4. The plugin returns the token to JS as `entitlementToken`.
+5. `/api/picture` requires `X-Enlighten-Product` + `X-Enlighten-Entitlement: <jwt>` and verifies the JWT with `verifyServerToken` before doing any work.
+
+CORS is pinned to a small allowlist (`enlighten://localhost`, `capacitor://localhost`, the production web origin, the Vercel domain). All shared logic lives in `lib/entitlement.js`.
+
+**Layer 2 — cryptographic JWS verification (deferred to TestFlight).**
+
+Lax mode (current) does not verify the JWS signature against Apple's certificate chain. Strict mode is wired through `APPLE_JWS_VERIFY_MODE=strict` and calls `verifyJwsCryptographically` in `lib/entitlement.js`, which is currently a stub. Strict verification needs `@apple/app-store-server-library` (or equivalent) and Apple's root certs, and will reject Xcode's local-config transactions because they are signed with a test cert rather than Apple's. Turn on strict mode when transactions come from real Apple servers (TestFlight or App Store).
+
+### Required Vercel env vars
 
 ```txt
-ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT=true
+ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT=true     # gate /api/picture on a valid token
+ENLIGHTEN_JWT_SECRET=<32+ random chars>       # HMAC secret for the server token
+APPLE_BUNDLE_ID=com.enlighten.daily           # bundle ID checked in the JWS claims
+APPLE_JWS_VERIFY_MODE=lax                     # lax now, strict before App Store
 ```
 
-When enabled, `/api/picture` expects:
+Generate a JWT secret with:
+
+```bash
+openssl rand -hex 32
+```
+
+### Headers on `/api/picture`
 
 ```txt
 X-Enlighten-Product: enlighten_ai_images_monthly
-X-Enlighten-Entitlement: <short-lived entitlement token>
+X-Enlighten-Entitlement: <server-issued JWT>
 ```
-
-Scope E does not yet implement receipt verification. The intended production path is:
-
-1. iOS StoreKit purchase returns a signed transaction.
-2. Native bridge sends the transaction to an entitlement endpoint.
-3. Server verifies the transaction with Apple.
-4. Server returns a short-lived entitlement token.
-5. `/api/picture` accepts image-generation requests only with a valid entitlement token.
 
 ## Product invariant
 

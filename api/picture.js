@@ -1,3 +1,5 @@
+const { setCorsHeaders, verifyServerToken } = require("../lib/entitlement.js");
+
 const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
   ? [process.env.ANTHROPIC_MODEL]
   : [
@@ -11,10 +13,11 @@ const FREEPIK_BASE_URL = "https://api.freepik.com";
 const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
 const REQUIRE_IMAGE_ENTITLEMENT = process.env.ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT === "true";
 
-function json(res, status, body) {
+function json(req, res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Cache-Control", "no-store");
+  setCorsHeaders(req, res);
   res.end(JSON.stringify(body));
 }
 
@@ -30,12 +33,10 @@ function hasImageEntitlement(req) {
   if (!REQUIRE_IMAGE_ENTITLEMENT) return true;
 
   const product = req.headers["x-enlighten-product"];
-  const entitlement = req.headers["x-enlighten-entitlement"];
+  const token = req.headers["x-enlighten-entitlement"];
 
-  // Scope E placeholder: the native iOS layer will exchange a StoreKit transaction
-  // for a short-lived server entitlement token. Until that verifier exists, production
-  // can keep ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT unset/false.
-  return product === IMAGE_PRODUCT_ID && Boolean(entitlement);
+  if (product !== IMAGE_PRODUCT_ID) return false;
+  return Boolean(verifyServerToken(token, IMAGE_PRODUCT_ID));
 }
 
 async function readBody(req) {
@@ -226,17 +227,24 @@ async function imageUrlToDataUrl(imageUrl) {
 }
 
 module.exports = async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    setCorsHeaders(req, res);
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
+
   if (req.method !== "POST") {
-    return json(res, 405, { error: "Method not allowed" });
+    return json(req, res, 405, { error: "Method not allowed" });
   }
 
   if (!hasImageEntitlement(req)) {
-    return json(res, 402, { error: "AI imagery requires an active Enlighten subscription." });
+    return json(req, res, 402, { error: "AI imagery requires an active Enlighten subscription." });
   }
 
   const missing = missingEnv();
   if (missing.length) {
-    return json(res, 500, {
+    return json(req, res, 500, {
       error: `Missing server environment variable${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`,
     });
   }
@@ -247,7 +255,7 @@ module.exports = async function handler(req, res) {
     const reference = compact(body.reference);
 
     if (!passage || !reference) {
-      return json(res, 400, { error: "Passage and reference are required." });
+      return json(req, res, 400, { error: "Passage and reference are required." });
     }
 
     const prompt = await writeIllustrationPrompt({ passage, reference });
@@ -258,7 +266,7 @@ module.exports = async function handler(req, res) {
 
     const imageDataUrl = await imageUrlToDataUrl(image.imageUrl);
 
-    return json(res, 200, {
+    return json(req, res, 200, {
       imageUrl: image.imageUrl,
       imageDataUrl,
       prompt,
@@ -266,7 +274,7 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error(error);
-    return json(res, 500, {
+    return json(req, res, 500, {
       error: error?.message || "Image generation failed.",
     });
   }

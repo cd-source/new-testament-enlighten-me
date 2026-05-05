@@ -176,6 +176,12 @@ function isNativeAppRuntime() {
   return Boolean(window.Capacitor?.isNativePlatform?.());
 }
 
+const REMOTE_API_BASE = "https://new-testament-enlighten-me.vercel.app";
+
+function apiUrl(path) {
+  return isNativeAppRuntime() ? `${REMOTE_API_BASE}${path}` : path;
+}
+
 function hasImageSubscription() {
   return Boolean(imageSubscription.isActive);
 }
@@ -194,12 +200,16 @@ function updateSubscriptionUi() {
   pictureButton.textContent = active ? "Picture this Message" : "Unlock AI Imagery";
 }
 
+function nativeBridgeArgs() {
+  return { productId: AI_IMAGE_PRODUCT_ID, apiBase: REMOTE_API_BASE };
+}
+
 async function loadImageSubscription() {
   try {
     if (window.EnlightenSubscriptions?.getStatus) {
       imageSubscription = {
         ...imageSubscription,
-        ...(await window.EnlightenSubscriptions.getStatus({ productId: AI_IMAGE_PRODUCT_ID })),
+        ...(await window.EnlightenSubscriptions.getStatus(nativeBridgeArgs())),
         source: "StoreKit",
       };
     } else {
@@ -222,7 +232,7 @@ async function subscribeToImagePlan() {
     if (window.EnlightenSubscriptions?.purchase) {
       imageSubscription = {
         ...imageSubscription,
-        ...(await window.EnlightenSubscriptions.purchase({ productId: AI_IMAGE_PRODUCT_ID })),
+        ...(await window.EnlightenSubscriptions.purchase(nativeBridgeArgs())),
         source: "StoreKit",
       };
     } else {
@@ -245,7 +255,7 @@ async function restoreImagePlan() {
     if (window.EnlightenSubscriptions?.restorePurchases) {
       imageSubscription = {
         ...imageSubscription,
-        ...(await window.EnlightenSubscriptions.restorePurchases({ productId: AI_IMAGE_PRODUCT_ID })),
+        ...(await window.EnlightenSubscriptions.restorePurchases(nativeBridgeArgs())),
         source: "StoreKit",
       };
     } else {
@@ -756,7 +766,7 @@ async function pictureThisMessage() {
   if (imagePrompt) imagePrompt.textContent = "";
 
   try {
-    const response = await fetch("/api/picture", {
+    const response = await fetch(apiUrl("/api/picture"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
