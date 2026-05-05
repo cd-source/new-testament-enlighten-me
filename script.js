@@ -799,6 +799,8 @@ async function pictureThisMessage() {
     imageStatus.hidden = true;
 
     if (imagePrompt) imagePrompt.textContent = "";
+
+    passageElement.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (error) {
     imageStatus.textContent = error.message || "Image generation failed.";
   } finally {

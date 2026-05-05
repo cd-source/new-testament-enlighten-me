@@ -51,7 +51,7 @@ public class EnlightenSubscriptionsPlugin: CAPPlugin, CAPBridgedPlugin {
                     switch verification {
                     case .verified(let transaction):
                         let token = await self.exchangeForServerToken(
-                            jws: transaction.jwsRepresentation,
+                            jws: verification.jwsRepresentation,
                             productId: productId,
                             apiBase: apiBase
                         )
@@ -103,22 +103,22 @@ public class EnlightenSubscriptionsPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @available(iOS 15.0, *)
-    private func activeEntitlement(productId: String) async -> Transaction? {
+    private func activeEntitlement(productId: String) async -> VerificationResult<Transaction>? {
         for await result in Transaction.currentEntitlements {
             guard case .verified(let transaction) = result else { continue }
             if transaction.productID != productId { continue }
             if transaction.revocationDate != nil { continue }
             if let expirationDate = transaction.expirationDate, expirationDate < Date() { continue }
-            return transaction
+            return result
         }
         return nil
     }
 
     @available(iOS 15.0, *)
-    private func tokenForEntitlement(_ transaction: Transaction?, productId: String, apiBase: String) async -> String {
-        guard let transaction = transaction else { return "" }
+    private func tokenForEntitlement(_ verification: VerificationResult<Transaction>?, productId: String, apiBase: String) async -> String {
+        guard let verification = verification else { return "" }
         return await self.exchangeForServerToken(
-            jws: transaction.jwsRepresentation,
+            jws: verification.jwsRepresentation,
             productId: productId,
             apiBase: apiBase
         )
