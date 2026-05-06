@@ -234,7 +234,11 @@ function updateSubscriptionUi() {
   subscribeButton.textContent = active ? "AI Imagery Active" : `Subscribe — ${AI_IMAGE_PRICE_LABEL}`;
   subscribeButton.disabled = active;
   restorePurchaseButton.disabled = false;
-  pictureButton.textContent = active ? "Picture this Message" : "Unlock AI Imagery";
+  pictureButton.textContent = getPictureButtonLabel(active);
+}
+
+function getPictureButtonLabel(active = hasImageSubscription()) {
+  return active ? "Create Scripture Card" : "Unlock AI Imagery";
 }
 
 function showView(viewName) {
@@ -538,7 +542,7 @@ function resetImagePanel() {
 function setImageLoading(isLoading) {
   isGeneratingImage = isLoading;
   pictureButton.disabled = isLoading || !currentPassage;
-  pictureButton.textContent = isLoading ? "Please wait…" : "Picture this Message";
+  pictureButton.textContent = isLoading ? "Creating…" : getPictureButtonLabel();
   imagePanel.classList.toggle("is-loading", isLoading);
 }
 

@@ -17,11 +17,13 @@
         <p class="eyebrow">Free local KJV scripture</p>
         <h1>Enlighten Me</h1>
 
-        <blockquote id="passage" class="passage">
-          Loading local KJV scripture…
-        </blockquote>
+        <div class="home-focal" aria-label="Current scripture message">
+          <blockquote id="passage" class="passage">
+            Loading local KJV scripture…
+          </blockquote>
 
-        <p id="reference" class="reference">—</p>
+          <p id="reference" class="reference">—</p>
+        </div>
 
         <div id="imagePanel" class="image-panel" hidden>
           <p id="imageStatus" class="image-status"></p>
@@ -47,19 +49,25 @@
           </div>
         </section>
 
-        <div class="actions">
-          <button id="enlightenButton" class="button" type="button">
-            Enlighten Me
-          </button>
-          <button id="pictureButton" class="button button-secondary" type="button" disabled>
-            Unlock AI Imagery
-          </button>
-          <button id="copyButton" class="button button-secondary" type="button" disabled>
-            Copy Passage
-          </button>
-          <button id="shareCardButton" class="button button-secondary" type="button" disabled>
-            Make Share Card
-          </button>
+        <div class="home-actions" aria-label="Scripture actions">
+          <div class="primary-actions">
+            <button id="enlightenButton" class="button button-primary" type="button">
+              Enlighten Me
+            </button>
+            <button id="pictureButton" class="button button-premium" type="button" disabled>
+              Unlock AI Imagery
+            </button>
+          </div>
+
+          <div class="utility-actions" aria-label="Passage utilities">
+            <button id="copyButton" class="utility-button" type="button" disabled>
+              Copy
+            </button>
+            <span class="utility-divider" aria-hidden="true">·</span>
+            <button id="shareCardButton" class="utility-button" type="button" disabled>
+              Share Card
+            </button>
+          </div>
         </div>
 
         <p id="actionStatus" class="action-status" aria-live="polite"></p>
