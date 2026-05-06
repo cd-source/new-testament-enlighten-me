@@ -9,123 +9,128 @@
 <body>
   <main class="page-shell">
     <section class="card" aria-live="polite">
-      <p class="eyebrow">Free local KJV scripture</p>
-      <h1>Enlighten Me</h1>
+      <section id="homeView" class="app-view home-view" aria-label="Enlighten Me home">
+        <button id="settingsToggle" class="settings-toggle" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settingsView">⚙</button>
+        <p class="eyebrow">Free local KJV scripture</p>
+        <h1>Enlighten Me</h1>
 
-      <blockquote id="passage" class="passage">
-        Loading local KJV scripture…
-      </blockquote>
+        <blockquote id="passage" class="passage">
+          Loading local KJV scripture…
+        </blockquote>
 
-      <p id="reference" class="reference">—</p>
+        <p id="reference" class="reference">—</p>
 
-      <div id="imagePanel" class="image-panel" hidden>
-        <p id="imageStatus" class="image-status"></p>
-        <img id="messageImage" class="message-image" alt="" hidden />
-      </div>
-
-      <div class="actions">
-        <button id="enlightenButton" class="button" type="button">
-          Enlighten Me
-        </button>
-        <button id="pictureButton" class="button button-secondary" type="button" disabled>
-          Unlock AI Imagery
-        </button>
-        <button id="copyButton" class="button button-secondary" type="button" disabled>
-          Copy Passage
-        </button>
-        <button id="shareTextButton" class="button button-secondary" type="button" disabled>
-          Share Text
-        </button>
-        <button id="shareCardButton" class="button button-secondary" type="button" disabled>
-          Make Share Card
-        </button>
-      </div>
-
-      <p id="actionStatus" class="action-status" aria-live="polite"></p>
-
-      <section id="subscriptionPanel" class="subscription-panel" aria-label="AI imagery subscription">
-        <div class="subscription-copy">
-          <p class="tool-kicker">Paid imagery</p>
-          <h2>AI scripture imagery is $3/month</h2>
-          <p id="subscriptionStatus" class="tool-meta">
-            All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscription unlocks AI image generation only.
-          </p>
+        <div id="imagePanel" class="image-panel" hidden>
+          <p id="imageStatus" class="image-status"></p>
+          <img id="messageImage" class="message-image" alt="" hidden />
         </div>
-        <div class="subscription-actions">
-          <button id="subscribeButton" class="button button-compact" type="button">
-            Subscribe — $3/month
+
+        <div class="actions">
+          <button id="enlightenButton" class="button" type="button">
+            Enlighten Me
           </button>
-          <button id="restorePurchaseButton" class="button button-secondary button-compact" type="button">
-            Restore Purchase
+          <button id="pictureButton" class="button button-secondary" type="button" disabled>
+            Unlock AI Imagery
+          </button>
+          <button id="copyButton" class="button button-secondary" type="button" disabled>
+            Copy Passage
+          </button>
+          <button id="shareCardButton" class="button button-secondary" type="button" disabled>
+            Make Share Card
           </button>
         </div>
-      </section>
 
-      <section id="shareCardPanel" class="share-card-panel" aria-label="Branded scripture share card" hidden>
-        <div class="tool-heading share-card-heading">
-          <p class="tool-kicker">Share Card</p>
-          <h2>Visual scripture card</h2>
-          <p class="tool-meta">A branded image for saving, sending, or sharing from iOS later.</p>
-        </div>
+        <p id="actionStatus" class="action-status" aria-live="polite"></p>
 
-        <div class="share-card-stage">
-          <canvas id="shareCardCanvas" class="share-card-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
-          <img id="shareCardPreview" class="share-card-preview" alt="Branded Enlighten scripture share card preview" hidden />
-        </div>
-
-        <div class="share-card-actions">
-          <button id="downloadCardButton" class="button button-secondary button-compact" type="button" disabled>
-            Download Card
-          </button>
-          <button id="shareCardImageButton" class="button button-secondary button-compact" type="button" disabled>
-            Share Image
-          </button>
-        </div>
-      </section>
-
-      <section class="scripture-tools" aria-label="Search and browse KJV scripture">
-        <div class="tool-panel search-panel">
-          <div class="tool-heading">
-            <p class="tool-kicker">Search</p>
-            <h2>Find any KJV word or phrase</h2>
+        <section id="shareCardPanel" class="share-card-panel" aria-label="Branded scripture share card" hidden>
+          <div class="tool-heading share-card-heading">
+            <p class="tool-kicker">Share Card</p>
+            <h2>Visual scripture card</h2>
+            <p class="tool-meta">A branded image for saving, sending, or sharing from iOS later.</p>
           </div>
 
-          <form id="searchForm" class="search-form">
-            <label class="sr-only" for="searchInput">Search KJV scripture</label>
-            <input id="searchInput" class="text-input" type="search" placeholder="Try love, peace, fear not…" autocomplete="off" />
-            <button id="searchButton" class="button button-compact" type="submit">Search</button>
-          </form>
-
-          <p id="searchMeta" class="tool-meta">Search all 31,102 KJV verses locally.</p>
-          <div id="searchResults" class="results-list" aria-live="polite"></div>
-        </div>
-
-        <div class="tool-panel browse-panel">
-          <div class="tool-heading">
-            <p class="tool-kicker">Browse</p>
-            <h2>Book → chapter → verse</h2>
+          <div class="share-card-stage">
+            <canvas id="shareCardCanvas" class="share-card-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
+            <img id="shareCardPreview" class="share-card-preview" alt="Branded Enlighten scripture share card preview" hidden />
           </div>
 
-          <div class="browse-controls">
-            <label>
-              <span>Book</span>
-              <select id="bookSelect" class="select-input"></select>
-            </label>
-            <label>
-              <span>Chapter</span>
-              <select id="chapterSelect" class="select-input"></select>
-            </label>
-            <label>
-              <span>Verse</span>
-              <select id="verseSelect" class="select-input"></select>
-            </label>
+          <div class="share-card-actions">
+            <button id="downloadCardButton" class="button button-secondary button-compact" type="button" disabled>
+              Download Card
+            </button>
+            <button id="shareCardImageButton" class="button button-secondary button-compact" type="button" disabled>
+              Share Image
+            </button>
+          </div>
+        </section>
+
+        <section class="scripture-tools" aria-label="Search and browse KJV scripture">
+          <div class="tool-panel search-panel">
+            <div class="tool-heading">
+              <p class="tool-kicker">Search</p>
+              <h2>Find any KJV word or phrase</h2>
+            </div>
+
+            <form id="searchForm" class="search-form">
+              <label class="sr-only" for="searchInput">Search KJV scripture</label>
+              <input id="searchInput" class="text-input" type="search" placeholder="Try love, peace, fear not…" autocomplete="off" />
+              <button id="searchButton" class="button button-compact" type="submit">Search</button>
+            </form>
+
+            <p id="searchMeta" class="tool-meta">Search all 31,102 KJV verses locally.</p>
+            <div id="searchResults" class="results-list" aria-live="polite"></div>
           </div>
 
-          <p id="browseMeta" class="tool-meta">Select a verse or choose from the chapter list below.</p>
-          <div id="chapterVerses" class="chapter-list" aria-live="polite"></div>
-        </div>
+          <div class="tool-panel browse-panel">
+            <div class="tool-heading">
+              <p class="tool-kicker">Browse</p>
+              <h2>Book → chapter → verse</h2>
+            </div>
+
+            <div class="browse-controls">
+              <label>
+                <span>Book</span>
+                <select id="bookSelect" class="select-input"></select>
+              </label>
+              <label>
+                <span>Chapter</span>
+                <select id="chapterSelect" class="select-input"></select>
+              </label>
+              <label>
+                <span>Verse</span>
+                <select id="verseSelect" class="select-input"></select>
+              </label>
+            </div>
+
+            <p id="browseMeta" class="tool-meta">Select a verse or choose from the chapter list below.</p>
+            <div id="chapterVerses" class="chapter-list" aria-live="polite"></div>
+          </div>
+        </section>
       </section>
 
+      <section id="settingsView" class="app-view settings-view" aria-label="Settings" hidden>
+        <button id="settingsBackButton" class="back-button" type="button" aria-label="Back to home">← Home</button>
+        <p class="eyebrow">Settings</p>
+        <h1>Settings</h1>
+
+        <section id="subscriptionPanel" class="subscription-panel" aria-label="AI imagery subscription">
+          <div class="subscription-copy">
+            <p class="tool-kicker">Paid imagery</p>
+            <h2>AI scripture imagery is $3/month</h2>
+            <p id="subscriptionStatus" class="tool-meta">
+              All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscription unlocks AI image generation only.
+            </p>
+          </div>
+          <div class="subscription-actions">
+            <button id="subscribeButton" class="button button-compact" type="button">
+              Subscribe — $3/month
+            </button>
+            <button id="restorePurchaseButton" class="button button-secondary button-compact" type="button">
+              Restore Purchase
+            </button>
+          </div>
+        </section>
+      </section>
     </section>
   </main>
 

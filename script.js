@@ -14,11 +14,14 @@ const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
 const enlightenButton = document.getElementById("enlightenButton");
 const copyButton = document.getElementById("copyButton");
-const shareTextButton = document.getElementById("shareTextButton");
 const shareCardButton = document.getElementById("shareCardButton");
 const pictureButton = document.getElementById("pictureButton");
 const actionStatus = document.getElementById("actionStatus");
+const homeView = document.getElementById("homeView");
+const settingsView = document.getElementById("settingsView");
 const subscriptionPanel = document.getElementById("subscriptionPanel");
+const settingsToggle = document.getElementById("settingsToggle");
+const settingsBackButton = document.getElementById("settingsBackButton");
 const subscriptionStatus = document.getElementById("subscriptionStatus");
 const subscribeButton = document.getElementById("subscribeButton");
 const restorePurchaseButton = document.getElementById("restorePurchaseButton");
@@ -200,6 +203,17 @@ function updateSubscriptionUi() {
   pictureButton.textContent = active ? "Picture this Message" : "Unlock AI Imagery";
 }
 
+function setSettingsOpen(isOpen) {
+  homeView.hidden = isOpen;
+  settingsView.hidden = !isOpen;
+  settingsToggle.setAttribute("aria-expanded", String(isOpen));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function toggleSettings() {
+  setSettingsOpen(true);
+}
+
 function nativeBridgeArgs() {
   return { productId: AI_IMAGE_PRODUCT_ID, apiBase: REMOTE_API_BASE };
 }
@@ -275,7 +289,7 @@ async function restoreImagePlan() {
 }
 
 function showImageSubscriptionPrompt() {
-  subscriptionPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+  setSettingsOpen(true);
   setActionStatus(`AI imagery requires the ${AI_IMAGE_PRICE_LABEL} subscription. Scripture features remain free.`);
 }
 
@@ -351,7 +365,6 @@ function setCurrentPassage(passage, options = {}) {
   passageElement.textContent = `“${passageText}”`;
   referenceElement.textContent = passage.reference;
   copyButton.disabled = false;
-  shareTextButton.disabled = false;
   shareCardButton.disabled = false;
   pictureButton.disabled = false;
   updateSubscriptionUi();
@@ -525,27 +538,6 @@ async function copyCurrentPassage() {
   }
 }
 
-async function shareCurrentPassage() {
-  if (!currentPassage) return;
-
-  const text = getShareText();
-
-  try {
-    if (navigator.share) {
-      await navigator.share({ title: "Enlighten", text });
-      setActionStatus("Share sheet opened.");
-    } else {
-      await navigator.clipboard.writeText(text);
-      setActionStatus("Sharing is not available here, so the passage was copied.");
-    }
-  } catch (error) {
-    if (error?.name !== "AbortError") {
-      console.error(error);
-      setActionStatus("Share failed. Passage copied where supported.");
-    }
-  }
-}
-
 function resetShareCard() {
   currentShareCardDataUrl = "";
   shareCardPanel.hidden = true;
@@ -588,21 +580,29 @@ function drawRoundedRect(context, x, y, width, height, radius) {
   context.closePath();
 }
 
-function drawShareCardText(context, text, reference) {
-  const maxWidth = 780;
-  let quoteFontSize = text.length > 330 ? 44 : text.length > 220 ? 50 : 58;
+function drawShareCardText(context, text, reference, compact = false) {
+  const maxWidth = compact ? 720 : 780;
+  const minFont = compact ? 26 : 36;
+  const maxLines = compact ? 6 : 10;
+  const centerY = compact ? 905 : 690;
+  const minTop = compact ? 770 : 366;
+  const referenceGap = compact ? 38 : 52;
+  const referenceFontSize = compact ? 26 : 34;
+  let quoteFontSize = compact
+    ? (text.length > 330 ? 30 : text.length > 220 ? 34 : 38)
+    : (text.length > 330 ? 44 : text.length > 220 ? 50 : 58);
   let lines = [];
 
   do {
     context.font = `${quoteFontSize}px Georgia, serif`;
     lines = wrapCanvasText(context, `“${text}”`, maxWidth);
-    if (lines.length <= 10 || quoteFontSize <= 36) break;
+    if (lines.length <= maxLines || quoteFontSize <= minFont) break;
     quoteFontSize -= 4;
-  } while (quoteFontSize >= 36);
+  } while (quoteFontSize >= minFont);
 
   const lineHeight = quoteFontSize * 1.34;
   const quoteBlockHeight = lines.length * lineHeight;
-  let y = Math.max(366, 690 - quoteBlockHeight / 2);
+  let y = Math.max(minTop, centerY - quoteBlockHeight / 2);
 
   context.fillStyle = "#f8fafc";
   context.textAlign = "center";
@@ -615,17 +615,42 @@ function drawShareCardText(context, text, reference) {
   }
 
   context.fillStyle = "#facc15";
-  context.font = "700 34px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  context.fillText(`— ${reference} (KJV)`, 540, y + 52, maxWidth);
+  context.font = `700 ${referenceFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  context.fillText(`— ${reference} (KJV)`, 540, y + referenceGap, maxWidth);
 }
 
-function renderShareCardCanvas() {
+function loadCanvasImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("Image load failed for canvas use."));
+    img.src = src;
+  });
+}
+
+async function renderShareCardCanvas(forceTextOnly = false) {
   if (!currentPassage) return "";
 
   const context = shareCardCanvas.getContext("2d");
   const width = shareCardCanvas.width;
   const height = shareCardCanvas.height;
   const passageText = getPassageText(currentPassage);
+
+  let imageForCanvas = null;
+  const wantImage = !forceTextOnly && messageImage.naturalWidth > 0 && !messageImage.hidden;
+  if (wantImage) {
+    const src = messageImage.src || "";
+    if (src.startsWith("data:")) {
+      imageForCanvas = messageImage;
+    } else {
+      try {
+        imageForCanvas = await loadCanvasImage(src);
+      } catch (_err) {
+        imageForCanvas = null;
+      }
+    }
+  }
 
   const background = context.createLinearGradient(0, 0, width, height);
   background.addColorStop(0, "#0b1020");
@@ -651,12 +676,6 @@ function renderShareCardCanvas() {
   context.lineWidth = 2;
   drawRoundedRect(context, 70, 70, 940, 1210, 56);
   context.stroke();
-
-  context.fillStyle = "rgba(15, 23, 42, 0.62)";
-  drawRoundedRect(context, 112, 188, 856, 910, 44);
-  context.fill();
-  context.strokeStyle = "rgba(255, 255, 255, 0.14)";
-  context.stroke();
   context.restore();
 
   context.textAlign = "center";
@@ -666,7 +685,54 @@ function renderShareCardCanvas() {
   context.fillText("ENLIGHTEN", 540, 150);
   context.letterSpacing = "0px";
 
-  drawShareCardText(context, passageText, currentPassage.reference);
+  const hasImage = imageForCanvas !== null;
+
+  if (hasImage) {
+    context.save();
+    drawRoundedRect(context, 112, 188, 856, 520, 36);
+    context.clip();
+    const sourceRatio = imageForCanvas.naturalWidth / imageForCanvas.naturalHeight;
+    const targetRatio = 856 / 520;
+    let drawW, drawH, drawX, drawY;
+    if (sourceRatio > targetRatio) {
+      drawH = 520;
+      drawW = drawH * sourceRatio;
+      drawX = 112 + (856 - drawW) / 2;
+      drawY = 188;
+    } else {
+      drawW = 856;
+      drawH = drawW / sourceRatio;
+      drawX = 112;
+      drawY = 188 + (520 - drawH) / 2;
+    }
+    context.drawImage(imageForCanvas, drawX, drawY, drawW, drawH);
+    context.restore();
+
+    context.save();
+    context.strokeStyle = "rgba(250, 204, 21, 0.28)";
+    context.lineWidth = 2;
+    drawRoundedRect(context, 112, 188, 856, 520, 36);
+    context.stroke();
+
+    context.fillStyle = "rgba(15, 23, 42, 0.78)";
+    drawRoundedRect(context, 112, 728, 856, 370, 32);
+    context.fill();
+    context.strokeStyle = "rgba(255, 255, 255, 0.14)";
+    context.stroke();
+    context.restore();
+
+    drawShareCardText(context, passageText, currentPassage.reference, true);
+  } else {
+    context.save();
+    context.fillStyle = "rgba(15, 23, 42, 0.62)";
+    drawRoundedRect(context, 112, 188, 856, 910, 44);
+    context.fill();
+    context.strokeStyle = "rgba(255, 255, 255, 0.14)";
+    context.stroke();
+    context.restore();
+
+    drawShareCardText(context, passageText, currentPassage.reference);
+  }
 
   context.fillStyle = "#cbd5e1";
   context.font = "600 30px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
@@ -681,7 +747,18 @@ function renderShareCardCanvas() {
   context.font = "800 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   context.fillText("Save • Send • Share", 540, 1238);
 
-  currentShareCardDataUrl = shareCardCanvas.toDataURL("image/png");
+  let dataUrl;
+  try {
+    dataUrl = shareCardCanvas.toDataURL("image/png");
+  } catch (error) {
+    if (hasImage) {
+      console.warn("Share card export tainted; retrying without AI image:", error);
+      return await renderShareCardCanvas(true);
+    }
+    throw error;
+  }
+
+  currentShareCardDataUrl = dataUrl;
   shareCardPreview.src = currentShareCardDataUrl;
   shareCardPreview.hidden = false;
   downloadCardButton.disabled = false;
@@ -690,12 +767,19 @@ function renderShareCardCanvas() {
   return currentShareCardDataUrl;
 }
 
-function showShareCard() {
+async function showShareCard() {
   if (!currentPassage) return;
 
   shareCardPanel.hidden = false;
-  renderShareCardCanvas();
-  setActionStatus("Share card ready.");
+  setActionStatus("Composing share card…");
+  try {
+    await renderShareCardCanvas();
+    setActionStatus("Share card ready.");
+  } catch (error) {
+    console.error("Share card render failed:", error);
+    setActionStatus("Could not create share card.");
+  }
+  shareCardPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function getShareCardBlob() {
@@ -709,7 +793,7 @@ function getShareCardBlob() {
 
 async function downloadShareCard() {
   if (!currentPassage) return;
-  if (!currentShareCardDataUrl) renderShareCardCanvas();
+  if (!currentShareCardDataUrl) await renderShareCardCanvas();
 
   const link = document.createElement("a");
   link.href = currentShareCardDataUrl;
@@ -720,18 +804,66 @@ async function downloadShareCard() {
   setActionStatus("Downloaded share card.");
 }
 
+function dataUrlToBase64(dataUrl) {
+  const idx = dataUrl.indexOf(",");
+  return idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl;
+}
+
+async function shareViaCapacitor() {
+  const Plugins = window.Capacitor?.Plugins;
+  if (!Plugins) return false;
+
+  const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
+  if (!dataUrl) return false;
+
+  if (Plugins.ImageShare?.shareImage) {
+    await Plugins.ImageShare.shareImage({
+      base64: dataUrlToBase64(dataUrl),
+      dialogTitle: "Share scripture card",
+    });
+    return true;
+  }
+
+  if (!Plugins.Filesystem || !Plugins.Share) return false;
+  const fileName = getShareCardFileName();
+  await Plugins.Filesystem.writeFile({
+    path: fileName,
+    data: dataUrlToBase64(dataUrl),
+    directory: "DOCUMENTS",
+  });
+  const { uri } = await Plugins.Filesystem.getUri({
+    path: fileName,
+    directory: "DOCUMENTS",
+  });
+  await Plugins.Share.share({
+    files: [uri],
+    dialogTitle: "Share scripture card",
+  });
+  return true;
+}
+
 async function shareCardImage() {
   if (!currentPassage) return;
-  if (!currentShareCardDataUrl) renderShareCardCanvas();
+  if (!currentShareCardDataUrl) await renderShareCardCanvas();
+
+  const text = `${currentPassage.reference} (KJV) — From Enlighten, your daily dose.`;
 
   try {
+    if (window.Capacitor?.isNativePlatform?.()) {
+      const ok = await shareViaCapacitor();
+      if (ok) {
+        setActionStatus("Share sheet opened with image card.");
+        return;
+      }
+    }
+
     const blob = await getShareCardBlob();
     const file = new File([blob], getShareCardFileName(), { type: "image/png" });
 
     if (navigator.canShare?.({ files: [file] }) && navigator.share) {
       await navigator.share({
         title: "Enlighten",
-        text: `${currentPassage.reference} (KJV) — From Enlighten, your daily dose.`,
+        text,
         files: [file],
       });
       setActionStatus("Share sheet opened with image card.");
@@ -743,7 +875,7 @@ async function shareCardImage() {
       setActionStatus("Image sharing is not available here, so text was copied.");
     }
   } catch (error) {
-    if (error?.name !== "AbortError") {
+    if (error?.name !== "AbortError" && error?.message !== "Share canceled") {
       console.error(error);
       setActionStatus("Share image failed. Try Download Card instead.");
     }
@@ -811,12 +943,13 @@ async function pictureThisMessage() {
 function bindEvents() {
   enlightenButton.addEventListener("click", enlighten);
   copyButton.addEventListener("click", copyCurrentPassage);
-  shareTextButton.addEventListener("click", shareCurrentPassage);
   shareCardButton.addEventListener("click", showShareCard);
   downloadCardButton.addEventListener("click", downloadShareCard);
   shareCardImageButton.addEventListener("click", shareCardImage);
   subscribeButton.addEventListener("click", subscribeToImagePlan);
   restorePurchaseButton.addEventListener("click", restoreImagePlan);
+  settingsToggle.addEventListener("click", toggleSettings);
+  settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
   pictureButton.addEventListener("click", pictureThisMessage);
   searchForm.addEventListener("submit", handleSearch);
 
@@ -865,7 +998,6 @@ function bindEvents() {
 async function initializeApp() {
   enlightenButton.disabled = true;
   copyButton.disabled = true;
-  shareTextButton.disabled = true;
   shareCardButton.disabled = true;
   downloadCardButton.disabled = true;
   shareCardImageButton.disabled = true;

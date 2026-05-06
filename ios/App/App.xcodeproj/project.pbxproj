@@ -18,6 +18,8 @@
 		EE00BF010000000000000001 /* EnlightenSubscriptionsPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00FR010000000000000001 /* EnlightenSubscriptionsPlugin.swift */; };
 		EE00BF020000000000000002 /* EnlightenSubscriptionsPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = EE00FR020000000000000002 /* EnlightenSubscriptionsPlugin.m */; };
 		EE00BF040000000000000004 /* BridgeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00FR040000000000000004 /* BridgeViewController.swift */; };
+		EE00BF050000000000000005 /* ImageSharePlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00FR050000000000000005 /* ImageSharePlugin.swift */; };
+		EE00BF060000000000000006 /* ImageSharePlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = EE00FR060000000000000006 /* ImageSharePlugin.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +38,8 @@
 		EE00FR020000000000000002 /* EnlightenSubscriptionsPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EnlightenSubscriptionsPlugin.m; sourceTree = "<group>"; };
 		EE00FR030000000000000003 /* Enlighten.storekit */ = {isa = PBXFileReference; lastKnownFileType = file.storekit; path = Enlighten.storekit; sourceTree = "<group>"; };
 		EE00FR040000000000000004 /* BridgeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeViewController.swift; sourceTree = "<group>"; };
+		EE00FR050000000000000005 /* ImageSharePlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSharePlugin.swift; sourceTree = "<group>"; };
+		EE00FR060000000000000006 /* ImageSharePlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ImageSharePlugin.m; sourceTree = "<group>"; };
 		FC68EB0AF532CFC21C3344DD /* Pods-App.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-App.debug.xcconfig"; path = "Pods/Target Support Files/Pods-App/Pods-App.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -86,6 +90,8 @@
 				EE00FR040000000000000004 /* BridgeViewController.swift */,
 				EE00FR010000000000000001 /* EnlightenSubscriptionsPlugin.swift */,
 				EE00FR020000000000000002 /* EnlightenSubscriptionsPlugin.m */,
+				EE00FR050000000000000005 /* ImageSharePlugin.swift */,
+				EE00FR060000000000000006 /* ImageSharePlugin.m */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -224,6 +230,8 @@
 				EE00BF040000000000000004 /* BridgeViewController.swift in Sources */,
 				EE00BF010000000000000001 /* EnlightenSubscriptionsPlugin.swift in Sources */,
 				EE00BF020000000000000002 /* EnlightenSubscriptionsPlugin.m in Sources */,
+				EE00BF050000000000000005 /* ImageSharePlugin.swift in Sources */,
+				EE00BF060000000000000006 /* ImageSharePlugin.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
