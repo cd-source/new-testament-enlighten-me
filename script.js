@@ -9,6 +9,9 @@ const MAX_SEARCH_RESULTS = 50;
 const AI_IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
 const AI_IMAGE_PRICE_LABEL = "$3/month";
 const WEB_PREVIEW_ENTITLEMENT_KEY = "enlighten.previewImageSubscription";
+const LIBRARY_DB_NAME = "enlightenCardLibrary";
+const LIBRARY_DB_VERSION = 1;
+const LIBRARY_STORE_NAME = "cards";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -19,10 +22,27 @@ const pictureButton = document.getElementById("pictureButton");
 const actionStatus = document.getElementById("actionStatus");
 const homeView = document.getElementById("homeView");
 const settingsView = document.getElementById("settingsView");
+const libraryView = document.getElementById("libraryView");
 const subscriptionPanel = document.getElementById("subscriptionPanel");
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsBackButton = document.getElementById("settingsBackButton");
+const libraryToggle = document.getElementById("libraryToggle");
+const libraryBackButton = document.getElementById("libraryBackButton");
+const librarySubtitle = document.getElementById("librarySubtitle");
+const libraryEmptyState = document.getElementById("libraryEmptyState");
+const libraryViewer = document.getElementById("libraryViewer");
+const libraryCardImage = document.getElementById("libraryCardImage");
+const libraryCardReference = document.getElementById("libraryCardReference");
+const libraryCardDate = document.getElementById("libraryCardDate");
+const libraryPrevButton = document.getElementById("libraryPrevButton");
+const libraryNextButton = document.getElementById("libraryNextButton");
+const libraryShareButton = document.getElementById("libraryShareButton");
+const libraryDeleteButton = document.getElementById("libraryDeleteButton");
+const libraryStatus = document.getElementById("libraryStatus");
 const subscriptionStatus = document.getElementById("subscriptionStatus");
+const subscriptionStatusBadge = document.getElementById("subscriptionStatusBadge");
+const subscriptionPlanSummary = document.getElementById("subscriptionPlanSummary");
+const settingsStatus = document.getElementById("settingsStatus");
 const subscribeButton = document.getElementById("subscribeButton");
 const restorePurchaseButton = document.getElementById("restorePurchaseButton");
 const searchForm = document.getElementById("searchForm");
@@ -38,7 +58,8 @@ const chapterVerses = document.getElementById("chapterVerses");
 const shareCardPanel = document.getElementById("shareCardPanel");
 const shareCardCanvas = document.getElementById("shareCardCanvas");
 const shareCardPreview = document.getElementById("shareCardPreview");
-const downloadCardButton = document.getElementById("downloadCardButton");
+const closeCardButton = document.getElementById("closeCardButton");
+const saveCardButton = document.getElementById("saveCardButton");
 const shareCardImageButton = document.getElementById("shareCardImageButton");
 const imagePanel = document.getElementById("imagePanel");
 const imageStatus = document.getElementById("imageStatus");
@@ -53,7 +74,13 @@ let versesById = new Map();
 let versesByBookChapter = new Map();
 let lastIndex = -1;
 let currentPassage = null;
+let currentGeneratedImageSrc = "";
 let currentShareCardDataUrl = "";
+let currentSavedCardId = "";
+let savedCards = [];
+let activeLibraryIndex = 0;
+let libraryDbPromise = null;
+let libraryTouchStartX = 0;
 let imageSubscription = {
   isActive: false,
   productId: AI_IMAGE_PRODUCT_ID,
@@ -193,29 +220,193 @@ function updateSubscriptionUi() {
   const active = hasImageSubscription();
   const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
 
+  const sourceLabel = imageSubscription.source || nativeLabel;
+
   subscriptionPanel.classList.toggle("is-subscribed", active);
+  subscriptionStatusBadge.textContent = active ? "AI imagery active" : "AI imagery not active";
+  subscriptionStatusBadge.classList.toggle("is-active", active);
   subscriptionStatus.textContent = active
-    ? `AI imagery unlocked via ${imageSubscription.source || nativeLabel}. KJV scripture remains free for everyone.`
+    ? `AI imagery is unlocked via ${sourceLabel}. KJV scripture remains free for everyone.`
     : `All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscribe for ${AI_IMAGE_PRICE_LABEL} to unlock AI image generation.`;
+  subscriptionPlanSummary.textContent = active
+    ? `Plan: AI imagery monthly · Source: ${sourceLabel}.`
+    : `Plan: AI imagery monthly · ${AI_IMAGE_PRICE_LABEL}.`;
   subscribeButton.textContent = active ? "AI Imagery Active" : `Subscribe — ${AI_IMAGE_PRICE_LABEL}`;
   subscribeButton.disabled = active;
   restorePurchaseButton.disabled = false;
   pictureButton.textContent = active ? "Picture this Message" : "Unlock AI Imagery";
 }
 
-function setSettingsOpen(isOpen) {
-  homeView.hidden = isOpen;
-  settingsView.hidden = !isOpen;
-  settingsToggle.setAttribute("aria-expanded", String(isOpen));
+function showView(viewName) {
+  const showingHome = viewName === "home";
+  homeView.hidden = !showingHome;
+  settingsView.hidden = viewName !== "settings";
+  libraryView.hidden = viewName !== "library";
+  settingsToggle.setAttribute("aria-expanded", String(viewName === "settings"));
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function setSettingsOpen(isOpen) {
+  showView(isOpen ? "settings" : "home");
 }
 
 function toggleSettings() {
   setSettingsOpen(true);
 }
 
+function setLibraryOpen(isOpen) {
+  showView(isOpen ? "library" : "home");
+  if (isOpen) {
+    renderLibrary();
+  }
+}
+
 function nativeBridgeArgs() {
   return { productId: AI_IMAGE_PRODUCT_ID, apiBase: REMOTE_API_BASE };
+}
+
+function openLibraryDb() {
+  if (!window.indexedDB) {
+    return Promise.reject(new Error("Local image storage is not available in this browser."));
+  }
+
+  if (libraryDbPromise) return libraryDbPromise;
+
+  libraryDbPromise = new Promise((resolve, reject) => {
+    const request = window.indexedDB.open(LIBRARY_DB_NAME, LIBRARY_DB_VERSION);
+
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(LIBRARY_STORE_NAME)) {
+        const store = db.createObjectStore(LIBRARY_STORE_NAME, { keyPath: "id" });
+        store.createIndex("createdAt", "createdAt", { unique: false });
+      }
+    };
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("Could not open local card library."));
+  });
+
+  return libraryDbPromise;
+}
+
+async function readSavedCards() {
+  const db = await openLibraryDb();
+
+  return await new Promise((resolve, reject) => {
+    const transaction = db.transaction(LIBRARY_STORE_NAME, "readonly");
+    const store = transaction.objectStore(LIBRARY_STORE_NAME);
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      const cards = Array.isArray(request.result) ? request.result : [];
+      cards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      resolve(cards);
+    };
+    request.onerror = () => reject(request.error || new Error("Could not read saved cards."));
+  });
+}
+
+async function writeSavedCard(card) {
+  const db = await openLibraryDb();
+
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(LIBRARY_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(LIBRARY_STORE_NAME);
+    const request = store.put(card);
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error || new Error("Could not save card."));
+  });
+}
+
+async function removeSavedCard(id) {
+  const db = await openLibraryDb();
+
+  await new Promise((resolve, reject) => {
+    const transaction = db.transaction(LIBRARY_STORE_NAME, "readwrite");
+    const store = transaction.objectStore(LIBRARY_STORE_NAME);
+    const request = store.delete(id);
+
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error || new Error("Could not delete card."));
+  });
+}
+
+async function loadSavedCards() {
+  try {
+    savedCards = await readSavedCards();
+  } catch (error) {
+    console.error("Card library failed to load:", error);
+    savedCards = [];
+    if (libraryStatus) libraryStatus.textContent = "Library storage is not available on this device.";
+  }
+
+  renderLibrary();
+}
+
+function formatSavedCardDate(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Saved on this device";
+  return `Saved ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+}
+
+function updateLibraryButton() {
+  if (!libraryToggle) return;
+  libraryToggle.textContent = savedCards.length ? `Library (${savedCards.length})` : "Library";
+}
+
+function renderLibrary() {
+  updateLibraryButton();
+
+  if (!libraryEmptyState || !libraryViewer) return;
+  const hasCards = savedCards.length > 0;
+  libraryEmptyState.hidden = hasCards;
+  libraryViewer.hidden = !hasCards;
+
+  if (librarySubtitle) {
+    librarySubtitle.textContent = hasCards
+      ? `${savedCards.length} saved scripture card${savedCards.length === 1 ? "" : "s"} on this device.`
+      : "Saved scripture cards live on this device.";
+  }
+
+  if (!hasCards) {
+    activeLibraryIndex = 0;
+    libraryCardImage?.removeAttribute("src");
+    if (libraryStatus) libraryStatus.textContent = "";
+    return;
+  }
+
+  activeLibraryIndex = Math.max(0, Math.min(activeLibraryIndex, savedCards.length - 1));
+  const card = savedCards[activeLibraryIndex];
+  libraryCardImage.src = card.dataUrl;
+  libraryCardImage.alt = `${card.reference} scripture card`;
+  libraryCardReference.textContent = card.reference || "Saved card";
+  libraryCardDate.textContent = `${formatSavedCardDate(card.createdAt)} · ${activeLibraryIndex + 1} of ${savedCards.length}`;
+  libraryPrevButton.disabled = savedCards.length <= 1;
+  libraryNextButton.disabled = savedCards.length <= 1;
+  libraryShareButton.disabled = false;
+  libraryDeleteButton.disabled = false;
+}
+
+function showLibraryOffset(offset) {
+  if (!savedCards.length) return;
+  activeLibraryIndex = (activeLibraryIndex + offset + savedCards.length) % savedCards.length;
+  renderLibrary();
+}
+
+function getActiveLibraryCard() {
+  return savedCards[activeLibraryIndex] || null;
+}
+
+function getLibraryCardFileName(card) {
+  const referenceSlug = (card?.reference || "scripture")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  const idSlug = String(card?.id || "card").slice(-8);
+
+  return `enlighten-${referenceSlug || "scripture"}-${idSlug}.png`;
 }
 
 async function loadImageSubscription() {
@@ -294,13 +485,22 @@ function showImageSubscriptionPrompt() {
 }
 
 function setActionStatus(message) {
-  if (!actionStatus) return;
-  actionStatus.textContent = message;
+  if (actionStatus) {
+    actionStatus.textContent = message;
+  }
+  if (settingsStatus) {
+    settingsStatus.textContent = message;
+  }
 
   window.clearTimeout(actionStatusTimer);
   if (message) {
     actionStatusTimer = window.setTimeout(() => {
-      actionStatus.textContent = "";
+      if (actionStatus?.textContent === message) {
+        actionStatus.textContent = "";
+      }
+      if (settingsStatus?.textContent === message) {
+        settingsStatus.textContent = "";
+      }
     }, 2600);
   }
 }
@@ -323,10 +523,12 @@ function getRandomPassage() {
 }
 
 function resetImagePanel() {
+  currentGeneratedImageSrc = "";
   imagePanel.hidden = true;
   imagePanel.classList.remove("is-loading");
   imageStatus.textContent = "";
   imageStatus.hidden = false;
+  resetShareCard();
   messageImage.hidden = true;
   messageImage.removeAttribute("src");
   if (promptDetails) promptDetails.hidden = true;
@@ -538,12 +740,26 @@ async function copyCurrentPassage() {
   }
 }
 
+function setFocalCardVisible(isVisible) {
+  homeView.classList.toggle("has-focal-card", isVisible);
+  passageElement.hidden = isVisible;
+  referenceElement.hidden = isVisible;
+}
+
+function scrollHomeFocalIntoView() {
+  homeView.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function resetShareCard() {
   currentShareCardDataUrl = "";
+  currentSavedCardId = "";
   shareCardPanel.hidden = true;
   shareCardPreview.hidden = true;
   shareCardPreview.removeAttribute("src");
-  downloadCardButton.disabled = true;
+  setFocalCardVisible(false);
+  closeCardButton.disabled = true;
+  saveCardButton.disabled = true;
+  saveCardButton.textContent = "Save to Library";
   shareCardImageButton.disabled = true;
 }
 
@@ -619,14 +835,29 @@ function drawShareCardText(context, text, reference, compact = false) {
   context.fillText(`— ${reference} (KJV)`, 540, y + referenceGap, maxWidth);
 }
 
-function loadCanvasImage(src) {
+function loadCanvasImage(src, options = {}) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
+    if (options.crossOrigin) {
+      img.crossOrigin = options.crossOrigin;
+    }
     img.onload = () => resolve(img);
     img.onerror = () => reject(new Error("Image load failed for canvas use."));
     img.src = src;
   });
+}
+
+async function getImageForCanvas(src) {
+  if (!src) return null;
+
+  if (src.startsWith("data:") || src.startsWith("blob:")) {
+    if (messageImage.src === src && messageImage.naturalWidth > 0) {
+      return messageImage;
+    }
+    return await loadCanvasImage(src);
+  }
+
+  return await loadCanvasImage(src, { crossOrigin: "anonymous" });
 }
 
 async function renderShareCardCanvas(forceTextOnly = false) {
@@ -638,17 +869,14 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   const passageText = getPassageText(currentPassage);
 
   let imageForCanvas = null;
-  const wantImage = !forceTextOnly && messageImage.naturalWidth > 0 && !messageImage.hidden;
+  const src = currentGeneratedImageSrc || messageImage.src || "";
+  const wantImage = !forceTextOnly && Boolean(src);
   if (wantImage) {
-    const src = messageImage.src || "";
-    if (src.startsWith("data:")) {
-      imageForCanvas = messageImage;
-    } else {
-      try {
-        imageForCanvas = await loadCanvasImage(src);
-      } catch (_err) {
-        imageForCanvas = null;
-      }
+    try {
+      imageForCanvas = await getImageForCanvas(src);
+    } catch (error) {
+      console.warn("Could not prepare generated image for card canvas:", error);
+      imageForCanvas = null;
     }
   }
 
@@ -738,15 +966,6 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   context.font = "600 30px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   context.fillText("From Enlighten, your daily dose.", 540, 1162);
 
-  context.fillStyle = "rgba(250, 204, 21, 0.14)";
-  drawRoundedRect(context, 314, 1200, 452, 58, 29);
-  context.fill();
-  context.strokeStyle = "rgba(250, 204, 21, 0.34)";
-  context.stroke();
-  context.fillStyle = "#fde68a";
-  context.font = "800 22px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  context.fillText("Save • Send • Share", 540, 1238);
-
   let dataUrl;
   try {
     dataUrl = shareCardCanvas.toDataURL("image/png");
@@ -759,9 +978,12 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   }
 
   currentShareCardDataUrl = dataUrl;
+  shareCardPanel.hidden = false;
   shareCardPreview.src = currentShareCardDataUrl;
   shareCardPreview.hidden = false;
-  downloadCardButton.disabled = false;
+  setFocalCardVisible(true);
+  closeCardButton.disabled = false;
+  saveCardButton.disabled = false;
   shareCardImageButton.disabled = false;
 
   return currentShareCardDataUrl;
@@ -770,38 +992,52 @@ async function renderShareCardCanvas(forceTextOnly = false) {
 async function showShareCard() {
   if (!currentPassage) return;
 
-  shareCardPanel.hidden = false;
   setActionStatus("Composing share card…");
   try {
     await renderShareCardCanvas();
     setActionStatus("Share card ready.");
+    scrollHomeFocalIntoView();
   } catch (error) {
     console.error("Share card render failed:", error);
     setActionStatus("Could not create share card.");
   }
-  shareCardPanel.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function getShareCardBlob() {
-  return new Promise((resolve, reject) => {
-    shareCardCanvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error("Could not create share card image."));
-    }, "image/png");
-  });
+function closeShareCard() {
+  resetShareCard();
+  imagePanel.hidden = true;
+  setActionStatus("Card closed.");
 }
 
-async function downloadShareCard() {
+async function saveCurrentCardToLibrary() {
   if (!currentPassage) return;
   if (!currentShareCardDataUrl) await renderShareCardCanvas();
 
-  const link = document.createElement("a");
-  link.href = currentShareCardDataUrl;
-  link.download = getShareCardFileName();
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setActionStatus("Downloaded share card.");
+  const id = currentSavedCardId || `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const card = {
+    id,
+    reference: currentPassage.reference,
+    passageText: getPassageText(currentPassage),
+    verseIds: Array.isArray(currentPassage.verse_ids) ? currentPassage.verse_ids : [],
+    passageId: currentPassage.id || "",
+    dataUrl: currentShareCardDataUrl,
+    createdAt: currentSavedCardId
+      ? (savedCards.find((nextCard) => nextCard.id === currentSavedCardId)?.createdAt || new Date().toISOString())
+      : new Date().toISOString(),
+  };
+
+  saveCardButton.disabled = true;
+  try {
+    await writeSavedCard(card);
+    currentSavedCardId = id;
+    await loadSavedCards();
+    saveCardButton.textContent = "Saved";
+    setActionStatus("Saved to Library.");
+  } catch (error) {
+    console.error(error);
+    saveCardButton.disabled = false;
+    setActionStatus("Could not save card to Library.");
+  }
 }
 
 function dataUrlToBase64(dataUrl) {
@@ -809,12 +1045,22 @@ function dataUrlToBase64(dataUrl) {
   return idx >= 0 ? dataUrl.slice(idx + 1) : dataUrl;
 }
 
-async function shareViaCapacitor() {
-  const Plugins = window.Capacitor?.Plugins;
-  if (!Plugins) return false;
+function dataUrlToBlob(dataUrl) {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header?.match(/data:(.*?);base64/)?.[1] || "image/png";
+  const binary = atob(base64 || "");
+  const bytes = new Uint8Array(binary.length);
 
-  const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  if (!dataUrl) return false;
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: mime });
+}
+
+async function shareDataUrlViaCapacitor(dataUrl, fileName) {
+  const Plugins = window.Capacitor?.Plugins;
+  if (!Plugins || !dataUrl) return false;
 
   if (Plugins.ImageShare?.shareImage) {
     await Plugins.ImageShare.shareImage({
@@ -825,7 +1071,6 @@ async function shareViaCapacitor() {
   }
 
   if (!Plugins.Filesystem || !Plugins.Share) return false;
-  const fileName = getShareCardFileName();
   await Plugins.Filesystem.writeFile({
     path: fileName,
     data: dataUrlToBase64(dataUrl),
@@ -842,23 +1087,18 @@ async function shareViaCapacitor() {
   return true;
 }
 
-async function shareCardImage() {
-  if (!currentPassage) return;
-  if (!currentShareCardDataUrl) await renderShareCardCanvas();
-
-  const text = `${currentPassage.reference} (KJV) — From Enlighten, your daily dose.`;
-
+async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActionStatus) {
   try {
     if (window.Capacitor?.isNativePlatform?.()) {
-      const ok = await shareViaCapacitor();
+      const ok = await shareDataUrlViaCapacitor(dataUrl, fileName);
       if (ok) {
-        setActionStatus("Share sheet opened with image card.");
+        statusTarget("Share sheet opened with image card.");
         return;
       }
     }
 
-    const blob = await getShareCardBlob();
-    const file = new File([blob], getShareCardFileName(), { type: "image/png" });
+    const blob = dataUrlToBlob(dataUrl);
+    const file = new File([blob], fileName, { type: "image/png" });
 
     if (navigator.canShare?.({ files: [file] }) && navigator.share) {
       await navigator.share({
@@ -866,19 +1106,59 @@ async function shareCardImage() {
         text,
         files: [file],
       });
-      setActionStatus("Share sheet opened with image card.");
+      statusTarget("Share sheet opened with image card.");
     } else if (navigator.share) {
-      await navigator.share({ title: "Enlighten", text: getShareText() });
-      setActionStatus("Image sharing is not available here, so text share opened.");
+      await navigator.share({ title: "Enlighten", text });
+      statusTarget("Image sharing is not available here, so text share opened.");
     } else {
-      await navigator.clipboard.writeText(getShareText());
-      setActionStatus("Image sharing is not available here, so text was copied.");
+      await navigator.clipboard.writeText(text);
+      statusTarget("Image sharing is not available here, so text was copied.");
     }
   } catch (error) {
     if (error?.name !== "AbortError" && error?.message !== "Share canceled") {
       console.error(error);
-      setActionStatus("Share image failed. Try Download Card instead.");
+      statusTarget("Share image failed. Please try again.");
     }
+  }
+}
+
+async function shareCardImage() {
+  if (!currentPassage) return;
+  const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
+  const text = `${currentPassage.reference} (KJV) — From Enlighten, your daily dose.`;
+  await shareCardDataUrl(dataUrl, getShareCardFileName(), text);
+}
+
+async function shareActiveLibraryCard() {
+  const card = getActiveLibraryCard();
+  if (!card) return;
+  const text = `${card.reference} (KJV) — From Enlighten, your daily dose.`;
+  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), text, (message) => {
+    if (libraryStatus) libraryStatus.textContent = message;
+  });
+}
+
+async function deleteActiveLibraryCard() {
+  const card = getActiveLibraryCard();
+  if (!card) return;
+
+  const shouldDelete = window.confirm(`Delete the saved card for ${card.reference}?`);
+  if (!shouldDelete) return;
+
+  try {
+    await removeSavedCard(card.id);
+    if (currentSavedCardId === card.id) {
+      currentSavedCardId = "";
+      saveCardButton.textContent = "Save to Library";
+      saveCardButton.disabled = false;
+    }
+    savedCards = savedCards.filter((nextCard) => nextCard.id !== card.id);
+    activeLibraryIndex = Math.max(0, activeLibraryIndex - 1);
+    renderLibrary();
+    if (libraryStatus) libraryStatus.textContent = "Deleted saved card.";
+  } catch (error) {
+    console.error(error);
+    if (libraryStatus) libraryStatus.textContent = "Could not delete saved card.";
   }
 }
 
@@ -892,6 +1172,8 @@ async function pictureThisMessage() {
 
   setImageLoading(true);
   showPleaseWait();
+  currentGeneratedImageSrc = "";
+  resetShareCard();
   messageImage.hidden = true;
   messageImage.removeAttribute("src");
   if (promptDetails) promptDetails.hidden = true;
@@ -924,16 +1206,49 @@ async function pictureThisMessage() {
 
     await preloadImage(imageSource);
 
+    currentGeneratedImageSrc = imageSource;
     messageImage.src = imageSource;
     messageImage.alt = "";
-    messageImage.hidden = false;
-    imageStatus.textContent = "";
-    imageStatus.hidden = true;
+    messageImage.hidden = true;
+    imagePanel.hidden = false;
+    imageStatus.hidden = false;
+    imageStatus.textContent = "Composing scripture card…";
 
     if (imagePrompt) imagePrompt.textContent = "";
 
-    passageElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    shareCardPanel.hidden = true;
+    shareCardPreview.hidden = true;
+    setActionStatus("Composing scripture card…");
+
+    try {
+      await renderShareCardCanvas();
+      imageStatus.textContent = "";
+      imageStatus.hidden = true;
+      imagePanel.hidden = true;
+      setActionStatus("Scripture card ready. Save it, share it, or close it.");
+      scrollHomeFocalIntoView();
+    } catch (cardError) {
+      console.error("Scripture card render failed:", cardError);
+      currentGeneratedImageSrc = "";
+
+      try {
+        await renderShareCardCanvas(true);
+        imageStatus.textContent = "";
+        imageStatus.hidden = true;
+        imagePanel.hidden = true;
+        setActionStatus("Card ready without the illustration. Save it, share it, or close it.");
+        scrollHomeFocalIntoView();
+      } catch (fallbackError) {
+        console.error("Text-only card render failed:", fallbackError);
+        imagePanel.hidden = false;
+        imageStatus.hidden = false;
+        imageStatus.textContent = "Could not create the finished card. Please try again.";
+        setActionStatus("Could not create scripture card.");
+      }
+    }
   } catch (error) {
+    imagePanel.hidden = false;
+    imageStatus.hidden = false;
     imageStatus.textContent = error.message || "Image generation failed.";
   } finally {
     setImageLoading(false);
@@ -944,12 +1259,27 @@ function bindEvents() {
   enlightenButton.addEventListener("click", enlighten);
   copyButton.addEventListener("click", copyCurrentPassage);
   shareCardButton.addEventListener("click", showShareCard);
-  downloadCardButton.addEventListener("click", downloadShareCard);
+  closeCardButton.addEventListener("click", closeShareCard);
+  saveCardButton.addEventListener("click", saveCurrentCardToLibrary);
   shareCardImageButton.addEventListener("click", shareCardImage);
   subscribeButton.addEventListener("click", subscribeToImagePlan);
   restorePurchaseButton.addEventListener("click", restoreImagePlan);
   settingsToggle.addEventListener("click", toggleSettings);
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
+  libraryToggle.addEventListener("click", () => setLibraryOpen(true));
+  libraryBackButton.addEventListener("click", () => setLibraryOpen(false));
+  libraryPrevButton.addEventListener("click", () => showLibraryOffset(-1));
+  libraryNextButton.addEventListener("click", () => showLibraryOffset(1));
+  libraryShareButton.addEventListener("click", shareActiveLibraryCard);
+  libraryDeleteButton.addEventListener("click", deleteActiveLibraryCard);
+  libraryCardImage.addEventListener("touchstart", (event) => {
+    libraryTouchStartX = event.touches?.[0]?.clientX || 0;
+  });
+  libraryCardImage.addEventListener("touchend", (event) => {
+    const endX = event.changedTouches?.[0]?.clientX || 0;
+    const deltaX = endX - libraryTouchStartX;
+    if (Math.abs(deltaX) > 40) showLibraryOffset(deltaX < 0 ? 1 : -1);
+  });
   pictureButton.addEventListener("click", pictureThisMessage);
   searchForm.addEventListener("submit", handleSearch);
 
@@ -999,7 +1329,8 @@ async function initializeApp() {
   enlightenButton.disabled = true;
   copyButton.disabled = true;
   shareCardButton.disabled = true;
-  downloadCardButton.disabled = true;
+  closeCardButton.disabled = true;
+  saveCardButton.disabled = true;
   shareCardImageButton.disabled = true;
   pictureButton.disabled = true;
   subscribeButton.disabled = true;
@@ -1015,6 +1346,7 @@ async function initializeApp() {
   try {
     await loadScriptureData();
     await loadImageSubscription();
+    await loadSavedCards();
     initializeBrowseControls();
     bindEvents();
 

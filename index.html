@@ -10,7 +10,10 @@
   <main class="page-shell">
     <section class="card" aria-live="polite">
       <section id="homeView" class="app-view home-view" aria-label="Enlighten Me home">
-        <button id="settingsToggle" class="settings-toggle" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settingsView">⚙</button>
+        <div class="top-actions" aria-label="App navigation">
+          <button id="libraryToggle" class="top-action-button library-toggle" type="button" aria-label="Open saved scripture card library" aria-controls="libraryView">Library</button>
+          <button id="settingsToggle" class="top-action-button settings-toggle" type="button" aria-label="Settings" aria-expanded="false" aria-controls="settingsView">⚙</button>
+        </div>
         <p class="eyebrow">Free local KJV scripture</p>
         <h1>Enlighten Me</h1>
 
@@ -24,6 +27,25 @@
           <p id="imageStatus" class="image-status"></p>
           <img id="messageImage" class="message-image" alt="" hidden />
         </div>
+
+        <section id="shareCardPanel" class="share-card-panel focal-card-panel" aria-label="Finished scripture card" hidden>
+          <div class="share-card-stage">
+            <canvas id="shareCardCanvas" class="share-card-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
+            <img id="shareCardPreview" class="share-card-preview" alt="Finished Enlighten scripture card preview" hidden />
+          </div>
+
+          <div class="share-card-actions">
+            <button id="closeCardButton" class="button button-secondary button-compact" type="button" disabled>
+              Close
+            </button>
+            <button id="saveCardButton" class="button button-secondary button-compact" type="button" disabled>
+              Save to Library
+            </button>
+            <button id="shareCardImageButton" class="button button-secondary button-compact" type="button" disabled>
+              Share
+            </button>
+          </div>
+        </section>
 
         <div class="actions">
           <button id="enlightenButton" class="button" type="button">
@@ -41,28 +63,6 @@
         </div>
 
         <p id="actionStatus" class="action-status" aria-live="polite"></p>
-
-        <section id="shareCardPanel" class="share-card-panel" aria-label="Branded scripture share card" hidden>
-          <div class="tool-heading share-card-heading">
-            <p class="tool-kicker">Share Card</p>
-            <h2>Visual scripture card</h2>
-            <p class="tool-meta">A branded image for saving, sending, or sharing from iOS later.</p>
-          </div>
-
-          <div class="share-card-stage">
-            <canvas id="shareCardCanvas" class="share-card-canvas" width="1080" height="1350" aria-hidden="true"></canvas>
-            <img id="shareCardPreview" class="share-card-preview" alt="Branded Enlighten scripture share card preview" hidden />
-          </div>
-
-          <div class="share-card-actions">
-            <button id="downloadCardButton" class="button button-secondary button-compact" type="button" disabled>
-              Download Card
-            </button>
-            <button id="shareCardImageButton" class="button button-secondary button-compact" type="button" disabled>
-              Share Image
-            </button>
-          </div>
-        </section>
 
         <section class="scripture-tools" aria-label="Search and browse KJV scripture">
           <div class="tool-panel search-panel">
@@ -108,28 +108,139 @@
         </section>
       </section>
 
-      <section id="settingsView" class="app-view settings-view" aria-label="Settings" hidden>
-        <button id="settingsBackButton" class="back-button" type="button" aria-label="Back to home">← Home</button>
-        <p class="eyebrow">Settings</p>
-        <h1>Settings</h1>
 
-        <section id="subscriptionPanel" class="subscription-panel" aria-label="AI imagery subscription">
-          <div class="subscription-copy">
-            <p class="tool-kicker">Paid imagery</p>
-            <h2>AI scripture imagery is $3/month</h2>
-            <p id="subscriptionStatus" class="tool-meta">
-              All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscription unlocks AI image generation only.
-            </p>
+      <section id="libraryView" class="app-view library-view" aria-label="Saved scripture card library" hidden>
+        <header class="settings-header library-header">
+          <button id="libraryBackButton" class="back-button" type="button" aria-label="Back to home">← Home</button>
+          <div class="settings-title">
+            <p class="eyebrow">Library</p>
+            <h1>Saved Cards</h1>
+            <p id="librarySubtitle" class="settings-subtitle">Saved scripture cards live on this device.</p>
           </div>
-          <div class="subscription-actions">
-            <button id="subscribeButton" class="button button-compact" type="button">
-              Subscribe — $3/month
-            </button>
-            <button id="restorePurchaseButton" class="button button-secondary button-compact" type="button">
-              Restore Purchase
-            </button>
+        </header>
+
+        <section id="libraryEmptyState" class="library-empty settings-card">
+          <p class="tool-kicker">No cards yet</p>
+          <h2>Your saved scripture cards will appear here.</h2>
+          <p>Create an AI scripture image, then save the finished card to return to it later.</p>
+        </section>
+
+        <section id="libraryViewer" class="library-viewer" hidden>
+          <div class="library-card-stage">
+            <button id="libraryPrevButton" class="library-nav-button" type="button" aria-label="Previous saved card">‹</button>
+            <img id="libraryCardImage" class="library-card-image" alt="Saved scripture card" />
+            <button id="libraryNextButton" class="library-nav-button" type="button" aria-label="Next saved card">›</button>
+          </div>
+
+          <div class="library-card-meta">
+            <p id="libraryCardReference" class="reference">—</p>
+            <p id="libraryCardDate" class="tool-meta"></p>
+          </div>
+
+          <div class="share-card-actions library-actions">
+            <button id="libraryShareButton" class="button button-secondary button-compact" type="button">Share</button>
+            <button id="libraryDeleteButton" class="button button-secondary button-compact danger-button" type="button">Delete</button>
           </div>
         </section>
+
+        <p id="libraryStatus" class="settings-status" aria-live="polite"></p>
+      </section>
+
+      <section id="settingsView" class="app-view settings-view" aria-label="Settings" hidden>
+        <header class="settings-header">
+          <button id="settingsBackButton" class="back-button" type="button" aria-label="Back to home">← Home</button>
+          <div class="settings-title">
+            <p class="eyebrow">Settings</p>
+            <h1>Settings</h1>
+            <p class="settings-subtitle">Manage subscription and app options.</p>
+          </div>
+        </header>
+
+        <div class="settings-sections">
+          <section class="settings-section" aria-labelledby="subscriptionSettingsTitle">
+            <div class="settings-section-heading">
+              <p class="tool-kicker">Subscription</p>
+              <h2 id="subscriptionSettingsTitle">AI imagery</h2>
+            </div>
+
+            <section id="subscriptionPanel" class="subscription-panel settings-card" aria-label="AI imagery subscription">
+              <div class="subscription-copy">
+                <div class="settings-card-topline">
+                  <span id="subscriptionStatusBadge" class="status-pill">Checking status…</span>
+                </div>
+                <h3>AI scripture imagery is $3/month</h3>
+                <p id="subscriptionStatus" class="tool-meta">
+                  All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscription unlocks AI image generation only.
+                </p>
+                <ul class="settings-feature-list" aria-label="Included features">
+                  <li><strong>Free:</strong> local KJV scripture, search, browse, copy, text sharing, and share cards.</li>
+                  <li><strong>Paid:</strong> AI scripture-inspired imagery.</li>
+                </ul>
+                <p id="subscriptionPlanSummary" class="settings-note">Plan: AI imagery monthly.</p>
+              </div>
+              <div class="subscription-actions">
+                <button id="subscribeButton" class="button button-compact" type="button">
+                  Subscribe — $3/month
+                </button>
+                <button id="restorePurchaseButton" class="button button-secondary button-compact" type="button">
+                  Restore Purchase
+                </button>
+              </div>
+            </section>
+          </section>
+
+          <section class="settings-section" aria-labelledby="appSettingsTitle">
+            <div class="settings-section-heading">
+              <p class="tool-kicker">App</p>
+              <h2 id="appSettingsTitle">Share & image tools</h2>
+            </div>
+            <div class="settings-card settings-list">
+              <div class="settings-row">
+                <div>
+                  <h3>Share Cards</h3>
+                  <p>Create branded scripture cards for saving or sharing.</p>
+                </div>
+                <span class="settings-row-meta">Free</span>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <h3>AI Imagery</h3>
+                  <p>Generate scripture-inspired artwork when subscription is active.</p>
+                </div>
+                <span class="settings-row-meta">Paid</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-section" aria-labelledby="aboutSettingsTitle">
+            <div class="settings-section-heading">
+              <p class="tool-kicker">About</p>
+              <h2 id="aboutSettingsTitle">Enlighten Me</h2>
+            </div>
+            <div class="settings-card settings-list">
+              <div class="settings-row">
+                <div>
+                  <h3>Enlighten Me</h3>
+                  <p>Free local KJV scripture. AI imagery optional.</p>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <h3>Saved cards</h3>
+                  <p>Saved cards are stored on this device. They are not currently synced across devices.</p>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <h3>Scripture text</h3>
+                  <p>King James Version text is public domain.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <p id="settingsStatus" class="settings-status" aria-live="polite"></p>
       </section>
     </section>
   </main>

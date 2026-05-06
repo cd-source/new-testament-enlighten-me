@@ -218,7 +218,7 @@ async function imageUrlToDataUrl(imageUrl) {
     if (!contentType.startsWith("image/")) return null;
 
     const arrayBuffer = await response.arrayBuffer();
-    if (arrayBuffer.byteLength > 4_000_000) return null;
+    if (arrayBuffer.byteLength > 12_000_000) return null;
 
     return `data:${contentType};base64,${Buffer.from(arrayBuffer).toString("base64")}`;
   } catch (_error) {
