@@ -139,44 +139,56 @@
     row.className = "web-sign-in-row";
     row.innerHTML = `
       <p class="tool-meta" id="webSignInStatus"></p>
-      <form id="webSignInForm" class="web-sign-in-form">
-        <label class="sr-only" for="webSignInEmail">Email</label>
-        <input id="webSignInEmail" class="text-input" type="email" placeholder="you@example.com" autocomplete="email" required />
-        <button id="webSignInSubmit" class="button button-secondary button-compact" type="submit">Email me a link</button>
-      </form>
+      <div id="webSignInControls" class="web-sign-in-controls">
+        <button id="webGoogleSignInButton" class="button button-secondary button-compact web-google-button" type="button">
+          <span class="web-google-icon" aria-hidden="true">G</span>
+          Continue with Google
+        </button>
+        <div class="web-sign-in-divider"><span>or</span></div>
+        <form id="webSignInForm" class="web-sign-in-form">
+          <label class="sr-only" for="webSignInEmail">Email</label>
+          <input id="webSignInEmail" class="text-input" type="email" placeholder="you@example.com" autocomplete="email" required />
+          <label class="sr-only" for="webSignInPassword">Password</label>
+          <input id="webSignInPassword" class="text-input" type="password" placeholder="Password (8+ characters)" autocomplete="current-password" minlength="8" required />
+          <div class="web-sign-in-buttons">
+            <button id="webSignInSubmit" class="button button-secondary button-compact" type="submit">Sign in</button>
+            <button id="webSignUpSubmit" class="button button-compact" type="button">Create account</button>
+          </div>
+        </form>
+        <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:cd@edenic.co?subject=Enlighten%20password%20reset">Email us</a> to reset.</p>
+      </div>
       <button id="webSignOutButton" class="utility-button" type="button" hidden>Sign out</button>
       <p class="tool-meta" id="webSignInMessage" hidden></p>
     `;
     panel.insertBefore(row, actions);
 
-    document.getElementById("webSignInForm").addEventListener("submit", async (event) => {
+    document.getElementById("webSignInForm").addEventListener("submit", (event) => {
       event.preventDefault();
-      const input = document.getElementById("webSignInEmail");
-      const email = (input.value || "").trim();
-      if (!email) return;
+      handleEmailAuth("signin");
+    });
 
-      const submit = document.getElementById("webSignInSubmit");
+    document.getElementById("webSignUpSubmit").addEventListener("click", () => {
+      handleEmailAuth("signup");
+    });
+
+    document.getElementById("webGoogleSignInButton").addEventListener("click", async () => {
       const message = document.getElementById("webSignInMessage");
-      submit.disabled = true;
-      submit.textContent = "Sending…";
-
+      const button = document.getElementById("webGoogleSignInButton");
+      button.disabled = true;
       try {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: window.location.origin },
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: "google",
+          options: { redirectTo: window.location.origin },
         });
         if (error) {
-          message.textContent = `Could not send sign-in email: ${error.message}`;
-        } else {
-          message.textContent = `Check ${email} for a sign-in link.`;
+          message.textContent = `Could not start Google sign-in: ${error.message}`;
+          message.hidden = false;
         }
-        message.hidden = false;
       } catch (error) {
-        message.textContent = error?.message || "Sign-in failed.";
+        message.textContent = error?.message || "Google sign-in failed.";
         message.hidden = false;
       } finally {
-        submit.disabled = false;
-        submit.textContent = "Email me a link";
+        button.disabled = false;
       }
     });
 
@@ -185,21 +197,58 @@
     });
   }
 
+  async function handleEmailAuth(mode) {
+    const emailInput = document.getElementById("webSignInEmail");
+    const passwordInput = document.getElementById("webSignInPassword");
+    const email = (emailInput?.value || "").trim();
+    const password = passwordInput?.value || "";
+    if (!email || !password) return;
+
+    const signInBtn = document.getElementById("webSignInSubmit");
+    const signUpBtn = document.getElementById("webSignUpSubmit");
+    const message = document.getElementById("webSignInMessage");
+    signInBtn.disabled = true;
+    signUpBtn.disabled = true;
+    message.hidden = true;
+
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          message.textContent = `Could not create account: ${error.message}`;
+          message.hidden = false;
+        }
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          message.textContent = `Could not sign in: ${error.message}`;
+          message.hidden = false;
+        }
+      }
+    } catch (error) {
+      message.textContent = error?.message || "Sign-in failed.";
+      message.hidden = false;
+    } finally {
+      signInBtn.disabled = false;
+      signUpBtn.disabled = false;
+    }
+  }
+
   function renderSignInState() {
     const status = document.getElementById("webSignInStatus");
-    const form = document.getElementById("webSignInForm");
+    const controls = document.getElementById("webSignInControls");
     const signOutButton = document.getElementById("webSignOutButton");
-    if (!status || !form) return;
+    if (!status || !controls) return;
 
     if (currentSession?.user?.email) {
       status.textContent = `Signed in as ${currentSession.user.email}.`;
-      form.hidden = true;
+      controls.hidden = true;
       if (signOutButton) signOutButton.hidden = false;
       if (subscribeButton) subscribeButton.hidden = false;
     } else {
       status.textContent =
-        "Sign in with email to subscribe. Scripture features stay free without an account.";
-      form.hidden = false;
+        "Sign in to subscribe. Scripture features stay free without an account.";
+      controls.hidden = false;
       if (signOutButton) signOutButton.hidden = true;
       if (subscribeButton) subscribeButton.hidden = true;
     }
