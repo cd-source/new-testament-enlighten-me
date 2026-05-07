@@ -5,6 +5,9 @@
   if (typeof window === "undefined") return;
   if (window.Capacitor?.isNativePlatform?.()) return;
 
+  const subscribeButton = document.getElementById("subscribeButton");
+  if (subscribeButton) subscribeButton.hidden = true;
+
   let supabase = null;
   let publicConfig = null;
   let currentSession = null;
@@ -192,11 +195,13 @@
       status.textContent = `Signed in as ${currentSession.user.email}.`;
       form.hidden = true;
       if (signOutButton) signOutButton.hidden = false;
+      if (subscribeButton) subscribeButton.hidden = false;
     } else {
       status.textContent =
         "Sign in with email to subscribe. Scripture features stay free without an account.";
       form.hidden = false;
       if (signOutButton) signOutButton.hidden = true;
+      if (subscribeButton) subscribeButton.hidden = true;
     }
   }
 
