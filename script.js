@@ -190,7 +190,7 @@ function getPassageText(passage) {
 
 function getShareText() {
   if (!currentPassage) return "";
-  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (KJV)\n\nFrom Enlighten, your daily dose.`;
+  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (KJV)`;
 }
 
 function getShareCardFileName() {
@@ -804,8 +804,8 @@ function drawShareCardText(context, text, reference, compact = false) {
   const maxWidth = compact ? 720 : 780;
   const minFont = compact ? 26 : 36;
   const maxLines = compact ? 6 : 10;
-  const centerY = compact ? 905 : 690;
-  const minTop = compact ? 770 : 366;
+  const centerY = compact ? 945 : 720;
+  const minTop = compact ? 790 : 386;
   const referenceGap = compact ? 38 : 52;
   const referenceFontSize = compact ? 26 : 34;
   let quoteFontSize = compact
@@ -947,7 +947,7 @@ async function renderShareCardCanvas(forceTextOnly = false) {
     context.stroke();
 
     context.fillStyle = "rgba(15, 23, 42, 0.78)";
-    drawRoundedRect(context, 112, 728, 856, 370, 32);
+    drawRoundedRect(context, 112, 728, 856, 460, 32);
     context.fill();
     context.strokeStyle = "rgba(255, 255, 255, 0.14)";
     context.stroke();
@@ -957,7 +957,7 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   } else {
     context.save();
     context.fillStyle = "rgba(15, 23, 42, 0.62)";
-    drawRoundedRect(context, 112, 188, 856, 910, 44);
+    drawRoundedRect(context, 112, 188, 856, 1000, 44);
     context.fill();
     context.strokeStyle = "rgba(255, 255, 255, 0.14)";
     context.stroke();
@@ -965,10 +965,6 @@ async function renderShareCardCanvas(forceTextOnly = false) {
 
     drawShareCardText(context, passageText, currentPassage.reference);
   }
-
-  context.fillStyle = "#cbd5e1";
-  context.font = "600 30px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
-  context.fillText("From Enlighten, your daily dose.", 540, 1162);
 
   let dataUrl;
   try {
@@ -1129,14 +1125,14 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
 async function shareCardImage() {
   if (!currentPassage) return;
   const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  const text = `${currentPassage.reference} (KJV) — From Enlighten, your daily dose.`;
+  const text = `${currentPassage.reference} (KJV)`;
   await shareCardDataUrl(dataUrl, getShareCardFileName(), text);
 }
 
 async function shareActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
-  const text = `${card.reference} (KJV) — From Enlighten, your daily dose.`;
+  const text = `${card.reference} (KJV)`;
   await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), text, (message) => {
     if (libraryStatus) libraryStatus.textContent = message;
   });
