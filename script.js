@@ -254,6 +254,18 @@ function toggleSettings() {
   setSettingsOpen(true);
 }
 
+function openInitialViewFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const view = params.get("view");
+  if (view !== "settings" && view !== "library") return;
+  if (view === "settings") setSettingsOpen(true);
+  if (view === "library") setLibraryOpen(true);
+  params.delete("view");
+  const newSearch = params.toString();
+  const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ""}${window.location.hash}`;
+  window.history.replaceState({}, "", newUrl);
+}
+
 function setLibraryOpen(isOpen) {
   showView(isOpen ? "library" : "home");
   if (isOpen) {
@@ -1386,6 +1398,7 @@ async function initializeApp() {
     await loadSavedCards();
     initializeBrowseControls();
     bindEvents();
+    openInitialViewFromUrl();
 
     enlightenButton.disabled = false;
     subscribeButton.disabled = hasImageSubscription();
