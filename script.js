@@ -226,8 +226,10 @@ function updateSubscriptionUi() {
   subscriptionStatusBadge.classList.toggle("is-active", active);
   subscriptionStatus.textContent = active
     ? `Active via ${sourceLabel}. Renews monthly.`
-    : `${IMAGE_PRICE_LABEL} — unlocks scripture image creation. Everything else stays free.`;
-  subscribeButton.textContent = active ? "Image Creation Active" : `Subscribe — ${IMAGE_PRICE_LABEL}`;
+    : `${IMAGE_PRICE_LABEL} - unlocks unlimited image creation to bring your favorite verses to life`;
+  subscribeButton.textContent = active
+    ? "Image Creation Active"
+    : `Step 2 of 2: click here to subscribe for ${IMAGE_PRICE_LABEL}`;
   subscribeButton.disabled = active;
   restorePurchaseButton.disabled = false;
   pictureButton.textContent = getPictureButtonLabel(active);
