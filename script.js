@@ -387,15 +387,17 @@ function renderLibrary() {
   libraryCardImage.alt = `${card.reference} scripture card`;
   libraryCardReference.textContent = card.reference || "Saved card";
   libraryCardDate.textContent = `${formatSavedCardDate(card.createdAt)} · ${activeLibraryIndex + 1} of ${savedCards.length}`;
-  libraryPrevButton.disabled = savedCards.length <= 1;
-  libraryNextButton.disabled = savedCards.length <= 1;
+  libraryPrevButton.disabled = activeLibraryIndex <= 0;
+  libraryNextButton.disabled = activeLibraryIndex >= savedCards.length - 1;
   libraryShareButton.disabled = false;
   libraryDeleteButton.disabled = false;
 }
 
 function showLibraryOffset(offset) {
   if (!savedCards.length) return;
-  activeLibraryIndex = (activeLibraryIndex + offset + savedCards.length) % savedCards.length;
+  const next = activeLibraryIndex + offset;
+  if (next < 0 || next >= savedCards.length) return;
+  activeLibraryIndex = next;
   renderLibrary();
 }
 

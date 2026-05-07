@@ -16,6 +16,12 @@
   box-sizing: border-box;
 }
 
+html,
+body {
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -292,16 +298,16 @@ select {
 }
 
 .library-card-stage {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 18px;
 }
 
 .library-card-image {
   display: block;
-  width: min(100%, 430px);
-  margin: 0 auto;
+  width: min(100%, 480px);
+  margin: 0;
   border: 1px solid rgba(250, 204, 21, 0.3);
   border-radius: 26px;
   background: rgba(255, 255, 255, 0.06);
@@ -309,20 +315,42 @@ select {
 }
 
 .library-nav-button {
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(250, 204, 21, 0.32);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(34, 197, 94, 0.55);
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.58);
-  color: var(--gold);
+  background: rgba(34, 197, 94, 0.85);
+  color: #052e16;
   font-size: 2rem;
   line-height: 1;
   cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, opacity 180ms ease;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+}
+
+.library-card-stage > .library-nav-button:first-of-type {
+  left: 4px;
+}
+
+.library-card-stage > .library-nav-button:last-of-type {
+  right: 4px;
+}
+
+.library-nav-button:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 1);
+  border-color: rgba(34, 197, 94, 1);
 }
 
 .library-nav-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.42;
+  cursor: default;
+  border-color: rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(203, 213, 225, 0.45);
+  box-shadow: none;
 }
 
 .library-card-meta {
@@ -873,17 +901,18 @@ h1 {
   }
 
   .share-card-preview,
-  .focal-card-panel .share-card-preview,
-  .library-card-image {
+  .focal-card-panel .share-card-preview {
     width: min(100%, 320px);
   }
 
-  .library-card-stage {
-    grid-template-columns: 1fr;
+  .library-card-image {
+    width: 100%;
   }
 
   .library-nav-button {
-    display: none;
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
   }
 
   .browse-controls,
