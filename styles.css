@@ -182,24 +182,17 @@ select {
   background: rgba(15, 23, 42, 0.58);
 }
 
-.settings-card-topline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
 .status-pill {
   display: inline-flex;
   align-items: center;
   width: fit-content;
-  border: 1px solid rgba(250, 204, 21, 0.3);
+  border: 1px solid rgba(250, 204, 21, 0.34);
   border-radius: 999px;
-  padding: 7px 11px;
+  padding: 6px 12px;
   color: var(--gold);
   background: rgba(250, 204, 21, 0.1);
   font: 800 0.72rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -517,38 +510,75 @@ h1 {
 }
 
 .subscription-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
-  align-items: center;
   padding: 22px;
-  border: 1px solid rgba(250, 204, 21, 0.2);
+  border: 1px solid var(--panel-border);
   border-radius: 22px;
-  background: linear-gradient(135deg, rgba(250, 204, 21, 0.12), rgba(15, 23, 42, 0.68));
+  background: rgba(15, 23, 42, 0.58);
 }
 
 .subscription-panel.is-subscribed {
   border-color: rgba(74, 222, 128, 0.36);
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(15, 23, 42, 0.68));
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08), rgba(15, 23, 42, 0.6));
 }
 
-.subscription-copy h2,
-.subscription-copy h3 {
-  margin: 0;
-  color: var(--text);
-  font-size: clamp(1.2rem, 2vw, 1.55rem);
-  line-height: 1.15;
+.subscription-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .subscription-copy .tool-meta {
-  margin-bottom: 0;
+  margin: 0;
+  min-height: 0;
+  color: var(--muted);
+  font: 600 0.95rem/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .subscription-actions {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  flex-direction: column;
   gap: 10px;
+}
+
+.subscription-actions .button {
+  width: 100%;
+}
+
+.web-sign-in-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.web-sign-in-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.web-sign-in-form .text-input {
+  flex: 1 1 140px;
+  min-width: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 0.92rem;
+}
+
+.web-sign-in-form .button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.web-sign-in-row .tool-meta {
+  margin: 0;
+  min-height: 0;
+}
+
+#webSignOutButton {
+  align-self: flex-start;
 }
 
 .scripture-tools {
@@ -902,17 +932,12 @@ h1 {
     width: fit-content;
   }
 
-  .subscription-panel,
   .scripture-tools {
     grid-template-columns: 1fr;
   }
 
   .settings-row {
     align-items: flex-start;
-  }
-
-  .subscription-actions {
-    justify-content: stretch;
   }
 
   .share-card-preview,

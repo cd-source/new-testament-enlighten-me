@@ -135,14 +135,14 @@
     row.id = "webSignInRow";
     row.className = "web-sign-in-row";
     row.innerHTML = `
-      <p class="tool-meta" id="webSignInStatus" style="margin: 0;"></p>
-      <form id="webSignInForm" class="web-sign-in-form" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <p class="tool-meta" id="webSignInStatus"></p>
+      <form id="webSignInForm" class="web-sign-in-form">
         <label class="sr-only" for="webSignInEmail">Email</label>
-        <input id="webSignInEmail" class="text-input" type="email" placeholder="you@example.com" autocomplete="email" required style="flex: 1; min-width: 0;" />
+        <input id="webSignInEmail" class="text-input" type="email" placeholder="you@example.com" autocomplete="email" required />
         <button id="webSignInSubmit" class="button button-secondary button-compact" type="submit">Email me a link</button>
       </form>
       <button id="webSignOutButton" class="utility-button" type="button" hidden>Sign out</button>
-      <p class="tool-meta" id="webSignInMessage" hidden style="margin: 0;"></p>
+      <p class="tool-meta" id="webSignInMessage" hidden></p>
     `;
     panel.insertBefore(row, actions);
 
