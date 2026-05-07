@@ -543,6 +543,45 @@ h1 {
   gap: 10px;
 }
 
+.subscription-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.subscription-examples-label {
+  margin: 0;
+}
+
+.subscription-examples-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.subscription-examples-grid li {
+  margin: 0;
+  padding: 0;
+}
+
+.subscription-examples-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border: 1px solid rgba(250, 204, 21, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+}
+
+.subscription-panel.is-subscribed .subscription-examples {
+  display: none;
+}
+
 .subscription-actions .button {
   width: 100%;
 }
