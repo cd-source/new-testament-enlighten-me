@@ -247,7 +247,7 @@
       if (subscribeButton) subscribeButton.hidden = false;
     } else {
       status.textContent =
-        "Sign in to subscribe. Scripture features stay free without an account.";
+        "Step 1 of 2: Sign in to subscribe. Scripture features stay free without an account.";
       controls.hidden = false;
       if (signOutButton) signOutButton.hidden = true;
       if (subscribeButton) subscribeButton.hidden = true;
