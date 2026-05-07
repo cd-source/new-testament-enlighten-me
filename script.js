@@ -45,11 +45,10 @@ const subscriptionPlanSummary = document.getElementById("subscriptionPlanSummary
 const settingsStatus = document.getElementById("settingsStatus");
 const subscribeButton = document.getElementById("subscribeButton");
 const restorePurchaseButton = document.getElementById("restorePurchaseButton");
-const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
-const searchButton = document.getElementById("searchButton");
 const searchMeta = document.getElementById("searchMeta");
 const searchResults = document.getElementById("searchResults");
+const testamentFilter = document.getElementById("testamentFilter");
 const bookSelect = document.getElementById("bookSelect");
 const chapterSelect = document.getElementById("chapterSelect");
 const verseSelect = document.getElementById("verseSelect");
@@ -81,6 +80,7 @@ let savedCards = [];
 let activeLibraryIndex = 0;
 let libraryDbPromise = null;
 let libraryTouchStartX = 0;
+let activeTestament = "all";
 let imageSubscription = {
   isActive: false,
   productId: AI_IMAGE_PRODUCT_ID,
@@ -691,12 +691,26 @@ function normalizeSearchQuery(value) {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
-function searchVerses(query) {
+function matchesTestament(verse, testament) {
+  if (testament === "old") return verse.testament === "Old";
+  if (testament === "new") return verse.testament === "New";
+  return true;
+}
+
+function testamentLabel(testament) {
+  if (testament === "old") return "Old Testament";
+  if (testament === "new") return "New Testament";
+  return "KJV";
+}
+
+function searchVerses(query, testament = activeTestament) {
   const normalizedQuery = normalizeSearchQuery(query);
   if (normalizedQuery.length < 2) return [];
 
-  const exactReferenceMatches = verses.filter((verse) => verse.reference.toLowerCase() === normalizedQuery);
-  const textMatches = verses.filter((verse) => {
+  const pool = testament === "all" ? verses : verses.filter((verse) => matchesTestament(verse, testament));
+
+  const exactReferenceMatches = pool.filter((verse) => verse.reference.toLowerCase() === normalizedQuery);
+  const textMatches = pool.filter((verse) => {
     const haystack = `${verse.reference} ${verse.text}`.toLowerCase();
     return haystack.includes(normalizedQuery);
   });
@@ -706,9 +720,13 @@ function searchVerses(query) {
     .slice(0, MAX_SEARCH_RESULTS);
 }
 
-function renderSearchResults(results, query) {
+function renderSearchResults(results, query, testament = activeTestament) {
+  const scope = testamentLabel(testament);
+
   if (!query) {
-    searchMeta.textContent = "Search all 31,102 KJV verses locally.";
+    searchMeta.textContent = testament === "all"
+      ? "Search all 31,102 KJV verses locally."
+      : `Searching ${scope} verses only.`;
     searchResults.innerHTML = "";
     return;
   }
@@ -720,13 +738,13 @@ function renderSearchResults(results, query) {
   }
 
   if (results.length === 0) {
-    searchMeta.textContent = `No local KJV matches for “${query}”.`;
+    searchMeta.textContent = `No ${scope} matches for “${query}”.`;
     searchResults.innerHTML = "";
     return;
   }
 
   const cappedLabel = results.length === MAX_SEARCH_RESULTS ? `Top ${MAX_SEARCH_RESULTS}` : results.length;
-  searchMeta.textContent = `${cappedLabel} local KJV match${results.length === 1 ? "" : "es"} for “${query}”.`;
+  searchMeta.textContent = `${cappedLabel} ${scope} match${results.length === 1 ? "" : "es"} for “${query}”.`;
   searchResults.innerHTML = results
     .map((verse) => `
       <button class="result-row" type="button" data-verse-id="${escapeHtml(verse.id)}">
@@ -737,10 +755,18 @@ function renderSearchResults(results, query) {
     .join("");
 }
 
-function handleSearch(event) {
-  event.preventDefault();
+function runSearch() {
   const query = normalizeSearchQuery(searchInput.value);
   renderSearchResults(searchVerses(query), query);
+}
+
+function setTestamentFilter(testament) {
+  if (testament === activeTestament) return;
+  activeTestament = testament;
+  for (const pill of testamentFilter.querySelectorAll(".filter-pill")) {
+    pill.setAttribute("aria-pressed", pill.dataset.testament === testament ? "true" : "false");
+  }
+  runSearch();
 }
 
 async function copyCurrentPassage() {
@@ -1276,13 +1302,13 @@ function bindEvents() {
     if (Math.abs(deltaX) > 40) showLibraryOffset(deltaX < 0 ? 1 : -1);
   });
   pictureButton.addEventListener("click", pictureThisMessage);
-  searchForm.addEventListener("submit", handleSearch);
 
-  searchInput.addEventListener("input", () => {
-    const query = normalizeSearchQuery(searchInput.value);
-    if (query.length === 0 || query.length >= 3) {
-      renderSearchResults(searchVerses(query), query);
-    }
+  searchInput.addEventListener("input", runSearch);
+
+  testamentFilter.addEventListener("click", (event) => {
+    const pill = event.target.closest(".filter-pill");
+    if (!pill) return;
+    setTestamentFilter(pill.dataset.testament);
   });
 
   searchResults.addEventListener("click", (event) => {
@@ -1330,7 +1356,6 @@ async function initializeApp() {
   pictureButton.disabled = true;
   subscribeButton.disabled = true;
   restorePurchaseButton.disabled = true;
-  searchButton.disabled = true;
   searchInput.disabled = true;
   bookSelect.disabled = true;
   chapterSelect.disabled = true;
@@ -1348,7 +1373,6 @@ async function initializeApp() {
     enlightenButton.disabled = false;
     subscribeButton.disabled = hasImageSubscription();
     restorePurchaseButton.disabled = false;
-    searchButton.disabled = false;
     searchInput.disabled = false;
     bookSelect.disabled = false;
     chapterSelect.disabled = false;

@@ -78,11 +78,15 @@
               <h2>Find guidance in scripture</h2>
             </div>
 
-            <form id="searchForm" class="search-form">
+            <div class="search-controls">
               <label class="sr-only" for="searchInput">Search KJV scripture</label>
               <input id="searchInput" class="text-input" type="search" placeholder="Try love, peace, fear not…" autocomplete="off" />
-              <button id="searchButton" class="button button-compact" type="submit">Search</button>
-            </form>
+              <div id="testamentFilter" class="testament-filter" role="group" aria-label="Filter by testament">
+                <button type="button" class="filter-pill" data-testament="all" aria-pressed="true">Both</button>
+                <button type="button" class="filter-pill" data-testament="old" aria-pressed="false">Old</button>
+                <button type="button" class="filter-pill" data-testament="new" aria-pressed="false">New</button>
+              </div>
+            </div>
 
             <p id="searchMeta" class="tool-meta">Search all 31,102 verses locally.</p>
             <div id="searchResults" class="results-list" aria-live="polite"></div>
