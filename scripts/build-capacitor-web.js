@@ -7,6 +7,7 @@ const entries = [
   "index.html",
   "styles.css",
   "script.js",
+  "web-subscribe.js",
   "data/kjv/books.json",
   "data/kjv/passages.json",
   "data/kjv/themes.json",

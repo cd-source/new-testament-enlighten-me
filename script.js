@@ -423,6 +423,11 @@ async function loadImageSubscription() {
         ...(await window.EnlightenSubscriptions.getStatus(nativeBridgeArgs())),
         source: "StoreKit",
       };
+    } else if (window.EnlightenWeb?.getStatus) {
+      imageSubscription = {
+        ...imageSubscription,
+        ...(await window.EnlightenWeb.getStatus()),
+      };
     } else {
       imageSubscription = {
         ...imageSubscription,
@@ -438,6 +443,10 @@ async function loadImageSubscription() {
   updateSubscriptionUi();
 }
 
+if (typeof window !== "undefined") {
+  window.refreshEnlightenSubscription = loadImageSubscription;
+}
+
 async function subscribeToImagePlan() {
   try {
     if (window.EnlightenSubscriptions?.purchase) {
@@ -446,6 +455,10 @@ async function subscribeToImagePlan() {
         ...(await window.EnlightenSubscriptions.purchase(nativeBridgeArgs())),
         source: "StoreKit",
       };
+    } else if (window.EnlightenWeb?.startSubscribe) {
+      setActionStatus("Redirecting to checkout…");
+      await window.EnlightenWeb.startSubscribe();
+      return;
     } else {
       window.localStorage.setItem(WEB_PREVIEW_ENTITLEMENT_KEY, "active");
       imageSubscription = { ...imageSubscription, isActive: true, source: "web preview" };
@@ -456,7 +469,7 @@ async function subscribeToImagePlan() {
   } catch (error) {
     if (error?.name !== "AbortError") {
       console.error(error);
-      setActionStatus("Subscription could not be completed. Please try again.");
+      setActionStatus(error?.message || "Subscription could not be completed. Please try again.");
     }
   }
 }
@@ -468,6 +481,11 @@ async function restoreImagePlan() {
         ...imageSubscription,
         ...(await window.EnlightenSubscriptions.restorePurchases(nativeBridgeArgs())),
         source: "StoreKit",
+      };
+    } else if (window.EnlightenWeb?.refreshStatus) {
+      imageSubscription = {
+        ...imageSubscription,
+        ...(await window.EnlightenWeb.refreshStatus()),
       };
     } else {
       imageSubscription = {
