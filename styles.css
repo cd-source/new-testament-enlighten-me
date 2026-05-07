@@ -112,6 +112,10 @@ select {
   position: relative;
 }
 
+.home-view {
+  padding-top: 64px;
+}
+
 .settings-view,
 .library-view {
   min-height: 520px;
@@ -1014,6 +1018,10 @@ h1 {
     position: static;
     justify-content: flex-end;
     margin-bottom: 20px;
+  }
+
+  .home-view {
+    padding-top: 0;
   }
 
   .settings-header {
