@@ -66,7 +66,6 @@ async function writeIllustrationPrompt({ passage, reference }) {
           "The style is ancient Old and New Testament / biblical, not modern or contemporary.",
           "Use cinematic sacred illustration language: parchment warmth, oil-painting depth, ancient Near Eastern and Judean landscapes, lamplight, robes, sandals, stone, olive trees, desert dawn, mountains, rivers, wilderness, humble faces, divine light.",
           "The image may be a literal biblical scene, or it may be a symbolic/metaphorical visual interpretation of the passage when metaphor better captures the spiritual message.",
-          "If using metaphor, keep it grounded in ancient biblical visual language: light and shadow, wilderness and water, seed and harvest, gates and paths, lamps, bread, vessels, storms, stillness, hands, robes, stone, olive branches, and sacred radiance.",
           "Do not include text, typography, captions, logos, watermarks, modern clothing, modern buildings, phones, cameras, neon, sci-fi, fantasy armor, or comic-book style.",
           "Return only the final image prompt. No commentary. No markdown.",
         ].join(" "),
