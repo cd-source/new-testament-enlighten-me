@@ -12,7 +12,7 @@
     {
       "id": "EE0E0002-0000-0000-0000-000000000001",
       "localizations": [],
-      "name": "Enlighten AI Imagery",
+      "name": "Enlighten Image Creation",
       "subscriptions": [
         {
           "adHocOffers": [],
@@ -24,14 +24,14 @@
           "introductoryOffer": null,
           "localizations": [
             {
-              "description": "AI imagery for KJV scripture. Scripture, search, and share cards remain free.",
-              "displayName": "Enlighten AI Imagery (Monthly)",
+              "description": "Scripture image creation for KJV. Scripture, search, and share cards remain free.",
+              "displayName": "Enlighten Image Creation (Monthly)",
               "locale": "en_US"
             }
           ],
           "productID": "enlighten_ai_images_monthly",
           "recurringSubscriptionPeriod": "P1M",
-          "referenceName": "Enlighten AI Imagery Monthly",
+          "referenceName": "Enlighten Image Creation Monthly",
           "subscriptionGroupID": "EE0E0002-0000-0000-0000-000000000001",
           "type": "RecurringSubscription"
         }

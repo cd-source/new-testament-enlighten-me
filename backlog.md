@@ -2,10 +2,6 @@
 
 Deferred work — not blocking current scope, pick up later.
 
-## Copy / UX
-
-- **Drop "AI" from imagery copy.** User-facing strings like "AI imagery active", "AI scripture imagery", "Unlock AI Imagery", "AI scripture-inspired imagery" become the "AI"-less versions ("Imagery active", "Scripture imagery", "Unlock Imagery", etc.). Keep "AI" in code-only identifiers (e.g. product id `enlighten_ai_images_monthly`, anchor names) — copy only. Touches `index.html`, `script.js`, the iOS Settings/Subscription strings, and any server-issued status messages.
-
 ## Infrastructure
 
 - **Domain migration to `www.enlighten-me.co`.** User acquired the domain 2026-05-07; not live yet. Trigger when DNS resolves. Touchpoints:

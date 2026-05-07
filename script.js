@@ -6,8 +6,8 @@ const BOOKS_DATA_URL = "./data/kjv/books.json";
 const PASSAGES_DATA_URL = "./data/kjv/passages.json";
 const VERSES_DATA_URL = "./data/kjv/verses.json";
 const MAX_SEARCH_RESULTS = 50;
-const AI_IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
-const AI_IMAGE_PRICE_LABEL = "$3/month";
+const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
+const IMAGE_PRICE_LABEL = "$3/month";
 const WEB_PREVIEW_ENTITLEMENT_KEY = "enlighten.previewImageSubscription";
 const LIBRARY_DB_NAME = "enlightenCardLibrary";
 const LIBRARY_DB_VERSION = 1;
@@ -41,7 +41,6 @@ const libraryDeleteButton = document.getElementById("libraryDeleteButton");
 const libraryStatus = document.getElementById("libraryStatus");
 const subscriptionStatus = document.getElementById("subscriptionStatus");
 const subscriptionStatusBadge = document.getElementById("subscriptionStatusBadge");
-const subscriptionPlanSummary = document.getElementById("subscriptionPlanSummary");
 const settingsStatus = document.getElementById("settingsStatus");
 const subscribeButton = document.getElementById("subscribeButton");
 const restorePurchaseButton = document.getElementById("restorePurchaseButton");
@@ -83,7 +82,7 @@ let libraryTouchStartX = 0;
 let activeTestament = "all";
 let imageSubscription = {
   isActive: false,
-  productId: AI_IMAGE_PRODUCT_ID,
+  productId: IMAGE_PRODUCT_ID,
   source: "unloaded",
   entitlementToken: "",
 };
@@ -223,22 +222,19 @@ function updateSubscriptionUi() {
   const sourceLabel = imageSubscription.source || nativeLabel;
 
   subscriptionPanel.classList.toggle("is-subscribed", active);
-  subscriptionStatusBadge.textContent = active ? "AI imagery active" : "AI imagery not active";
+  subscriptionStatusBadge.textContent = active ? "Image creation active" : "Image creation not active";
   subscriptionStatusBadge.classList.toggle("is-active", active);
   subscriptionStatus.textContent = active
-    ? `AI imagery is unlocked via ${sourceLabel}. KJV scripture remains free for everyone.`
-    : `All KJV scripture, search, browse, copy, text share, and share cards stay free. Subscribe for ${AI_IMAGE_PRICE_LABEL} to unlock AI image generation.`;
-  subscriptionPlanSummary.textContent = active
-    ? `Plan: AI imagery monthly · Source: ${sourceLabel}.`
-    : `Plan: AI imagery monthly · ${AI_IMAGE_PRICE_LABEL}.`;
-  subscribeButton.textContent = active ? "AI Imagery Active" : `Subscribe — ${AI_IMAGE_PRICE_LABEL}`;
+    ? `Active via ${sourceLabel}. Renews monthly.`
+    : `${IMAGE_PRICE_LABEL} — unlocks scripture image creation. Everything else stays free.`;
+  subscribeButton.textContent = active ? "Image Creation Active" : `Subscribe — ${IMAGE_PRICE_LABEL}`;
   subscribeButton.disabled = active;
   restorePurchaseButton.disabled = false;
   pictureButton.textContent = getPictureButtonLabel(active);
 }
 
 function getPictureButtonLabel(active = hasImageSubscription()) {
-  return active ? "Create Scripture Card" : "Unlock AI Imagery";
+  return active ? "Create Scripture Card" : "Unlock Image Creation";
 }
 
 function showView(viewName) {
@@ -266,7 +262,7 @@ function setLibraryOpen(isOpen) {
 }
 
 function nativeBridgeArgs() {
-  return { productId: AI_IMAGE_PRODUCT_ID, apiBase: REMOTE_API_BASE };
+  return { productId: IMAGE_PRODUCT_ID, apiBase: REMOTE_API_BASE };
 }
 
 function openLibraryDb() {
@@ -465,7 +461,7 @@ async function subscribeToImagePlan() {
     }
 
     updateSubscriptionUi();
-    setActionStatus("AI imagery subscription is active.");
+    setActionStatus("Image creation subscription is active.");
   } catch (error) {
     if (error?.name !== "AbortError") {
       console.error(error);
@@ -514,7 +510,7 @@ async function restoreImagePlan() {
 
 function showImageSubscriptionPrompt() {
   setSettingsOpen(true);
-  setActionStatus(`AI imagery requires the ${AI_IMAGE_PRICE_LABEL} subscription. Scripture features remain free.`);
+  setActionStatus(`Image creation requires the ${IMAGE_PRICE_LABEL} subscription. Scripture features remain free.`);
 }
 
 function setActionStatus(message) {
@@ -1010,7 +1006,7 @@ async function renderShareCardCanvas(forceTextOnly = false) {
     dataUrl = shareCardCanvas.toDataURL("image/png");
   } catch (error) {
     if (hasImage) {
-      console.warn("Share card export tainted; retrying without AI image:", error);
+      console.warn("Share card export tainted; retrying without scripture image:", error);
       return await renderShareCardCanvas(true);
     }
     throw error;
@@ -1223,7 +1219,7 @@ async function pictureThisMessage() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Enlighten-Product": AI_IMAGE_PRODUCT_ID,
+        "X-Enlighten-Product": IMAGE_PRODUCT_ID,
         ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
       },
       body: JSON.stringify({
@@ -1303,6 +1299,9 @@ function bindEvents() {
   shareCardImageButton.addEventListener("click", shareCardImage);
   subscribeButton.addEventListener("click", subscribeToImagePlan);
   restorePurchaseButton.addEventListener("click", restoreImagePlan);
+  if (!isNativeAppRuntime()) {
+    restorePurchaseButton.hidden = true;
+  }
   settingsToggle.addEventListener("click", toggleSettings);
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));

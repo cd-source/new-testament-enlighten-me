@@ -209,23 +209,6 @@ select {
   background: rgba(34, 197, 94, 0.12);
 }
 
-.settings-feature-list {
-  margin: 14px 0 0;
-  padding-left: 19px;
-  color: var(--muted);
-  font: 600 0.92rem/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-.settings-feature-list li + li {
-  margin-top: 6px;
-}
-
-.settings-note {
-  margin: 14px 0 0;
-  color: var(--muted-2);
-  font: 700 0.82rem/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
 .settings-list {
   overflow: hidden;
 }
