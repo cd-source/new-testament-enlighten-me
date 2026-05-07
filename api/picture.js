@@ -238,7 +238,7 @@ module.exports = async function handler(req, res) {
   }
 
   if (!hasImageEntitlement(req)) {
-    return json(req, res, 402, { error: "AI imagery requires an active Enlighten subscription." });
+    return json(req, res, 402, { error: "Image Creation requires an active subscription." });
   }
 
   const missing = missingEnv();

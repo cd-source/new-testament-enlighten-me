@@ -476,10 +476,19 @@ async function restoreImagePlan() {
     }
 
     updateSubscriptionUi();
-    setActionStatus(hasImageSubscription() ? "Purchase restored." : "No active AI imagery subscription found.");
+    if (hasImageSubscription()) {
+      const exchangeError = imageSubscription.exchangeError;
+      if (exchangeError) {
+        setActionStatus(`Subscription found, but server token failed: ${exchangeError}`);
+      } else {
+        setActionStatus("Purchase restored.");
+      }
+    } else {
+      setActionStatus("No active subscription found.");
+    }
   } catch (error) {
     console.error(error);
-    setActionStatus("Restore failed. Please try again.");
+    setActionStatus(`Restore failed: ${error?.message || "Please try again."}`);
   }
 }
 
@@ -801,16 +810,16 @@ function drawRoundedRect(context, x, y, width, height, radius) {
 }
 
 function drawShareCardText(context, text, reference, compact = false) {
-  const maxWidth = compact ? 720 : 780;
-  const minFont = compact ? 26 : 36;
+  const maxWidth = compact ? 920 : 940;
+  const minFont = compact ? 30 : 42;
   const maxLines = compact ? 6 : 10;
-  const centerY = compact ? 945 : 720;
-  const minTop = compact ? 790 : 386;
-  const referenceGap = compact ? 38 : 52;
-  const referenceFontSize = compact ? 26 : 34;
+  const centerY = compact ? 1060 : 720;
+  const minTop = compact ? 830 : 200;
+  const referenceGap = compact ? 44 : 60;
+  const referenceFontSize = compact ? 32 : 42;
   let quoteFontSize = compact
-    ? (text.length > 330 ? 30 : text.length > 220 ? 34 : 38)
-    : (text.length > 330 ? 44 : text.length > 220 ? 50 : 58);
+    ? (text.length > 330 ? 38 : text.length > 220 ? 46 : 54)
+    : (text.length > 330 ? 56 : text.length > 220 ? 66 : 76);
   let lines = [];
 
   do {
@@ -903,64 +912,48 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   context.fillStyle = glowTwo;
   context.fillRect(0, 0, width, height);
 
-  context.save();
-  context.strokeStyle = "rgba(250, 204, 21, 0.28)";
-  context.lineWidth = 2;
-  drawRoundedRect(context, 70, 70, 940, 1210, 56);
-  context.stroke();
-  context.restore();
-
   context.textAlign = "center";
   context.fillStyle = "#facc15";
   context.font = "800 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   context.letterSpacing = "4px";
-  context.fillText("ENLIGHTEN", 540, 150);
+  context.fillText("ENLIGHTEN", 540, 80);
   context.letterSpacing = "0px";
 
   const hasImage = imageForCanvas !== null;
 
   if (hasImage) {
     context.save();
-    drawRoundedRect(context, 112, 188, 856, 520, 36);
+    drawRoundedRect(context, 24, 120, 1032, 650, 36);
     context.clip();
     const sourceRatio = imageForCanvas.naturalWidth / imageForCanvas.naturalHeight;
-    const targetRatio = 856 / 520;
+    const targetRatio = 1032 / 650;
     let drawW, drawH, drawX, drawY;
     if (sourceRatio > targetRatio) {
-      drawH = 520;
+      drawH = 650;
       drawW = drawH * sourceRatio;
-      drawX = 112 + (856 - drawW) / 2;
-      drawY = 188;
+      drawX = 24 + (1032 - drawW) / 2;
+      drawY = 120;
     } else {
-      drawW = 856;
+      drawW = 1032;
       drawH = drawW / sourceRatio;
-      drawX = 112;
-      drawY = 188 + (520 - drawH) / 2;
+      drawX = 24;
+      drawY = 120 + (650 - drawH) / 2;
     }
     context.drawImage(imageForCanvas, drawX, drawY, drawW, drawH);
     context.restore();
 
     context.save();
-    context.strokeStyle = "rgba(250, 204, 21, 0.28)";
-    context.lineWidth = 2;
-    drawRoundedRect(context, 112, 188, 856, 520, 36);
-    context.stroke();
-
     context.fillStyle = "rgba(15, 23, 42, 0.78)";
-    drawRoundedRect(context, 112, 728, 856, 460, 32);
+    drawRoundedRect(context, 24, 800, 1032, 520, 32);
     context.fill();
-    context.strokeStyle = "rgba(255, 255, 255, 0.14)";
-    context.stroke();
     context.restore();
 
     drawShareCardText(context, passageText, currentPassage.reference, true);
   } else {
     context.save();
     context.fillStyle = "rgba(15, 23, 42, 0.62)";
-    drawRoundedRect(context, 112, 188, 856, 1000, 44);
+    drawRoundedRect(context, 24, 120, 1032, 1200, 44);
     context.fill();
-    context.strokeStyle = "rgba(255, 255, 255, 0.14)";
-    context.stroke();
     context.restore();
 
     drawShareCardText(context, passageText, currentPassage.reference);
