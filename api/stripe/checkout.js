@@ -5,6 +5,7 @@ const {
   getSupabaseAdmin,
   verifySupabaseUserToken,
 } = require("../../lib/supabase-admin.js");
+const { captureException, flush } = require("../../lib/sentry.js");
 
 function json(req, res, status, body) {
   res.statusCode = status;
@@ -102,6 +103,11 @@ module.exports = async function handler(req, res) {
     return json(req, res, 200, { url: session.url, sessionId: session.id });
   } catch (error) {
     console.error("checkout error:", error);
+    captureException(error, {
+      tags: { route: "stripe-checkout" },
+      user: { id: user.id, email: user.email },
+    });
+    await flush();
     return json(req, res, 500, {
       error: error?.message || "Checkout session creation failed.",
     });

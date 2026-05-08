@@ -4,6 +4,7 @@ const {
   getSupabaseAdmin,
   extractCurrentPeriodEnd,
 } = require("../../lib/supabase-admin.js");
+const { captureException, flush } = require("../../lib/sentry.js");
 
 async function readRawBody(req) {
   const chunks = [];
@@ -124,6 +125,8 @@ module.exports = async function handler(req, res) {
     event = stripe.webhooks.constructEvent(raw, signature, secret);
   } catch (error) {
     console.error("stripe webhook signature failed:", error.message);
+    captureException(error, { tags: { route: "stripe-webhook", stage: "signature" } });
+    await flush();
     res.statusCode = 400;
     res.end(`Webhook Error: ${error.message}`);
     return;
@@ -137,6 +140,11 @@ module.exports = async function handler(req, res) {
     res.end(JSON.stringify({ received: true }));
   } catch (error) {
     console.error("stripe webhook handler error:", error);
+    captureException(error, {
+      tags: { route: "stripe-webhook", stage: "handler", event_type: event?.type || "unknown" },
+      extra: { event_id: event?.id },
+    });
+    await flush();
     res.statusCode = 500;
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify({ error: error.message || "handler failed" }));

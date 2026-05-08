@@ -3,6 +3,7 @@ const {
   countRecentImageGenerations,
   recordImageGeneration,
 } = require("../lib/supabase-admin.js");
+const { captureException, flush } = require("../lib/sentry.js");
 
 const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
   ? [process.env.ANTHROPIC_MODEL]
@@ -282,6 +283,11 @@ module.exports = async function handler(req, res) {
       }
     } catch (error) {
       console.error("rate-limit check failed:", error?.message || error);
+      captureException(error, {
+        tags: { route: "picture", stage: "rate-limit" },
+        user: auth.identity ? { id: auth.identity.userId } : undefined,
+      });
+      await flush();
       // Fail closed: if we can't read the counter, do not let generation proceed.
       return json(req, res, 503, {
         error: "Image creation is temporarily unavailable. Please try again shortly.",
@@ -324,6 +330,11 @@ module.exports = async function handler(req, res) {
     });
   } catch (error) {
     console.error(error);
+    captureException(error, {
+      tags: { route: "picture", stage: "generate" },
+      user: auth.identity ? { id: auth.identity.userId } : undefined,
+    });
+    await flush();
     return json(req, res, 500, {
       error: error?.message || "Image generation failed.",
     });
