@@ -61,7 +61,8 @@ async function handleEvent(event, stripe, supabase) {
     }
     case "customer.subscription.created":
     case "customer.subscription.updated": {
-      await upsertFromSubscription(supabase, event.data.object);
+      const subscription = await stripe.subscriptions.retrieve(event.data.object.id);
+      await upsertFromSubscription(supabase, subscription);
       return;
     }
     case "customer.subscription.deleted": {
