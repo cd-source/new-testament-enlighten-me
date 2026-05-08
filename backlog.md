@@ -4,8 +4,8 @@ Deferred work — not blocking current scope, pick up later.
 
 ## Soft-launch pre-flight (Stripe / compliance)
 
-- **Configure custom SMTP via Resend** — REQUIRED for launch. Default Supabase SMTP is capped at ~2 auth emails per hour project-wide (signup + reset + magic link share one bucket). Confirmed in testing: second signup attempt within the hour returns "email rate limit exceeded" and no email is sent. Setup: Resend account → add `enlighten-me.co` sending domain → add SPF + DKIM + DMARC records to Cloudflare → verify in Resend → generate API key → Supabase Auth → Emails → Enable custom SMTP. Re-test across gmail / icloud / outlook after.
 - **Error visibility on prod** — at minimum a Vercel log watch routine, ideally Sentry on `/api/picture` and `/api/stripe/*` so silent failures surface
+- **Cross-provider deliverability check** — Resend SMTP is live, but only verified end-to-end with one test address. Send signup-confirm + password-reset emails to gmail / icloud / outlook / yahoo before public launch and confirm none land in spam (DKIM is in place; DMARC is currently absent — add `v=DMARC1; p=none;` at `_dmarc` if Gmail spam-flags us)
 
 ## Web UI / UX
 
