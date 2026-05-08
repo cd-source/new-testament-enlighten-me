@@ -54,6 +54,8 @@ module.exports = async function handler(req, res) {
     const claims = verification.claims;
     const token = issueServerToken({
       productId: claims.productId,
+      userId: claims.originalTransactionId,
+      source: "ios",
       originalTransactionId: claims.originalTransactionId,
       expiresDate: claims.expiresDate,
     });

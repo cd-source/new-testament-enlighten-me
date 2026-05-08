@@ -1,4 +1,8 @@
 const { setCorsHeaders, verifyServerToken } = require("../lib/entitlement.js");
+const {
+  countRecentImageGenerations,
+  recordImageGeneration,
+} = require("../lib/supabase-admin.js");
 
 const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
   ? [process.env.ANTHROPIC_MODEL]
@@ -12,6 +16,8 @@ const FREEPIK_MODEL = process.env.FREEPIK_MODEL || "mystic";
 const FREEPIK_BASE_URL = "https://api.freepik.com";
 const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
 const REQUIRE_IMAGE_ENTITLEMENT = process.env.ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT === "true";
+const IMAGE_DAILY_LIMIT = Number.parseInt(process.env.IMAGE_DAILY_LIMIT || "50", 10);
+const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 function json(req, res, status, body) {
   res.statusCode = status;
@@ -29,14 +35,28 @@ function missingEnv() {
   return ["ANTHROPIC_API_KEY", "FREEPIK_API_KEY"].filter((name) => !process.env[name]);
 }
 
-function hasImageEntitlement(req) {
-  if (!REQUIRE_IMAGE_ENTITLEMENT) return true;
+function authenticateRequest(req) {
+  if (!REQUIRE_IMAGE_ENTITLEMENT) {
+    return { authenticated: true, identity: null };
+  }
 
   const product = req.headers["x-enlighten-product"];
   const token = req.headers["x-enlighten-entitlement"];
 
-  if (product !== IMAGE_PRODUCT_ID) return false;
-  return Boolean(verifyServerToken(token, IMAGE_PRODUCT_ID));
+  if (product !== IMAGE_PRODUCT_ID) return { authenticated: false };
+
+  const decoded = verifyServerToken(token, IMAGE_PRODUCT_ID);
+  if (!decoded) return { authenticated: false };
+
+  // Prefer the explicit subject claim; fall back to otid for tokens issued
+  // before the rate-limit rollout (≤24h transitional window).
+  const userId = decoded.sub || decoded.otid;
+  if (!userId) return { authenticated: false };
+
+  return {
+    authenticated: true,
+    identity: { userId: String(userId), source: decoded.src || "web" },
+  };
 }
 
 async function readBody(req) {
@@ -98,7 +118,7 @@ async function writeIllustrationPrompt({ passage, reference }) {
 
     const prompt = compact(text);
     if (!prompt) throw new Error("Anthropic returned an empty image prompt.");
-    return prompt;
+    return { prompt, model };
   }
 
   throw lastError || new Error("No Anthropic Sonnet model was available.");
@@ -237,7 +257,8 @@ module.exports = async function handler(req, res) {
     return json(req, res, 405, { error: "Method not allowed" });
   }
 
-  if (!hasImageEntitlement(req)) {
+  const auth = authenticateRequest(req);
+  if (!auth.authenticated) {
     return json(req, res, 402, { error: "Image Creation requires an active subscription." });
   }
 
@@ -246,6 +267,26 @@ module.exports = async function handler(req, res) {
     return json(req, res, 500, {
       error: `Missing server environment variable${missing.length > 1 ? "s" : ""}: ${missing.join(", ")}`,
     });
+  }
+
+  if (auth.identity && IMAGE_DAILY_LIMIT > 0) {
+    try {
+      const recent = await countRecentImageGenerations(auth.identity.userId, RATE_LIMIT_WINDOW_MS);
+      if (recent >= IMAGE_DAILY_LIMIT) {
+        res.setHeader("Retry-After", String(RATE_LIMIT_WINDOW_MS / 1000));
+        return json(req, res, 429, {
+          error: `Daily image limit reached (${IMAGE_DAILY_LIMIT} per 24 hours). Please try again later.`,
+          limit: IMAGE_DAILY_LIMIT,
+          windowSeconds: RATE_LIMIT_WINDOW_MS / 1000,
+        });
+      }
+    } catch (error) {
+      console.error("rate-limit check failed:", error?.message || error);
+      // Fail closed: if we can't read the counter, do not let generation proceed.
+      return json(req, res, 503, {
+        error: "Image creation is temporarily unavailable. Please try again shortly.",
+      });
+    }
   }
 
   try {
@@ -257,13 +298,23 @@ module.exports = async function handler(req, res) {
       return json(req, res, 400, { error: "Passage and reference are required." });
     }
 
-    const prompt = await writeIllustrationPrompt({ passage, reference });
+    const { prompt, model: anthropicModel } = await writeIllustrationPrompt({ passage, reference });
     const started = await startFreepikImage(prompt);
     const image = started.immediateUrl
       ? { imageUrl: started.immediateUrl, payload: started.payload }
       : await pollFreepikImage(started.taskId);
 
     const imageDataUrl = await imageUrlToDataUrl(image.imageUrl);
+
+    if (auth.identity) {
+      await recordImageGeneration({
+        userId: auth.identity.userId,
+        source: auth.identity.source,
+        reference,
+        promptSummary: prompt.slice(0, 80),
+        anthropicModel,
+      });
+    }
 
     return json(req, res, 200, {
       imageUrl: image.imageUrl,

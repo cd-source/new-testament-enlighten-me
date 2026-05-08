@@ -66,6 +66,8 @@ module.exports = async function handler(req, res) {
 
     const token = issueServerToken({
       productId: PRODUCT_ID,
+      userId: user.id,
+      source: "web",
       originalTransactionId: data.stripe_subscription_id || null,
       expiresDate: periodEndMs,
     });
