@@ -5,7 +5,7 @@ const {
   getSupabaseAdmin,
   verifySupabaseUserToken,
 } = require("../../lib/supabase-admin.js");
-const { captureException, flush } = require("../../lib/sentry.js");
+const { captureException, flush } = require("../../lib/alerts.js");
 
 function json(req, res, status, body) {
   res.statusCode = status;

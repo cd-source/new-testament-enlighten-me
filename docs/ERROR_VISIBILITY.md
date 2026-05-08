@@ -1,8 +1,9 @@
 # Error visibility
 
-Production server-side errors are reported to Sentry. Until `SENTRY_DSN` is
-set in the environment, the integration is fully inert (no network calls, no
-overhead) — code can ship without breaking anything.
+Production server-side errors are emailed via Resend to the address in
+`ALERT_EMAIL`. The integration is fully inert (no network calls, no overhead)
+until both `RESEND_API_KEY` and `ALERT_EMAIL` are set in the environment, so
+this code can ship without breaking anything.
 
 ## What is captured
 
@@ -14,50 +15,61 @@ overhead) — code can ship without breaking anything.
 | `api/stripe/webhook.js` | event handler throws (500, Stripe will retry) | `route=stripe-webhook, stage=handler, event_type`, event id |
 | `api/stripe/checkout.js` | session creation fails (500) | `route=stripe-checkout`, user id + email |
 
-The wrapper lives in `lib/sentry.js`. PII is off (`sendDefaultPii: false`);
-user context is limited to the Supabase user id (and email on checkout, which
-the user just typed into Stripe anyway).
+The wrapper lives in `lib/alerts.js`. Each alert email contains: timestamp,
+Vercel environment, deploy commit SHA, tags, user id, and the full stack
+trace. Best-effort delivery — a Resend outage will never break the response
+path of the originating request.
 
-## One-time setup (≈5 min)
+### Dedup
 
-1. Sign up at [sentry.io](https://sentry.io) — free tier covers 5k errors/mo,
-   one user, 30-day retention. More than enough for soft launch.
-2. Create a new project → platform **Node.js**. Name it `enlighten-me`.
-3. Copy the **DSN** Sentry shows you (looks like
-   `https://abc123@o123.ingest.sentry.io/456`).
-4. Vercel → project → **Settings → Environment Variables**:
-   - Name: `SENTRY_DSN`
-   - Value: the DSN from step 3
-   - Environments: **Production** (and **Preview** if you want preview-deploy
-     errors to land in Sentry too)
-5. Redeploy (any push to `main`, or hit "Redeploy" in Vercel) so functions
-   pick up the new env var.
+In-memory dedup with a 5-minute window per `route|stage|message`. This is
+per-function-instance, so a flapping error across many cold-starts can still
+produce a few duplicate emails. Acceptable at soft-launch volume; if it
+becomes noisy, swap the in-memory `Map` for a Supabase table keyed on the
+same fingerprint.
 
-To verify, force an error: hit `/api/stripe/checkout` without a valid auth
-header, or temporarily throw inside one of the catch blocks. The error should
-appear in Sentry within a minute.
+## One-time setup
 
-## Recommended Sentry alert rules
+Already in place: `RESEND_API_KEY` (used by Supabase Auth SMTP). Reuse the
+same key here.
 
-In Sentry → **Alerts → Create Alert Rule**:
+1. Vercel → project → **Settings → Environment Variables**, add:
+   - **Name:** `ALERT_EMAIL`
+   - **Value:** the inbox where you want alerts delivered (e.g. `cd@edenic.co`)
+   - **Environments:** Production (and Preview if you want preview-deploy errors too)
+2. (Optional) `ALERT_FROM_EMAIL` — defaults to
+   `Enlighten Alerts <alerts@enlighten-me.co>`. Only override if you want a
+   different sender label.
+3. Redeploy (any push to `main`, or hit "Redeploy" in Vercel) so functions
+   pick up the new env vars.
 
-- **First-seen error**: notify on a brand-new exception type (catches new bug
-  classes immediately)
-- **Stripe webhook handler failure**: filter `tags:route:stripe-webhook AND
-  tags:stage:handler` → alert on every occurrence (these are payment-state
-  divergences and need eyes)
-- **Picture-generate spike**: filter `tags:route:picture` → alert if >5 errors
-  in 10 minutes (catches Anthropic / Freepik outages or a bad model rollout)
+To verify, force a real error path: temporarily throw inside one of the catch
+blocks, deploy, hit the endpoint, confirm the email arrives, revert.
 
-Slack or email destination — your call. For solo ops, email to
-`cd@edenic.co` is fine.
+## Recommended inbox setup
+
+Create a Gmail / Fastmail filter:
+
+- From: `alerts@enlighten-me.co`
+- Action: apply label `Enlighten/Alerts`, mark as important, optional push
+  notification on subject containing `stripe-webhook` (those are payment-state
+  divergences and should page you)
 
 ## What is *not* captured
 
-- Frontend / client-side errors (no `@sentry/browser` yet — could add later
-  if `script.js` or `web-subscribe.js` start producing user-facing breakage
-  in the wild)
-- Vercel build / deploy failures (those surface in Vercel's own dashboard
-  and email)
+- Frontend / client-side errors — these would need a small `/api/client-error`
+  endpoint and a `window.onerror` handler in `script.js`. Not yet wired
+- Vercel build / deploy failures — surface in Vercel's dashboard and email
 - 4xx user errors (validation, auth, rate-limit hit) — these are working as
   designed, not bugs
+
+## When to consider upgrading to a dedicated tool
+
+Sentry / Highlight / similar are worth the account when you start needing:
+
+- Cross-error grouping ("show me all errors from this Anthropic outage")
+- Search / filter UI over an error history (>30 days)
+- Source-map-aware frontend stack traces
+- On-call rotation, paging, or per-team routing
+
+Until then, inbox + Vercel logs cover the soft-launch ground.

@@ -4,7 +4,7 @@ const {
   getSupabaseAdmin,
   extractCurrentPeriodEnd,
 } = require("../../lib/supabase-admin.js");
-const { captureException, flush } = require("../../lib/sentry.js");
+const { captureException, flush } = require("../../lib/alerts.js");
 
 async function readRawBody(req) {
   const chunks = [];

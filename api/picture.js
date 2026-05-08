@@ -3,7 +3,7 @@ const {
   countRecentImageGenerations,
   recordImageGeneration,
 } = require("../lib/supabase-admin.js");
-const { captureException, flush } = require("../lib/sentry.js");
+const { captureException, flush } = require("../lib/alerts.js");
 
 const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
   ? [process.env.ANTHROPIC_MODEL]
