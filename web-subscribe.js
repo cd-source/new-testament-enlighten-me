@@ -157,7 +157,13 @@
         </form>
         <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:help@enlighten-me.co?subject=Enlighten%20password%20reset">Email us</a> to reset.</p>
       </div>
-      <button id="webSignOutButton" class="utility-button" type="button" hidden>Sign out</button>
+      <div id="webAccountRow" class="web-account-row" hidden>
+        <div class="web-account-info">
+          <span class="web-account-label">Signed in as</span>
+          <span class="web-account-email" id="webAccountEmail"></span>
+        </div>
+        <button id="webSignOutButton" class="web-sign-out-button" type="button">Sign out</button>
+      </div>
       <p class="tool-meta" id="webSignInMessage" hidden></p>
     `;
     panel.insertBefore(row, actions);
@@ -248,19 +254,22 @@
   function renderSignInState() {
     const status = document.getElementById("webSignInStatus");
     const controls = document.getElementById("webSignInControls");
-    const signOutButton = document.getElementById("webSignOutButton");
+    const accountRow = document.getElementById("webAccountRow");
+    const accountEmail = document.getElementById("webAccountEmail");
     if (!status || !controls) return;
 
     if (currentSession?.user?.email) {
-      status.textContent = `Signed in as ${currentSession.user.email}.`;
+      status.hidden = true;
       controls.hidden = true;
-      if (signOutButton) signOutButton.hidden = false;
+      if (accountEmail) accountEmail.textContent = currentSession.user.email;
+      if (accountRow) accountRow.hidden = false;
       if (subscribeButton) subscribeButton.hidden = false;
     } else {
+      status.hidden = false;
       status.textContent =
         "Step 1 of 2: Sign in to subscribe. Scripture features stay free without an account.";
       controls.hidden = false;
-      if (signOutButton) signOutButton.hidden = true;
+      if (accountRow) accountRow.hidden = true;
       if (subscribeButton) subscribeButton.hidden = true;
     }
   }
