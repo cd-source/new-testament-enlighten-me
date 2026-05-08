@@ -205,7 +205,7 @@ function isNativeAppRuntime() {
   return Boolean(window.Capacitor?.isNativePlatform?.());
 }
 
-const REMOTE_API_BASE = "https://new-testament-enlighten-me.vercel.app";
+const REMOTE_API_BASE = "https://enlighten-me.co";
 
 function apiUrl(path) {
   return isNativeAppRuntime() ? `${REMOTE_API_BASE}${path}` : path;

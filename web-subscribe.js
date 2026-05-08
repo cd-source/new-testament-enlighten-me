@@ -155,7 +155,7 @@
             <button id="webSignUpSubmit" class="button button-compact" type="button">Create account</button>
           </div>
         </form>
-        <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:cd@edenic.co?subject=Enlighten%20password%20reset">Email us</a> to reset.</p>
+        <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:help@enlighten-me.co?subject=Enlighten%20password%20reset">Email us</a> to reset.</p>
       </div>
       <button id="webSignOutButton" class="utility-button" type="button" hidden>Sign out</button>
       <p class="tool-meta" id="webSignInMessage" hidden></p>

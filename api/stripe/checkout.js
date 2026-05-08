@@ -28,7 +28,7 @@ async function readBody(req) {
 function resolveOrigin(req) {
   const origin = req.headers.origin;
   if (typeof origin === "string" && /^https?:\/\//.test(origin)) return origin;
-  return "https://new-testament-enlighten-me.vercel.app";
+  return "https://enlighten-me.co";
 }
 
 module.exports = async function handler(req, res) {

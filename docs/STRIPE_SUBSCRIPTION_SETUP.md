@@ -6,7 +6,7 @@ Web subscribers go through Supabase magic-link auth, then Stripe Checkout. iOS s
 
 1. Confirm the recurring price exists. (Sandbox: `price_1TUX2VRBMJLfqCVqmRVdSTHf`.)
 2. **Developers → Webhooks → Add endpoint**
-   - URL: `https://new-testament-enlighten-me.vercel.app/api/stripe/webhook`
+   - URL: `https://enlighten-me.co/api/stripe/webhook`
    - Events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`
 3. Reveal the **Signing secret** (`whsec_…`) — that's `STRIPE_WEBHOOK_SECRET`.
 
@@ -30,7 +30,7 @@ Set in Vercel → Project → Settings → Environment Variables (production + p
 
 ## End-to-end test (sandbox)
 
-1. Open `https://new-testament-enlighten-me.vercel.app/` and go to Settings → Subscription.
+1. Open `https://enlighten-me.co/` and go to Settings → Subscription.
 2. Enter your email → "Email me a link". Click the link.
 3. After sign-in, the panel shows "Signed in as …". Click `Subscribe — $3/month`.
 4. Stripe test card: `4242 4242 4242 4242`, any future expiry, any CVC, any ZIP.
