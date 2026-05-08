@@ -4,7 +4,6 @@ Deferred work — not blocking current scope, pick up later.
 
 ## Soft-launch pre-flight (Stripe / compliance)
 
-- **Set `ALERT_EMAIL` env var** — error-alert wiring is live (see `docs/ERROR_VISIBILITY.md`); inert until `ALERT_EMAIL` is set on Vercel. ~2 min: add `ALERT_EMAIL=cd@edenic.co` to Production env vars, redeploy. Reuses the existing `RESEND_API_KEY`. Add a Gmail filter for `from:alerts@enlighten-me.co` → label + push notification on `stripe-webhook` subjects
 - **Cross-provider deliverability check** — Resend SMTP is live, but only verified end-to-end with one test address. Send signup-confirm + password-reset emails to gmail / icloud / outlook / yahoo before public launch and confirm none land in spam (DKIM is in place; DMARC is currently absent — add `v=DMARC1; p=none;` at `_dmarc` if Gmail spam-flags us)
 
 ## Web UI / UX
