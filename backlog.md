@@ -20,6 +20,7 @@ Deferred work — not blocking current scope, pick up later.
 
 - **Settings page polish** — conflicting colors/weights on email addresses and sign-out notifications; spacing inconsistent
 - **Search panel filtering** — needs better filters (e.g. by book) so results are narrowable instead of one flat list
+- **Home page top-verse rotation** — increase the size of the "top verses" pool and improve the random-pick distribution; current rotation feels repetitive
 - **App URL on share cards (web)** — when sharing a verse card, include the enlighten-me.co URL so recipients can find/download the app
 - **Link-preview thumbnail (Open Graph / Twitter Card meta tags)** — when the site URL is texted/shared, the preview should show an Enlighten image instead of a blank/default. Add `og:image`, `og:title`, `og:description`, `twitter:card` meta tags pointing at a hosted thumbnail
 

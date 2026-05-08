@@ -1080,3 +1080,121 @@ h1 {
     gap: 8px;
   }
 }
+
+.site-footer {
+  width: min(980px, 100%);
+  margin: 24px auto 8px;
+  padding: 16px 8px 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.85rem;
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.site-footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.site-footer a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.18);
+}
+
+.site-footer a:hover {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.site-footer .footer-meta {
+  margin: 10px 0 0;
+  color: var(--muted-2);
+  font-size: 0.78rem;
+}
+
+.legal-card {
+  width: min(720px, 100%);
+  text-align: left;
+  padding: clamp(24px, 5vw, 48px);
+}
+
+.legal-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.legal-header .back-link {
+  align-self: flex-start;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.9rem;
+  border: 1px solid var(--card-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.legal-header .back-link:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.legal-header h1 {
+  margin: 6px 0 0;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+}
+
+.legal-header .effective {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 0.92rem;
+}
+
+.legal-prose {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.legal-prose h2 {
+  margin: 28px 0 8px;
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+.legal-prose h3 {
+  margin: 20px 0 6px;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+
+.legal-prose p,
+.legal-prose ul,
+.legal-prose ol {
+  margin: 0 0 12px;
+}
+
+.legal-prose ul,
+.legal-prose ol {
+  padding-left: 22px;
+}
+
+.legal-prose li {
+  margin-bottom: 6px;
+}
+
+.legal-prose a {
+  color: var(--gold);
+}
+
+.legal-prose strong {
+  color: var(--text);
+}
