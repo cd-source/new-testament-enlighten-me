@@ -71,6 +71,8 @@ let verses = [];
 let versesById = new Map();
 let versesByBookChapter = new Map();
 let lastIndex = -1;
+let passageDeck = [];
+let deckIndex = 0;
 let currentPassage = null;
 let currentGeneratedImageSrc = "";
 let currentShareCardDataUrl = "";
@@ -548,19 +550,29 @@ function setActionStatus(message) {
   }
 }
 
+function shufflePassageDeck(avoidIndex) {
+  passageDeck = passages.map((_, i) => i);
+  for (let i = passageDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [passageDeck[i], passageDeck[j]] = [passageDeck[j], passageDeck[i]];
+  }
+  deckIndex = 0;
+  if (passages.length > 1 && passageDeck[0] === avoidIndex) {
+    const swap = 1 + Math.floor(Math.random() * (passageDeck.length - 1));
+    [passageDeck[0], passageDeck[swap]] = [passageDeck[swap], passageDeck[0]];
+  }
+}
+
 function getRandomPassage() {
   if (!passages.length) {
     throw new Error("No passages have been loaded.");
   }
 
-  let nextIndex = Math.floor(Math.random() * passages.length);
-
-  if (passages.length > 1) {
-    while (nextIndex === lastIndex) {
-      nextIndex = Math.floor(Math.random() * passages.length);
-    }
+  if (passageDeck.length !== passages.length || deckIndex >= passageDeck.length) {
+    shufflePassageDeck(lastIndex);
   }
 
+  const nextIndex = passageDeck[deckIndex++];
   lastIndex = nextIndex;
   return passages[nextIndex];
 }

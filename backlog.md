@@ -11,7 +11,7 @@ Deferred work — not blocking current scope, pick up later.
 
 - **Settings page polish** — conflicting colors/weights on email addresses and sign-out notifications; spacing inconsistent
 - **Search panel filtering** — needs better filters (e.g. by book) so results are narrowable instead of one flat list
-- **Home page top-verse rotation** — increase the size of the "top verses" pool and improve the random-pick distribution; current rotation feels repetitive
+- **Home page top-verse pool expansion** — `data/kjv/passages.json` only has 20 entries. Distribution algorithm now uses shuffle-deck rotation (no repeat until all 20 shown), but the long-tail repetition is unsolvable without more content. Author additional passages following the existing schema (themes, tone, visual_motifs, familiarity, weight, etc.) to grow the pool to 50–100+.
 - **App URL on share cards (web)** — when sharing a verse card, include the enlighten-me.co URL so recipients can find/download the app
 
 ## Localization
