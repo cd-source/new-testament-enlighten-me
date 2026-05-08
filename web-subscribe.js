@@ -213,10 +213,17 @@
 
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
           message.textContent = `Could not create account: ${error.message}`;
           message.hidden = false;
+        } else if (data?.user && (data.user.identities?.length ?? 0) === 0) {
+          message.textContent = `An account already exists for ${email}. Sign in instead, or email help@enlighten-me.co to reset your password.`;
+          message.hidden = false;
+        } else {
+          message.textContent = `Account created. Check ${email} for a confirmation link, then return here to sign in.`;
+          message.hidden = false;
+          if (passwordInput) passwordInput.value = "";
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
