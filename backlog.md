@@ -4,12 +4,8 @@ Deferred work — not blocking current scope, pick up later.
 
 ## Soft-launch pre-flight (Stripe / compliance)
 
-- **Re-test Supabase signup email deliverability** — "Confirm email" is now ON in Auth → Providers → Email (was OFF, which is why the first test received nothing). Re-run signup test across gmail / icloud / outlook on default Supabase SMTP. If any land in spam or fail to arrive, escalate to: configure custom SMTP via Resend (verify `enlighten-me.co` sending domain with SPF + DKIM + DMARC in Cloudflare, wire SMTP creds into Supabase Auth → Emails)
+- **Configure custom SMTP via Resend** — REQUIRED for launch. Default Supabase SMTP is capped at ~2 auth emails per hour project-wide (signup + reset + magic link share one bucket). Confirmed in testing: second signup attempt within the hour returns "email rate limit exceeded" and no email is sent. Setup: Resend account → add `enlighten-me.co` sending domain → add SPF + DKIM + DMARC records to Cloudflare → verify in Resend → generate API key → Supabase Auth → Emails → Enable custom SMTP. Re-test across gmail / icloud / outlook after.
 - **Error visibility on prod** — at minimum a Vercel log watch routine, ideally Sentry on `/api/picture` and `/api/stripe/*` so silent failures surface
-
-## Documentation
-
-- Update `docs/STRIPE_SUBSCRIPTION_SETUP.md` — replace magic-link copy with current Google + email-password flow (`web-subscribe.js:131-198`)
 
 ## Web UI / UX
 
@@ -26,7 +22,6 @@ Deferred work — not blocking current scope, pick up later.
 ## iOS
 
 - **App URL on share cards (iOS)** — same as web, on the iOS share path
-- **Capacitor App Store guard verification** — confirm `web-subscribe.js` actually no-ops on iOS so Apple doesn't reject the build for routing payments outside StoreKit
 - **App Store listing page** — copy, screenshots, keywords, privacy nutrition labels
 - **UX / UI polish pass**
 - **TestFlight build** — internal testing rollout
