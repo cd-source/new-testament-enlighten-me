@@ -213,7 +213,11 @@
 
     try {
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/?view=settings` },
+        });
         if (error) {
           message.textContent = `Could not create account: ${error.message}`;
           message.hidden = false;
