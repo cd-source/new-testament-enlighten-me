@@ -189,9 +189,12 @@ function getPassageText(passage) {
     .join(" ");
 }
 
+const SHARE_URL = "https://www.enlighten-me.co";
+const SHARE_URL_DISPLAY = "enlighten-me.co";
+
 function getShareText() {
   if (!currentPassage) return "";
-  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (KJV)`;
+  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (KJV)\n${SHARE_URL}`;
 }
 
 function getShareCardFileName() {
@@ -914,6 +917,14 @@ function drawShareCardText(context, text, reference, compact = false) {
   context.fillStyle = "#facc15";
   context.font = `700 ${referenceFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
   context.fillText(`— ${reference} (KJV)`, 540, y + referenceGap, maxWidth);
+
+  context.save();
+  context.fillStyle = "rgba(248, 250, 252, 0.78)";
+  context.font = `600 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
+  context.textAlign = "center";
+  context.textBaseline = "alphabetic";
+  context.fillText(SHARE_URL_DISPLAY, 540, 1300);
+  context.restore();
 }
 
 function loadCanvasImage(src, options = {}) {
@@ -1186,14 +1197,14 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
 async function shareCardImage() {
   if (!currentPassage) return;
   const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  const text = `${currentPassage.reference} (KJV)`;
+  const text = `${currentPassage.reference} (KJV)\n${SHARE_URL}`;
   await shareCardDataUrl(dataUrl, getShareCardFileName(), text);
 }
 
 async function shareActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
-  const text = `${card.reference} (KJV)`;
+  const text = `${card.reference} (KJV)\n${SHARE_URL}`;
   await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), text, (message) => {
     if (libraryStatus) libraryStatus.textContent = message;
   });
