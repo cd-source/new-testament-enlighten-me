@@ -1197,15 +1197,13 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
 async function shareCardImage() {
   if (!currentPassage) return;
   const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  const text = `${currentPassage.reference} (KJV)\n${SHARE_URL}`;
-  await shareCardDataUrl(dataUrl, getShareCardFileName(), text);
+  await shareCardDataUrl(dataUrl, getShareCardFileName(), SHARE_URL);
 }
 
 async function shareActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
-  const text = `${card.reference} (KJV)\n${SHARE_URL}`;
-  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), text, (message) => {
+  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), SHARE_URL, (message) => {
     if (libraryStatus) libraryStatus.textContent = message;
   });
 }
