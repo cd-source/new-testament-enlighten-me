@@ -10,7 +10,6 @@ Deferred work — not blocking current scope, pick up later.
 
 - **Search panel filtering** — needs better filters (e.g. by book) so results are narrowable instead of one flat list
 - **Home page top-verse pool expansion** — `data/kjv/passages.json` only has 20 entries. Distribution algorithm now uses shuffle-deck rotation (no repeat until all 20 shown), but the long-tail repetition is unsolvable without more content. Author additional passages following the existing schema (themes, tone, visual_motifs, familiarity, weight, etc.) to grow the pool to 50–100+.
-- **App URL on share cards (web)** — when sharing a verse card, include the enlighten-me.co URL so recipients can find/download the app
 
 ## Localization
 
@@ -18,7 +17,6 @@ Deferred work — not blocking current scope, pick up later.
 
 ## iOS
 
-- **App URL on share cards (iOS)** — same as web, on the iOS share path
 - **App Store listing page** — copy, screenshots, keywords, privacy nutrition labels
 - **UX / UI polish pass**
 - **TestFlight build** — internal testing rollout
