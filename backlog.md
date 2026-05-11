@@ -9,7 +9,6 @@ Deferred work — not blocking current scope, pick up later.
 ## Web UI / UX
 
 - **Search panel filtering** — needs filters (e.g. by book) so results narrow instead of one flat list. Design call needed.
-- **Home page top-verse pool expansion** — `data/kjv/passages.json` has 20 entries. Shuffle-deck rotation prevents repeat until the deck is exhausted, but the long tail still repeats without more content. Author additional passages to grow pool to 50–100+ following the existing schema (themes, tone, visual_motifs, familiarity, weight).
 
 ## Localization
 
