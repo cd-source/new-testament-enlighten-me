@@ -12,6 +12,7 @@ const WEB_PREVIEW_ENTITLEMENT_KEY = "enlighten.previewImageSubscription";
 const LIBRARY_DB_NAME = "enlightenCardLibrary";
 const LIBRARY_DB_VERSION = 1;
 const LIBRARY_STORE_NAME = "cards";
+const DECK_STORAGE_KEY = "enlighten.passageDeck.v1";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -178,6 +179,7 @@ async function loadScriptureData() {
   verses = nextVerses;
   versesById = nextVersesById;
   versesByBookChapter = buildBookChapterIndex(nextVerses);
+  restorePassageDeck();
 }
 
 function getPassageText(passage) {
@@ -553,6 +555,42 @@ function setActionStatus(message) {
   }
 }
 
+function persistPassageDeck() {
+  try {
+    if (typeof localStorage === "undefined") return;
+    const payload = JSON.stringify({
+      poolSize: passages.length,
+      deck: passageDeck,
+      deckIndex,
+      lastIndex,
+    });
+    localStorage.setItem(DECK_STORAGE_KEY, payload);
+  } catch (_) {
+    // localStorage may be unavailable (private mode, quota); deck still works in memory
+  }
+}
+
+function restorePassageDeck() {
+  try {
+    if (typeof localStorage === "undefined") return;
+    const raw = localStorage.getItem(DECK_STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!saved || saved.poolSize !== passages.length) return;
+    if (!Array.isArray(saved.deck) || saved.deck.length !== passages.length) return;
+    if (typeof saved.deckIndex !== "number" || saved.deckIndex < 0 || saved.deckIndex > passages.length) return;
+    const inRange = saved.deck.every((i) => Number.isInteger(i) && i >= 0 && i < passages.length);
+    if (!inRange) return;
+    const seen = new Set(saved.deck);
+    if (seen.size !== passages.length) return;
+    passageDeck = saved.deck;
+    deckIndex = saved.deckIndex;
+    lastIndex = Number.isInteger(saved.lastIndex) ? saved.lastIndex : -1;
+  } catch (_) {
+    // Corrupt or unavailable storage; fall back to fresh in-memory deck
+  }
+}
+
 function shufflePassageDeck(avoidIndex) {
   passageDeck = passages.map((_, i) => i);
   for (let i = passageDeck.length - 1; i > 0; i--) {
@@ -564,6 +602,7 @@ function shufflePassageDeck(avoidIndex) {
     const swap = 1 + Math.floor(Math.random() * (passageDeck.length - 1));
     [passageDeck[0], passageDeck[swap]] = [passageDeck[swap], passageDeck[0]];
   }
+  persistPassageDeck();
 }
 
 function getRandomPassage() {
@@ -577,6 +616,7 @@ function getRandomPassage() {
 
   const nextIndex = passageDeck[deckIndex++];
   lastIndex = nextIndex;
+  persistPassageDeck();
   return passages[nextIndex];
 }
 
