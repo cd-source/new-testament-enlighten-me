@@ -36,7 +36,17 @@ public class ImageSharePlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         let dialogTitle = call.getString("dialogTitle") ?? "Share scripture card"
+        let text = call.getString("text") ?? ""
         let item = ImageActivityItem(image: shareImage, pngData: shareData, title: dialogTitle)
+
+        var activityItems: [Any] = [item]
+        if !text.isEmpty {
+            if let url = URL(string: text), url.scheme != nil {
+                activityItems.append(url)
+            } else {
+                activityItems.append(text)
+            }
+        }
 
         DispatchQueue.main.async { [weak self] in
             guard let self = self,
@@ -49,7 +59,7 @@ public class ImageSharePlugin: CAPPlugin, CAPBridgedPlugin {
                 return
             }
 
-            let avc = UIActivityViewController(activityItems: [item], applicationActivities: nil)
+            let avc = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
             avc.setValue(dialogTitle, forKey: "subject")
 
             if let popover = avc.popoverPresentationController {

@@ -1170,7 +1170,7 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([bytes], { type: mime });
 }
 
-async function shareDataUrlViaCapacitor(dataUrl, fileName) {
+async function shareDataUrlViaCapacitor(dataUrl, fileName, text) {
   const Plugins = window.Capacitor?.Plugins;
   if (!Plugins || !dataUrl) return false;
 
@@ -1178,6 +1178,7 @@ async function shareDataUrlViaCapacitor(dataUrl, fileName) {
     await Plugins.ImageShare.shareImage({
       base64: dataUrlToBase64(dataUrl),
       dialogTitle: "Share scripture card",
+      text: text || "",
     });
     return true;
   }
@@ -1202,7 +1203,7 @@ async function shareDataUrlViaCapacitor(dataUrl, fileName) {
 async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActionStatus) {
   try {
     if (window.Capacitor?.isNativePlatform?.()) {
-      const ok = await shareDataUrlViaCapacitor(dataUrl, fileName);
+      const ok = await shareDataUrlViaCapacitor(dataUrl, fileName, text);
       if (ok) {
         statusTarget("Share sheet opened with image card.");
         return;
@@ -1376,6 +1377,9 @@ function bindEvents() {
   restorePurchaseButton.addEventListener("click", restoreImagePlan);
   if (!isNativeAppRuntime()) {
     restorePurchaseButton.hidden = true;
+  }
+  if (isNativeAppRuntime()) {
+    document.getElementById("refundFooterLink")?.remove();
   }
   settingsToggle.addEventListener("click", toggleSettings);
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));

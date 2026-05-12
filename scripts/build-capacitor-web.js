@@ -16,6 +16,9 @@ const entries = [
   "assets/examples/example-1.png",
   "assets/examples/example-2.png",
   "assets/examples/example-3.png",
+  "privacy.html",
+  "terms.html",
+  "refund.html",
 ];
 
 fs.rmSync(dist, { recursive: true, force: true });
