@@ -13,6 +13,9 @@ const entries = [
   "data/kjv/themes.json",
   "data/kjv/verses.json",
   "data/kjv/SOURCE.md",
+  "assets/examples/example-1.png",
+  "assets/examples/example-2.png",
+  "assets/examples/example-3.png",
 ];
 
 fs.rmSync(dist, { recursive: true, force: true });

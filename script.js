@@ -236,7 +236,7 @@ function updateSubscriptionUi() {
     : `${IMAGE_PRICE_LABEL} - unlocks unlimited image creation to bring your favorite verses to life`;
   subscribeButton.textContent = active
     ? "Image Creation Active"
-    : `Step 2 of 2: click here to subscribe for ${IMAGE_PRICE_LABEL}`;
+    : `Subscribe for ${IMAGE_PRICE_LABEL}`;
   subscribeButton.disabled = active;
   restorePurchaseButton.disabled = false;
   pictureButton.textContent = getPictureButtonLabel(active);

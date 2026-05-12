@@ -267,7 +267,7 @@
     } else {
       status.hidden = false;
       status.textContent =
-        "Step 1 of 2: Sign in to subscribe. Scripture features stay free without an account.";
+        "Sign in to subscribe. Scripture features stay free without an account.";
       controls.hidden = false;
       if (accountRow) accountRow.hidden = true;
       if (subscribeButton) subscribeButton.hidden = true;
