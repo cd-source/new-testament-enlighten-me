@@ -16,6 +16,5 @@ Deferred work — not blocking current scope, pick up later.
 
 ## iOS
 
-- **App Store listing** — copy, screenshots, keywords, privacy nutrition labels
-- **UX / UI polish pass**
-- **TestFlight build** — internal testing rollout
+- **UX / UI polish pass** — driven by TestFlight internal-tester feedback (v1.1 build 2 live on TestFlight; testers added 2026-05-11).
+- **App Store listing** — copy, screenshots, keywords, privacy nutrition labels. Screenshots come last, after polish settles.
