@@ -27,7 +27,7 @@ module.exports = function handler(req, res) {
       stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY || "",
       stripePriceId: process.env.STRIPE_PRICE_ID || "",
       productId: "enlighten_ai_images_monthly",
-      priceLabel: "$3/month",
+      priceLabel: "$2.99/month",
     })
   );
 };
