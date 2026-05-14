@@ -1,6 +1,6 @@
 {
   "appId": "com.enlighten.daily",
-  "appName": "Enlighten Me",
+  "appName": "Enlighten-Me",
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {

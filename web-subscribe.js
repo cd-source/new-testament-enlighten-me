@@ -155,7 +155,7 @@
             <button id="webSignUpSubmit" class="button button-compact" type="button">Create account</button>
           </div>
         </form>
-        <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:help@enlighten-me.co?subject=Enlighten%20password%20reset">Email us</a> to reset.</p>
+        <p class="tool-meta web-sign-in-help">Forgot password? <a href="mailto:help@enlighten-me.co?subject=Enlighten-Me%20password%20reset">Email us</a> to reset.</p>
       </div>
       <div id="webAccountRow" class="web-account-row" hidden>
         <div class="web-account-info">

@@ -2,7 +2,7 @@
   "name": "enlighten-me",
   "version": "0.1.0",
   "private": true,
-  "description": "Enlighten: free local KJV scripture with paid AI imagery.",
+  "description": "Enlighten-Me: free local KJV scripture with paid AI imagery.",
   "scripts": {
     "build": "node scripts/build-capacitor-web.js",
     "validate": "npm run build && node --check script.js && node scripts/validate-data.js",
