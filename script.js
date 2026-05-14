@@ -212,7 +212,7 @@ function isNativeAppRuntime() {
   return Boolean(window.Capacitor?.isNativePlatform?.());
 }
 
-const REMOTE_API_BASE = "https://enlighten-me.co";
+const REMOTE_API_BASE = "https://www.enlighten-me.co";
 
 function apiUrl(path) {
   return isNativeAppRuntime() ? `${REMOTE_API_BASE}${path}` : path;
