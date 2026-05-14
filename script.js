@@ -192,7 +192,6 @@ function getPassageText(passage) {
 }
 
 const SHARE_URL = "https://www.enlighten-me.co";
-const SHARE_URL_DISPLAY = "enlighten-me.co";
 
 function getShareText() {
   if (!currentPassage) return "";
@@ -957,14 +956,6 @@ function drawShareCardText(context, text, reference, compact = false) {
   context.fillStyle = "#facc15";
   context.font = `700 ${referenceFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
   context.fillText(`— ${reference} (KJV)`, 540, y + referenceGap, maxWidth);
-
-  context.save();
-  context.fillStyle = "rgba(248, 250, 252, 0.78)";
-  context.font = `600 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
-  context.textAlign = "center";
-  context.textBaseline = "alphabetic";
-  context.fillText(SHARE_URL_DISPLAY, 540, 1300);
-  context.restore();
 }
 
 function loadCanvasImage(src, options = {}) {
@@ -1035,7 +1026,7 @@ async function renderShareCardCanvas(forceTextOnly = false) {
   context.fillStyle = "#facc15";
   context.font = "800 24px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
   context.letterSpacing = "4px";
-  context.fillText("ENLIGHTEN", 540, 80);
+  context.fillText("ENLIGHTEN-ME", 540, 80);
   context.letterSpacing = "0px";
 
   const hasImage = imageForCanvas !== null;
@@ -1215,13 +1206,13 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
 
     if (navigator.canShare?.({ files: [file] }) && navigator.share) {
       await navigator.share({
-        title: "Enlighten",
+        title: "Enlighten-Me",
         text,
         files: [file],
       });
       statusTarget("Share sheet opened with image card.");
     } else if (navigator.share) {
-      await navigator.share({ title: "Enlighten", text });
+      await navigator.share({ title: "Enlighten-Me", text });
       statusTarget("Image sharing is not available here, so text share opened.");
     } else {
       await navigator.clipboard.writeText(text);
