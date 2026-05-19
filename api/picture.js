@@ -87,6 +87,8 @@ async function writeIllustrationPrompt({ passage, reference }) {
           "The style is ancient Old and New Testament / biblical, not modern or contemporary.",
           "Use cinematic sacred illustration language: parchment warmth, oil-painting depth, ancient Near Eastern and Judean landscapes, lamplight, robes, sandals, stone, olive trees, desert dawn, mountains, rivers, wilderness, humble faces, divine light.",
           "The image may be a literal biblical scene, or it may be a symbolic/metaphorical visual interpretation of the passage when metaphor better captures the spiritual message.",
+          "People depicted must reflect the true ethnic diversity of the ancient Near East and surrounding regions: warm brown, olive, and deep complexions drawn from Semitic, African, and Mediterranean ancestries — never pale or European-featured by default.",
+          "When the passage does not specify a person's sex, freely include women; in crowd or group scenes, vary sex across figures so women are well-represented.",
           "Do not include text, typography, captions, logos, watermarks, modern clothing, modern buildings, phones, cameras, neon, sci-fi, fantasy armor, or comic-book style.",
           "Return only the final image prompt. No commentary. No markdown.",
         ].join(" "),
