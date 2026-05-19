@@ -23,7 +23,7 @@ const TRANSLATIONS = {
     locale: "es-MX",
     stripeLocale: "es",
     exampleDir: "assets/examples/es-MX",
-    exampleExtension: "svg",
+    exampleExtension: "png",
     legalPaths: {
       privacy: "privacy.es-MX.html",
       terms: "terms.es-MX.html",
