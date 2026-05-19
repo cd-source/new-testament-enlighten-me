@@ -199,6 +199,30 @@
                   $2.99/month - unlocks unlimited image creation to bring your favorite verses to life
                 </p>
               </div>
+              <ol class="subscription-steps" aria-label="Subscription steps">
+                <li>
+                  <span class="subscription-step-number">1</span>
+                  <div>
+                    <h3>Sign in</h3>
+                    <p>Use Google or email so your subscription can be connected to your account.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="subscription-step-number">2</span>
+                  <div>
+                    <h3>Subscribe with Stripe</h3>
+                    <p>Complete the secure checkout and return to Settings automatically.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="subscription-step-number">3</span>
+                  <div>
+                    <h3>Create scripture images</h3>
+                    <p>Once active, Image Creation unlocks from the home screen.</p>
+                  </div>
+                </li>
+              </ol>
+
               <div class="subscription-examples" aria-label="Examples of scripture cards">
                 <p class="tool-kicker subscription-examples-label">Examples</p>
                 <ul class="subscription-examples-grid">
@@ -224,6 +248,16 @@
               <h2 id="appSettingsTitle">Share & image tools</h2>
             </div>
             <div class="settings-card settings-list">
+              <div class="settings-row settings-row-control">
+                <div>
+                  <h3>Language</h3>
+                  <p>Choose the app language and scripture translation.</p>
+                </div>
+                <select id="languageSelect" class="select-input language-select" aria-label="Language">
+                  <option value="en">English</option>
+                  <option value="es-MX">Español (México)</option>
+                </select>
+              </div>
               <div class="settings-row">
                 <div>
                   <h3>Share Cards</h3>

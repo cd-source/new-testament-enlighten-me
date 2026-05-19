@@ -32,6 +32,23 @@ function resolveOrigin(req) {
   return "https://enlighten-me.co";
 }
 
+function normalizeLanguage(value) {
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "es" || normalized === "es-mx") return "es-MX";
+  if (normalized === "en" || normalized === "en-us") return "en";
+  return "";
+}
+
+function buildSettingsReturnUrl(origin, language, params) {
+  const url = new URL(origin);
+  url.searchParams.set("view", "settings");
+  if (language) url.searchParams.set("lang", language);
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
+  return url.toString().replace("%7BCHECKOUT_SESSION_ID%7D", "{CHECKOUT_SESSION_ID}");
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") {
     setCorsHeaders(req, res);
@@ -86,6 +103,10 @@ module.exports = async function handler(req, res) {
     const origin = (typeof body.origin === "string" && /^https?:\/\//.test(body.origin))
       ? body.origin
       : resolveOrigin(req);
+    const language = normalizeLanguage(body.language || body.locale);
+    const locale = ["en", "es"].includes(body.locale)
+      ? body.locale
+      : (language === "es-MX" ? "es" : undefined);
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
@@ -95,9 +116,13 @@ module.exports = async function handler(req, res) {
       subscription_data: {
         metadata: { supabase_user_id: user.id },
       },
-      success_url: `${origin}/?subscribed=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/?subscribe_canceled=true`,
+      success_url: buildSettingsReturnUrl(origin, language, {
+        subscribed: "true",
+        session_id: "{CHECKOUT_SESSION_ID}",
+      }),
+      cancel_url: buildSettingsReturnUrl(origin, language, { subscribe_canceled: "true" }),
       allow_promotion_codes: true,
+      ...(locale ? { locale } : {}),
     });
 
     return json(req, res, 200, { url: session.url, sessionId: session.id });

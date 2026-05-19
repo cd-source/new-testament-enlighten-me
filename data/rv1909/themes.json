@@ -1,0 +1,77 @@
+[
+  {
+    "id": "comfort",
+    "label": "Consuelo",
+    "description": "Pasajes para paz, duelo, cargas y ánimo."
+  },
+  {
+    "id": "peace",
+    "label": "Paz",
+    "description": "Pasajes centrados en calma, quietud y descanso espiritual."
+  },
+  {
+    "id": "trust",
+    "label": "Confianza",
+    "description": "Pasajes sobre confiar en Dios en vez del temor o la autosuficiencia."
+  },
+  {
+    "id": "guidance",
+    "label": "Guía",
+    "description": "Pasajes para dirección, discernimiento y el camino por delante."
+  },
+  {
+    "id": "wisdom",
+    "label": "Sabiduría",
+    "description": "Pasajes que enseñan juicio, prioridades y entendimiento."
+  },
+  {
+    "id": "faith",
+    "label": "Fe",
+    "description": "Pasajes sobre creencia, confianza y visión espiritual."
+  },
+  {
+    "id": "strength",
+    "label": "Fortaleza",
+    "description": "Pasajes para valor, perseverancia y renovación."
+  },
+  {
+    "id": "hope",
+    "label": "Esperanza",
+    "description": "Pasajes que elevan el corazón hacia restauración y promesa."
+  },
+  {
+    "id": "courage",
+    "label": "Valor",
+    "description": "Pasajes para temor, riesgo y perseverancia."
+  },
+  {
+    "id": "prayer",
+    "label": "Oración",
+    "description": "Pasajes que invitan a pedir, buscar, agradecer y tener comunión con Dios."
+  },
+  {
+    "id": "gratitude",
+    "label": "Gratitud",
+    "description": "Pasajes para agradecimiento y gozo."
+  },
+  {
+    "id": "love",
+    "label": "Amor",
+    "description": "Pasajes sobre caridad, servicio y devoción."
+  },
+  {
+    "id": "humility",
+    "label": "Humildad",
+    "description": "Pasajes sobre caminar humildemente, arrepentimiento y renovación."
+  },
+  {
+    "id": "justice",
+    "label": "Justicia",
+    "description": "Pasajes sobre rectitud, misericordia y acción moral."
+  },
+  {
+    "id": "light",
+    "label": "Luz",
+    "description": "Pasajes que usan la luz como guía, salvación y vida."
+  }
+]
