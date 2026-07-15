@@ -159,11 +159,29 @@ function getUrlTranslationKey() {
   }
 }
 
+function getBrowserTranslationKey() {
+  try {
+    if (typeof navigator === "undefined") return "";
+    const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
+    for (const raw of preferred) {
+      const lower = String(raw || "").toLowerCase();
+      // Match any regional Spanish (es, es-MX, es-ES, es-419, …) to our es-MX bundle.
+      if (lower.startsWith("es")) return "es-MX";
+      if (lower.startsWith("en")) return "en";
+    }
+    return "";
+  } catch (_) {
+    return "";
+  }
+}
+
 function resolveInitialTranslationKey() {
   const requested = getUrlTranslationKey();
   if (requested) return requested;
   const stored = normalizeTranslationKey(getStoredTranslationKey());
   if (stored) return stored;
+  const browser = getBrowserTranslationKey();
+  if (browser) return browser;
   return DEFAULT_TRANSLATION_KEY;
 }
 
