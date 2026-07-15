@@ -1,0 +1,2823 @@
+[
+  {
+    "id": "psalm-23-1",
+    "reference": "Salmos 23:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-23-1"
+    ],
+    "themes": [
+      "comfort",
+      "peace",
+      "trust"
+    ],
+    "tone": [
+      "peaceful",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "shepherd",
+      "green pastures",
+      "still waters"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "psalm-119-105",
+    "reference": "Salmos 119:105",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-119-105"
+    ],
+    "themes": [
+      "guidance",
+      "wisdom",
+      "faith"
+    ],
+    "tone": [
+      "hopeful",
+      "steady"
+    ],
+    "visual_motifs": [
+      "lamp",
+      "path",
+      "night"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "isaiah-40-31",
+    "reference": "Isaías 40:31",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-40-31"
+    ],
+    "themes": [
+      "strength",
+      "patience",
+      "hope"
+    ],
+    "tone": [
+      "uplifting",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "eagles",
+      "sky",
+      "renewed strength"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "joshua-1-9",
+    "reference": "Josué 1:9",
+    "translation": "RV1909",
+    "verse_ids": [
+      "joshua-1-9"
+    ],
+    "themes": [
+      "courage",
+      "fear",
+      "presence"
+    ],
+    "tone": [
+      "bold",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "journey",
+      "wilderness",
+      "divine presence"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "proverbs-3-5",
+    "reference": "Proverbios 3:5",
+    "translation": "RV1909",
+    "verse_ids": [
+      "proverbs-3-5"
+    ],
+    "themes": [
+      "trust",
+      "wisdom",
+      "surrender"
+    ],
+    "tone": [
+      "steady",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "path",
+      "open hands",
+      "morning light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "micah-6-8",
+    "reference": "Miqueas 6:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "micah-6-8"
+    ],
+    "themes": [
+      "justice",
+      "mercy",
+      "humility"
+    ],
+    "tone": [
+      "moral",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "walking path",
+      "humble journey",
+      "open road"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "psalm-27-1",
+    "reference": "Salmos 27:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-27-1"
+    ],
+    "themes": [
+      "fear",
+      "salvation",
+      "courage"
+    ],
+    "tone": [
+      "confident",
+      "luminous"
+    ],
+    "visual_motifs": [
+      "light",
+      "darkness",
+      "refuge"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-51-10",
+    "reference": "Salmos 51:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-51-10"
+    ],
+    "themes": [
+      "renewal",
+      "repentance",
+      "prayer"
+    ],
+    "tone": [
+      "humble",
+      "reflective"
+    ],
+    "visual_motifs": [
+      "clean heart",
+      "water",
+      "renewal"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "prayer",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-5-8",
+    "reference": "Mateo 5:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-5-8"
+    ],
+    "themes": [
+      "purity",
+      "blessing",
+      "faith"
+    ],
+    "tone": [
+      "gentle",
+      "sacred"
+    ],
+    "visual_motifs": [
+      "mountain teaching",
+      "pure heart",
+      "light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "beatitude",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-7-7",
+    "reference": "Mateo 7:7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-7-7"
+    ],
+    "themes": [
+      "prayer",
+      "seeking",
+      "faith"
+    ],
+    "tone": [
+      "inviting",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "door",
+      "path",
+      "seeking"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-11-28",
+    "reference": "Mateo 11:28",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-11-28"
+    ],
+    "themes": [
+      "rest",
+      "comfort",
+      "burden"
+    ],
+    "tone": [
+      "gentle",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "rest",
+      "open arms",
+      "burden lifted"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "matthew-6-21",
+    "reference": "Mateo 6:21",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-6-21"
+    ],
+    "themes": [
+      "priorities",
+      "heart",
+      "devotion"
+    ],
+    "tone": [
+      "reflective",
+      "wise"
+    ],
+    "visual_motifs": [
+      "treasure",
+      "heart",
+      "lamp light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "john-14-27",
+    "reference": "Juan 14:27",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-14-27"
+    ],
+    "themes": [
+      "peace",
+      "comfort",
+      "faith"
+    ],
+    "tone": [
+      "calming",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "peace",
+      "stillness",
+      "upper room"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "john-8-12",
+    "reference": "Juan 8:12",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-8-12"
+    ],
+    "themes": [
+      "light",
+      "guidance",
+      "life"
+    ],
+    "tone": [
+      "luminous",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "light",
+      "darkness",
+      "path"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "1-corinthians-13-13",
+    "reference": "1 Corintios 13:13",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-corinthians-13-13"
+    ],
+    "themes": [
+      "love",
+      "faith",
+      "hope"
+    ],
+    "tone": [
+      "warm",
+      "devotional"
+    ],
+    "visual_motifs": [
+      "three virtues",
+      "light",
+      "community"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "1-thessalonians-5-16-18",
+    "reference": "1 Tesalonicenses 5:16–18",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-thessalonians-5-16",
+      "1-thessalonians-5-17",
+      "1-thessalonians-5-18"
+    ],
+    "themes": [
+      "gratitude",
+      "prayer",
+      "joy"
+    ],
+    "tone": [
+      "bright",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "prayer",
+      "thanksgiving",
+      "dawn"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "romans-12-21",
+    "reference": "Romanos 12:21",
+    "translation": "RV1909",
+    "verse_ids": [
+      "romans-12-21"
+    ],
+    "themes": [
+      "goodness",
+      "perseverance",
+      "character"
+    ],
+    "tone": [
+      "resolute",
+      "moral"
+    ],
+    "visual_motifs": [
+      "light overcoming darkness",
+      "path",
+      "strength"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "1-corinthians-16-14",
+    "reference": "1 Corintios 16:14",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-corinthians-16-14"
+    ],
+    "themes": [
+      "love",
+      "service",
+      "character"
+    ],
+    "tone": [
+      "simple",
+      "direct"
+    ],
+    "visual_motifs": [
+      "hands",
+      "service",
+      "warm light"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "2-corinthians-5-7",
+    "reference": "2 Corintios 5:7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "2-corinthians-5-7"
+    ],
+    "themes": [
+      "faith",
+      "trust",
+      "journey"
+    ],
+    "tone": [
+      "steady",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "walking",
+      "path",
+      "mist"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "philippians-4-13",
+    "reference": "Filipenses 4:13",
+    "translation": "RV1909",
+    "verse_ids": [
+      "philippians-4-13"
+    ],
+    "themes": [
+      "strength",
+      "endurance",
+      "faith"
+    ],
+    "tone": [
+      "encouraging",
+      "resolute"
+    ],
+    "visual_motifs": [
+      "strength",
+      "mountain",
+      "rising light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "genesis-1-1",
+    "reference": "Génesis 1:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "genesis-1-1"
+    ],
+    "themes": [
+      "faith",
+      "wisdom",
+      "wonder"
+    ],
+    "tone": [
+      "majestic",
+      "wondrous"
+    ],
+    "visual_motifs": [
+      "dawn of creation",
+      "heavens",
+      "earth"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "numbers-6-24-26",
+    "reference": "Números 6:24–26",
+    "translation": "RV1909",
+    "verse_ids": [
+      "numbers-6-24",
+      "numbers-6-25",
+      "numbers-6-26"
+    ],
+    "themes": [
+      "peace",
+      "comfort",
+      "blessing"
+    ],
+    "tone": [
+      "gentle",
+      "sacred"
+    ],
+    "visual_motifs": [
+      "lifted face",
+      "shining light",
+      "blessing"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "blessing",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "deuteronomy-6-5",
+    "reference": "Deuteronomio 6:5",
+    "translation": "RV1909",
+    "verse_ids": [
+      "deuteronomy-6-5"
+    ],
+    "themes": [
+      "love",
+      "devotion",
+      "faith"
+    ],
+    "tone": [
+      "devotional",
+      "earnest"
+    ],
+    "visual_motifs": [
+      "heart",
+      "whole soul",
+      "all might"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "deuteronomy-31-6",
+    "reference": "Deuteronomio 31:6",
+    "translation": "RV1909",
+    "verse_ids": [
+      "deuteronomy-31-6"
+    ],
+    "themes": [
+      "courage",
+      "presence",
+      "trust"
+    ],
+    "tone": [
+      "bold",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "steady step",
+      "horizon",
+      "companionship"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "1-samuel-16-7",
+    "reference": "1 Samuel 16:7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-samuel-16-7"
+    ],
+    "themes": [
+      "humility",
+      "wisdom",
+      "heart"
+    ],
+    "tone": [
+      "reflective",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "heart",
+      "inward gaze",
+      "still figure"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "psalm-1-1-3",
+    "reference": "Salmos 1:1–3",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-1-1",
+      "psalm-1-2",
+      "psalm-1-3"
+    ],
+    "themes": [
+      "wisdom",
+      "guidance",
+      "blessing"
+    ],
+    "tone": [
+      "reflective",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "tree by waters",
+      "fruit in season",
+      "rooted growth"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-19-1",
+    "reference": "Salmos 19:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-19-1"
+    ],
+    "themes": [
+      "wonder",
+      "wisdom",
+      "faith"
+    ],
+    "tone": [
+      "majestic",
+      "reverent"
+    ],
+    "visual_motifs": [
+      "night sky",
+      "stars",
+      "vast heavens"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-19-14",
+    "reference": "Salmos 19:14",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-19-14"
+    ],
+    "themes": [
+      "prayer",
+      "humility",
+      "wisdom"
+    ],
+    "tone": [
+      "humble",
+      "reflective"
+    ],
+    "visual_motifs": [
+      "spoken words",
+      "still heart",
+      "prayer"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "prayer",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "psalm-34-18",
+    "reference": "Salmos 34:18",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-34-18"
+    ],
+    "themes": [
+      "comfort",
+      "grief",
+      "presence"
+    ],
+    "tone": [
+      "tender",
+      "compassionate"
+    ],
+    "visual_motifs": [
+      "brokenhearted",
+      "near presence",
+      "soft light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-37-4",
+    "reference": "Salmos 37:4",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-37-4"
+    ],
+    "themes": [
+      "love",
+      "trust",
+      "hope"
+    ],
+    "tone": [
+      "warm",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "delight",
+      "open hands",
+      "morning light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-46-10",
+    "reference": "Salmos 46:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-46-10"
+    ],
+    "themes": [
+      "peace",
+      "trust",
+      "presence"
+    ],
+    "tone": [
+      "calming",
+      "still"
+    ],
+    "visual_motifs": [
+      "stillness",
+      "calm water",
+      "open sky"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "psalm-91-1-2",
+    "reference": "Salmos 91:1–2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-91-1",
+      "psalm-91-2"
+    ],
+    "themes": [
+      "trust",
+      "comfort",
+      "strength"
+    ],
+    "tone": [
+      "reassuring",
+      "sheltering"
+    ],
+    "visual_motifs": [
+      "shadow of wings",
+      "refuge",
+      "fortress"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-100-1-2",
+    "reference": "Salmos 100:1–2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-100-1",
+      "psalm-100-2"
+    ],
+    "themes": [
+      "gratitude",
+      "joy",
+      "prayer"
+    ],
+    "tone": [
+      "bright",
+      "celebratory"
+    ],
+    "visual_motifs": [
+      "joyful noise",
+      "singing",
+      "open courts"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "psalm-121-1-2",
+    "reference": "Salmos 121:1–2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-121-1",
+      "psalm-121-2"
+    ],
+    "themes": [
+      "hope",
+      "trust",
+      "strength"
+    ],
+    "tone": [
+      "uplifting",
+      "steady"
+    ],
+    "visual_motifs": [
+      "distant hills",
+      "lifted eyes",
+      "open sky"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-139-14",
+    "reference": "Salmos 139:14",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-139-14"
+    ],
+    "themes": [
+      "gratitude",
+      "wonder",
+      "love"
+    ],
+    "tone": [
+      "awed",
+      "warm"
+    ],
+    "visual_motifs": [
+      "fearfully made",
+      "wondrous works",
+      "inner light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "prayer",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "proverbs-16-9",
+    "reference": "Proverbios 16:9",
+    "translation": "RV1909",
+    "verse_ids": [
+      "proverbs-16-9"
+    ],
+    "themes": [
+      "guidance",
+      "trust",
+      "wisdom"
+    ],
+    "tone": [
+      "thoughtful",
+      "steady"
+    ],
+    "visual_motifs": [
+      "winding path",
+      "footsteps",
+      "horizon"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "proverbs-17-17",
+    "reference": "Proverbios 17:17",
+    "translation": "RV1909",
+    "verse_ids": [
+      "proverbs-17-17"
+    ],
+    "themes": [
+      "love",
+      "friendship",
+      "faithfulness"
+    ],
+    "tone": [
+      "warm",
+      "steady"
+    ],
+    "visual_motifs": [
+      "clasped hands",
+      "shared road",
+      "warm light"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "ecclesiastes-3-1",
+    "reference": "Eclesiastés 3:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "ecclesiastes-3-1"
+    ],
+    "themes": [
+      "wisdom",
+      "peace",
+      "trust"
+    ],
+    "tone": [
+      "reflective",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "four seasons",
+      "changing sky",
+      "passing time"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "isaiah-26-3",
+    "reference": "Isaías 26:3",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-26-3"
+    ],
+    "themes": [
+      "peace",
+      "trust",
+      "faith"
+    ],
+    "tone": [
+      "calming",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "still mind",
+      "anchored heart",
+      "soft light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "isaiah-41-10",
+    "reference": "Isaías 41:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-41-10"
+    ],
+    "themes": [
+      "courage",
+      "strength",
+      "comfort"
+    ],
+    "tone": [
+      "bold",
+      "tender"
+    ],
+    "visual_motifs": [
+      "upheld hand",
+      "steady ground",
+      "presence"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "isaiah-53-5",
+    "reference": "Isaías 53:5",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-53-5"
+    ],
+    "themes": [
+      "love",
+      "peace",
+      "redemption"
+    ],
+    "tone": [
+      "reverent",
+      "tender"
+    ],
+    "visual_motifs": [
+      "healing",
+      "stripes",
+      "peace given"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "jeremiah-29-11",
+    "reference": "Jeremías 29:11",
+    "translation": "RV1909",
+    "verse_ids": [
+      "jeremiah-29-11"
+    ],
+    "themes": [
+      "hope",
+      "trust",
+      "future"
+    ],
+    "tone": [
+      "hopeful",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "opening horizon",
+      "sunrise",
+      "future path"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "lamentations-3-22-23",
+    "reference": "Lamentaciones 3:22–23",
+    "translation": "RV1909",
+    "verse_ids": [
+      "lamentations-3-22",
+      "lamentations-3-23"
+    ],
+    "themes": [
+      "mercy",
+      "gratitude",
+      "hope"
+    ],
+    "tone": [
+      "tender",
+      "renewing"
+    ],
+    "visual_motifs": [
+      "morning light",
+      "fresh dew",
+      "daily mercies"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "zephaniah-3-17",
+    "reference": "Sofonías 3:17",
+    "translation": "RV1909",
+    "verse_ids": [
+      "zephaniah-3-17"
+    ],
+    "themes": [
+      "love",
+      "joy",
+      "presence"
+    ],
+    "tone": [
+      "warm",
+      "exultant"
+    ],
+    "visual_motifs": [
+      "singing presence",
+      "rejoicing",
+      "near love"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-5-3",
+    "reference": "Mateo 5:3",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-5-3"
+    ],
+    "themes": [
+      "humility",
+      "blessing",
+      "faith"
+    ],
+    "tone": [
+      "gentle",
+      "sacred"
+    ],
+    "visual_motifs": [
+      "poor in spirit",
+      "kingdom",
+      "mountain teaching"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "beatitude",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-5-14-16",
+    "reference": "Mateo 5:14–16",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-5-14",
+      "matthew-5-15",
+      "matthew-5-16"
+    ],
+    "themes": [
+      "light",
+      "service",
+      "love"
+    ],
+    "tone": [
+      "luminous",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "city on hill",
+      "lamp",
+      "shining light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "matthew-6-33",
+    "reference": "Mateo 6:33",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-6-33"
+    ],
+    "themes": [
+      "faith",
+      "priorities",
+      "trust"
+    ],
+    "tone": [
+      "instructive",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "seeking",
+      "kingdom",
+      "open hands"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "mark-10-27",
+    "reference": "Marcos 10:27",
+    "translation": "RV1909",
+    "verse_ids": [
+      "mark-10-27"
+    ],
+    "themes": [
+      "faith",
+      "hope",
+      "trust"
+    ],
+    "tone": [
+      "encouraging",
+      "bold"
+    ],
+    "visual_motifs": [
+      "impossible made possible",
+      "rising sun",
+      "open way"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "luke-6-31",
+    "reference": "Lucas 6:31",
+    "translation": "RV1909",
+    "verse_ids": [
+      "luke-6-31"
+    ],
+    "themes": [
+      "love",
+      "justice",
+      "wisdom"
+    ],
+    "tone": [
+      "direct",
+      "moral"
+    ],
+    "visual_motifs": [
+      "clasped hands",
+      "shared path",
+      "kindness"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "luke-1-37",
+    "reference": "Lucas 1:37",
+    "translation": "RV1909",
+    "verse_ids": [
+      "luke-1-37"
+    ],
+    "themes": [
+      "faith",
+      "hope",
+      "trust"
+    ],
+    "tone": [
+      "wondrous",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "opening door",
+      "annunciation light",
+      "promise"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "john-1-1",
+    "reference": "Juan 1:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-1-1"
+    ],
+    "themes": [
+      "faith",
+      "wisdom",
+      "wonder"
+    ],
+    "tone": [
+      "majestic",
+      "reverent"
+    ],
+    "visual_motifs": [
+      "dawn",
+      "spoken word",
+      "beginning"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "john-3-16",
+    "reference": "Juan 3:16",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-3-16"
+    ],
+    "themes": [
+      "love",
+      "faith",
+      "salvation"
+    ],
+    "tone": [
+      "warm",
+      "devotional"
+    ],
+    "visual_motifs": [
+      "open heart",
+      "world",
+      "everlasting light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "john-14-6",
+    "reference": "Juan 14:6",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-14-6"
+    ],
+    "themes": [
+      "guidance",
+      "faith",
+      "life"
+    ],
+    "tone": [
+      "confident",
+      "grounding"
+    ],
+    "visual_motifs": [
+      "way",
+      "truth",
+      "life"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "john-15-13",
+    "reference": "Juan 15:13",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-15-13"
+    ],
+    "themes": [
+      "love",
+      "friendship",
+      "sacrifice"
+    ],
+    "tone": [
+      "solemn",
+      "warm"
+    ],
+    "visual_motifs": [
+      "laid-down life",
+      "friends",
+      "deep love"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "acts-20-35",
+    "reference": "Hechos 20:35",
+    "translation": "RV1909",
+    "verse_ids": [
+      "acts-20-35"
+    ],
+    "themes": [
+      "love",
+      "service",
+      "gratitude"
+    ],
+    "tone": [
+      "humble",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "open hands",
+      "giving",
+      "warm light"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "romans-5-8",
+    "reference": "Romanos 5:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "romans-5-8"
+    ],
+    "themes": [
+      "love",
+      "grace",
+      "faith"
+    ],
+    "tone": [
+      "reverent",
+      "warm"
+    ],
+    "visual_motifs": [
+      "unearned love",
+      "cross",
+      "embrace"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "romans-8-28",
+    "reference": "Romanos 8:28",
+    "translation": "RV1909",
+    "verse_ids": [
+      "romans-8-28"
+    ],
+    "themes": [
+      "trust",
+      "hope",
+      "providence"
+    ],
+    "tone": [
+      "reassuring",
+      "steady"
+    ],
+    "visual_motifs": [
+      "woven threads",
+      "good unfolding",
+      "patient light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "romans-8-38-39",
+    "reference": "Romanos 8:38–39",
+    "translation": "RV1909",
+    "verse_ids": [
+      "romans-8-38",
+      "romans-8-39"
+    ],
+    "themes": [
+      "love",
+      "faith",
+      "comfort"
+    ],
+    "tone": [
+      "resolute",
+      "warm"
+    ],
+    "visual_motifs": [
+      "unbroken bond",
+      "all heights",
+      "all depths"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "2-corinthians-12-9",
+    "reference": "2 Corintios 12:9",
+    "translation": "RV1909",
+    "verse_ids": [
+      "2-corinthians-12-9"
+    ],
+    "themes": [
+      "grace",
+      "strength",
+      "humility"
+    ],
+    "tone": [
+      "tender",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "weakness",
+      "sufficient grace",
+      "soft light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "galatians-5-22-23",
+    "reference": "Gálatas 5:22–23",
+    "translation": "RV1909",
+    "verse_ids": [
+      "galatians-5-22",
+      "galatians-5-23"
+    ],
+    "themes": [
+      "love",
+      "peace",
+      "character"
+    ],
+    "tone": [
+      "warm",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "ripening fruit",
+      "garden",
+      "growth"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "ephesians-2-8-9",
+    "reference": "Efesios 2:8–9",
+    "translation": "RV1909",
+    "verse_ids": [
+      "ephesians-2-8",
+      "ephesians-2-9"
+    ],
+    "themes": [
+      "grace",
+      "faith",
+      "humility"
+    ],
+    "tone": [
+      "reverent",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "unearned gift",
+      "open hands",
+      "warm light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "ephesians-4-32",
+    "reference": "Efesios 4:32",
+    "translation": "RV1909",
+    "verse_ids": [
+      "ephesians-4-32"
+    ],
+    "themes": [
+      "love",
+      "kindness",
+      "forgiveness"
+    ],
+    "tone": [
+      "warm",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "open hands",
+      "kind exchange",
+      "gentle light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "philippians-4-6-7",
+    "reference": "Filipenses 4:6–7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "philippians-4-6",
+      "philippians-4-7"
+    ],
+    "themes": [
+      "peace",
+      "prayer",
+      "trust"
+    ],
+    "tone": [
+      "calming",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "guarded heart",
+      "prayer",
+      "quiet mind"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "philippians-4-8",
+    "reference": "Filipenses 4:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "philippians-4-8"
+    ],
+    "themes": [
+      "wisdom",
+      "peace",
+      "character"
+    ],
+    "tone": [
+      "reflective",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "clear mind",
+      "pure light",
+      "thoughtful gaze"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "colossians-3-23",
+    "reference": "Colosenses 3:23",
+    "translation": "RV1909",
+    "verse_ids": [
+      "colossians-3-23"
+    ],
+    "themes": [
+      "service",
+      "devotion",
+      "character"
+    ],
+    "tone": [
+      "resolute",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "working hands",
+      "dedication",
+      "warm light"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "2-timothy-1-7",
+    "reference": "2 Timoteo 1:7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "2-timothy-1-7"
+    ],
+    "themes": [
+      "courage",
+      "strength",
+      "love"
+    ],
+    "tone": [
+      "bold",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "steady flame",
+      "sound mind",
+      "open heart"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.2
+  },
+  {
+    "id": "hebrews-11-1",
+    "reference": "Hebreos 11:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "hebrews-11-1"
+    ],
+    "themes": [
+      "faith",
+      "hope",
+      "trust"
+    ],
+    "tone": [
+      "reflective",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "unseen",
+      "substance",
+      "quiet certainty"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "hebrews-13-8",
+    "reference": "Hebreos 13:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "hebrews-13-8"
+    ],
+    "themes": [
+      "faith",
+      "constancy",
+      "trust"
+    ],
+    "tone": [
+      "steady",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "unchanging horizon",
+      "ancient light",
+      "steady presence"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "james-1-5",
+    "reference": "Santiago 1:5",
+    "translation": "RV1909",
+    "verse_ids": [
+      "james-1-5"
+    ],
+    "themes": [
+      "wisdom",
+      "prayer",
+      "faith"
+    ],
+    "tone": [
+      "inviting",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "asking heart",
+      "open palm",
+      "given wisdom"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "1-peter-5-7",
+    "reference": "1 Pedro 5:7",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-peter-5-7"
+    ],
+    "themes": [
+      "trust",
+      "comfort",
+      "peace"
+    ],
+    "tone": [
+      "tender",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "released burden",
+      "held care",
+      "soft light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "genesis-28-15",
+    "reference": "Génesis 28:15",
+    "translation": "RV1909",
+    "verse_ids": [
+      "genesis-28-15"
+    ],
+    "themes": [
+      "presence",
+      "trust",
+      "comfort"
+    ],
+    "tone": [
+      "reassuring",
+      "tender"
+    ],
+    "visual_motifs": [
+      "open sky",
+      "ladder",
+      "promised return"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "exodus-14-14",
+    "reference": "Éxodo 14:14",
+    "translation": "RV1909",
+    "verse_ids": [
+      "exodus-14-14"
+    ],
+    "themes": [
+      "peace",
+      "trust",
+      "deliverance"
+    ],
+    "tone": [
+      "calming",
+      "resolute"
+    ],
+    "visual_motifs": [
+      "parted sea",
+      "stillness",
+      "shielded path"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "joshua-24-15",
+    "reference": "Josué 24:15",
+    "translation": "RV1909",
+    "verse_ids": [
+      "joshua-24-15"
+    ],
+    "themes": [
+      "devotion",
+      "faith",
+      "household"
+    ],
+    "tone": [
+      "resolute",
+      "moral"
+    ],
+    "visual_motifs": [
+      "household altar",
+      "open door",
+      "warm hearth"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "1-kings-19-11-12",
+    "reference": "1 Reyes 19:11–12",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-kings-19-11",
+      "1-kings-19-12"
+    ],
+    "themes": [
+      "presence",
+      "stillness",
+      "wonder"
+    ],
+    "tone": [
+      "hushed",
+      "reverent"
+    ],
+    "visual_motifs": [
+      "wind and fire",
+      "quiet voice",
+      "cave entrance"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "1-chronicles-16-34",
+    "reference": "1 Crónicas 16:34",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-chronicles-16-34"
+    ],
+    "themes": [
+      "gratitude",
+      "mercy",
+      "praise"
+    ],
+    "tone": [
+      "bright",
+      "warm"
+    ],
+    "visual_motifs": [
+      "open hands",
+      "lifted song",
+      "morning light"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "nehemiah-8-10",
+    "reference": "Nehemías 8:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "nehemiah-8-10"
+    ],
+    "themes": [
+      "joy",
+      "strength",
+      "gratitude"
+    ],
+    "tone": [
+      "uplifting",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "shared table",
+      "lifted heart",
+      "warm light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "job-19-25",
+    "reference": "Job 19:25",
+    "translation": "RV1909",
+    "verse_ids": [
+      "job-19-25"
+    ],
+    "themes": [
+      "hope",
+      "faith",
+      "redemption"
+    ],
+    "tone": [
+      "resolute",
+      "luminous"
+    ],
+    "visual_motifs": [
+      "standing figure",
+      "latter day",
+      "dawn rising"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "psalm-16-11",
+    "reference": "Salmos 16:11",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-16-11"
+    ],
+    "themes": [
+      "joy",
+      "guidance",
+      "presence"
+    ],
+    "tone": [
+      "bright",
+      "hopeful"
+    ],
+    "visual_motifs": [
+      "path of life",
+      "fullness of joy",
+      "right hand"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-30-5",
+    "reference": "Salmos 30:5",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-30-5"
+    ],
+    "themes": [
+      "hope",
+      "joy",
+      "comfort"
+    ],
+    "tone": [
+      "hopeful",
+      "tender"
+    ],
+    "visual_motifs": [
+      "night turning to morning",
+      "joy at dawn",
+      "fresh light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-56-3",
+    "reference": "Salmos 56:3",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-56-3"
+    ],
+    "themes": [
+      "trust",
+      "fear",
+      "faith"
+    ],
+    "tone": [
+      "honest",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "open palm",
+      "looking upward",
+      "calm breath"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "psalm-62-1",
+    "reference": "Salmos 62:1",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-62-1"
+    ],
+    "themes": [
+      "peace",
+      "trust",
+      "salvation"
+    ],
+    "tone": [
+      "still",
+      "reflective"
+    ],
+    "visual_motifs": [
+      "waiting soul",
+      "quiet water",
+      "morning hush"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "psalm-84-11",
+    "reference": "Salmos 84:11",
+    "translation": "RV1909",
+    "verse_ids": [
+      "psalm-84-11"
+    ],
+    "themes": [
+      "light",
+      "trust",
+      "blessing"
+    ],
+    "tone": [
+      "warm",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "sun",
+      "shield",
+      "given grace"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "proverbs-18-10",
+    "reference": "Proverbios 18:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "proverbs-18-10"
+    ],
+    "themes": [
+      "strength",
+      "trust",
+      "refuge"
+    ],
+    "tone": [
+      "bold",
+      "grounded"
+    ],
+    "visual_motifs": [
+      "strong tower",
+      "safe shelter",
+      "lifted name"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "ecclesiastes-4-9-10",
+    "reference": "Eclesiastés 4:9–10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "ecclesiastes-4-9",
+      "ecclesiastes-4-10"
+    ],
+    "themes": [
+      "friendship",
+      "love",
+      "wisdom"
+    ],
+    "tone": [
+      "warm",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "two travelers",
+      "lifted hand",
+      "shared road"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "isaiah-43-2",
+    "reference": "Isaías 43:2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-43-2"
+    ],
+    "themes": [
+      "presence",
+      "courage",
+      "comfort"
+    ],
+    "tone": [
+      "tender",
+      "resolute"
+    ],
+    "visual_motifs": [
+      "rivers",
+      "fire",
+      "kept through trial"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "isaiah-55-8-9",
+    "reference": "Isaías 55:8–9",
+    "translation": "RV1909",
+    "verse_ids": [
+      "isaiah-55-8",
+      "isaiah-55-9"
+    ],
+    "themes": [
+      "humility",
+      "wonder",
+      "wisdom"
+    ],
+    "tone": [
+      "reflective",
+      "reverent"
+    ],
+    "visual_motifs": [
+      "high heavens",
+      "vast distance",
+      "open sky"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "hosea-6-3",
+    "reference": "Oseas 6:3",
+    "translation": "RV1909",
+    "verse_ids": [
+      "hosea-6-3"
+    ],
+    "themes": [
+      "hope",
+      "seeking",
+      "renewal"
+    ],
+    "tone": [
+      "hopeful",
+      "steady"
+    ],
+    "visual_motifs": [
+      "morning rain",
+      "spring showers",
+      "sunrise"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "habakkuk-3-18-19",
+    "reference": "Habacuc 3:18–19",
+    "translation": "RV1909",
+    "verse_ids": [
+      "habakkuk-3-18",
+      "habakkuk-3-19"
+    ],
+    "themes": [
+      "joy",
+      "strength",
+      "trust"
+    ],
+    "tone": [
+      "resolute",
+      "exultant"
+    ],
+    "visual_motifs": [
+      "hind's feet",
+      "high places",
+      "rising joy"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "matthew-6-34",
+    "reference": "Mateo 6:34",
+    "translation": "RV1909",
+    "verse_ids": [
+      "matthew-6-34"
+    ],
+    "themes": [
+      "peace",
+      "trust",
+      "present moment"
+    ],
+    "tone": [
+      "grounded",
+      "calming"
+    ],
+    "visual_motifs": [
+      "today",
+      "open hands",
+      "morning light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "mark-9-23",
+    "reference": "Marcos 9:23",
+    "translation": "RV1909",
+    "verse_ids": [
+      "mark-9-23"
+    ],
+    "themes": [
+      "faith",
+      "hope",
+      "courage"
+    ],
+    "tone": [
+      "encouraging",
+      "bold"
+    ],
+    "visual_motifs": [
+      "open way",
+      "kindled belief",
+      "rising figure"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "luke-12-32",
+    "reference": "Lucas 12:32",
+    "translation": "RV1909",
+    "verse_ids": [
+      "luke-12-32"
+    ],
+    "themes": [
+      "courage",
+      "comfort",
+      "love"
+    ],
+    "tone": [
+      "tender",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "little flock",
+      "gentle shepherd",
+      "given kingdom"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "john-10-10",
+    "reference": "Juan 10:10",
+    "translation": "RV1909",
+    "verse_ids": [
+      "john-10-10"
+    ],
+    "themes": [
+      "life",
+      "hope",
+      "abundance"
+    ],
+    "tone": [
+      "bright",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "open gate",
+      "abundant life",
+      "rising light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "acts-17-28",
+    "reference": "Hechos 17:28",
+    "translation": "RV1909",
+    "verse_ids": [
+      "acts-17-28"
+    ],
+    "themes": [
+      "presence",
+      "wonder",
+      "faith"
+    ],
+    "tone": [
+      "reflective",
+      "reverent"
+    ],
+    "visual_motifs": [
+      "indwelling presence",
+      "breath",
+      "interwoven life"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 0.9
+  },
+  {
+    "id": "romans-12-2",
+    "reference": "Romanos 12:2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "romans-12-2"
+    ],
+    "themes": [
+      "renewal",
+      "wisdom",
+      "transformation"
+    ],
+    "tone": [
+      "earnest",
+      "instructive"
+    ],
+    "visual_motifs": [
+      "renewed mind",
+      "rising figure",
+      "morning light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "2-corinthians-4-17",
+    "reference": "2 Corintios 4:17",
+    "translation": "RV1909",
+    "verse_ids": [
+      "2-corinthians-4-17"
+    ],
+    "themes": [
+      "hope",
+      "endurance",
+      "glory"
+    ],
+    "tone": [
+      "hopeful",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "passing trial",
+      "weight of glory",
+      "rising dawn"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "ephesians-3-20",
+    "reference": "Efesios 3:20",
+    "translation": "RV1909",
+    "verse_ids": [
+      "ephesians-3-20"
+    ],
+    "themes": [
+      "hope",
+      "faith",
+      "power"
+    ],
+    "tone": [
+      "encouraging",
+      "exultant"
+    ],
+    "visual_motifs": [
+      "exceeding abundance",
+      "open horizon",
+      "rising tide"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "colossians-3-15",
+    "reference": "Colosenses 3:15",
+    "translation": "RV1909",
+    "verse_ids": [
+      "colossians-3-15"
+    ],
+    "themes": [
+      "peace",
+      "gratitude",
+      "community"
+    ],
+    "tone": [
+      "calming",
+      "warm"
+    ],
+    "visual_motifs": [
+      "ruling peace",
+      "shared body",
+      "thankful heart"
+    ],
+    "familiarity": "supporting",
+    "passage_type": "instruction",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "hebrews-12-1-2",
+    "reference": "Hebreos 12:1–2",
+    "translation": "RV1909",
+    "verse_ids": [
+      "hebrews-12-1",
+      "hebrews-12-2"
+    ],
+    "themes": [
+      "endurance",
+      "faith",
+      "focus"
+    ],
+    "tone": [
+      "resolute",
+      "encouraging"
+    ],
+    "visual_motifs": [
+      "long race",
+      "great cloud",
+      "set face"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "short_teaching_unit",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  },
+  {
+    "id": "james-4-8",
+    "reference": "Santiago 4:8",
+    "translation": "RV1909",
+    "verse_ids": [
+      "james-4-8"
+    ],
+    "themes": [
+      "prayer",
+      "humility",
+      "presence"
+    ],
+    "tone": [
+      "inviting",
+      "earnest"
+    ],
+    "visual_motifs": [
+      "drawing near",
+      "open arms",
+      "soft light"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "promise",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1
+  },
+  {
+    "id": "1-john-4-18",
+    "reference": "1 Juan 4:18",
+    "translation": "RV1909",
+    "verse_ids": [
+      "1-john-4-18"
+    ],
+    "themes": [
+      "love",
+      "courage",
+      "comfort"
+    ],
+    "tone": [
+      "tender",
+      "reassuring"
+    ],
+    "visual_motifs": [
+      "perfect love",
+      "fading fear",
+      "warm glow"
+    ],
+    "familiarity": "anchor",
+    "passage_type": "single_verse",
+    "context_complete": true,
+    "image_worthy": true,
+    "share_safe": true,
+    "weight": 1.1
+  }
+]

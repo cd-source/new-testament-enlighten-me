@@ -2,17 +2,44 @@ if (typeof window !== "undefined" && window.Capacitor?.Plugins?.EnlightenSubscri
   window.EnlightenSubscriptions = window.Capacitor.Plugins.EnlightenSubscriptions;
 }
 
-const BOOKS_DATA_URL = "./data/kjv/books.json";
-const PASSAGES_DATA_URL = "./data/kjv/passages.json";
-const VERSES_DATA_URL = "./data/kjv/verses.json";
+const TRANSLATION_STORAGE_KEY = "enlighten.translation.v3";
+const TRANSLATIONS = {
+  en: {
+    dataDir: "kjv",
+    langUrl: "./lang/en.json",
+    locale: "en-US",
+    stripeLocale: "en",
+    exampleDir: "assets/examples",
+    exampleExtension: "png",
+    legalPaths: {
+      privacy: "privacy.html",
+      terms: "terms.html",
+      refunds: "refund.html",
+    },
+  },
+  "es-MX": {
+    dataDir: "rv1909",
+    langUrl: "./lang/es-MX.json",
+    locale: "es-MX",
+    stripeLocale: "es",
+    exampleDir: "assets/examples/es-MX",
+    exampleExtension: "png",
+    legalPaths: {
+      privacy: "privacy.es-MX.html",
+      terms: "terms.es-MX.html",
+      refunds: "refund.es-MX.html",
+    },
+  },
+};
+const DEFAULT_TRANSLATION_KEY = "en";
 const MAX_SEARCH_RESULTS = 50;
 const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
-const IMAGE_PRICE_LABEL = "$2.99/month";
+const DEFAULT_IMAGE_PRICE_LABEL = "$2.99/month";
 const WEB_PREVIEW_ENTITLEMENT_KEY = "enlighten.previewImageSubscription";
 const LIBRARY_DB_NAME = "enlightenCardLibrary";
 const LIBRARY_DB_VERSION = 1;
 const LIBRARY_STORE_NAME = "cards";
-const DECK_STORAGE_KEY = "enlighten.passageDeck.v1";
+const DECK_STORAGE_KEY_PREFIX = "enlighten.passageDeck.v1";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -65,6 +92,7 @@ const imageStatus = document.getElementById("imageStatus");
 const messageImage = document.getElementById("messageImage");
 const promptDetails = document.getElementById("promptDetails");
 const imagePrompt = document.getElementById("imagePrompt");
+const languageSelect = document.getElementById("languageSelect");
 
 let books = [];
 let passages = [];
@@ -90,7 +118,113 @@ let imageSubscription = {
   entitlementToken: "",
 };
 let isGeneratingImage = false;
+let imageGenerationInterruptedByBackground = false;
+let appResumeWaiters = [];
 let actionStatusTimer = null;
+let searchTrackingTimer = null;
+const IMAGE_LOAD_RETRY_DELAYS_MS = [250, 750, 1500];
+const IMAGE_REQUEST_RETRY_LIMIT = 1;
+let activeTranslationKey = resolveInitialTranslationKey();
+let localeStrings = {};
+let localeStringsReady = false;
+
+function getTranslationConfig() {
+  return TRANSLATIONS[activeTranslationKey] || TRANSLATIONS[DEFAULT_TRANSLATION_KEY];
+}
+
+function getStoredTranslationKey() {
+  try {
+    if (typeof localStorage === "undefined") return "";
+    return localStorage.getItem(TRANSLATION_STORAGE_KEY) || "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function normalizeTranslationKey(value) {
+  if (TRANSLATIONS[value]) return value;
+  const normalized = String(value || "").toLowerCase();
+  if (normalized === "es" || normalized === "es-mx") return "es-MX";
+  if (normalized === "en" || normalized === "en-us") return "en";
+  return "";
+}
+
+function getUrlTranslationKey() {
+  try {
+    if (typeof window === "undefined") return "";
+    const params = new URLSearchParams(window.location.search);
+    return normalizeTranslationKey(params.get("lang") || params.get("language") || params.get("locale"));
+  } catch (_) {
+    return "";
+  }
+}
+
+function resolveInitialTranslationKey() {
+  const requested = getUrlTranslationKey();
+  if (requested) return requested;
+  const stored = normalizeTranslationKey(getStoredTranslationKey());
+  if (stored) return stored;
+  return DEFAULT_TRANSLATION_KEY;
+}
+
+function persistActiveTranslationKey() {
+  try {
+    if (typeof localStorage === "undefined") return;
+    localStorage.setItem(TRANSLATION_STORAGE_KEY, activeTranslationKey);
+  } catch (_) {
+    // Language still works for the current session if storage is unavailable.
+  }
+}
+
+function t(key, vars = {}) {
+  const template = localeStrings[key] || key;
+  return Object.entries(vars).reduce(
+    (value, [name, replacement]) => value.replaceAll(`{${name}}`, String(replacement)),
+    template
+  );
+}
+
+function getTranslationTag() {
+  return t("_meta.translation");
+}
+
+function getImagePriceLabel() {
+  const translated = t("subscription.price_label");
+  return translated === "subscription.price_label" ? DEFAULT_IMAGE_PRICE_LABEL : translated;
+}
+
+function getLegalPath(name) {
+  return getTranslationConfig().legalPaths?.[name] || `${name}.html`;
+}
+
+function getExampleImageSrc(index) {
+  const config = getTranslationConfig();
+  return `${config.exampleDir}/example-${index}.${config.exampleExtension}`;
+}
+
+function getScriptureDataUrl(fileName) {
+  return `./data/${getTranslationConfig().dataDir}/${fileName}`;
+}
+
+function getDeckStorageKey() {
+  return `${DECK_STORAGE_KEY_PREFIX}.${activeTranslationKey}`;
+}
+
+async function loadLocaleStrings() {
+  localeStringsReady = false;
+  localeStrings = await fetchJson(getTranslationConfig().langUrl, "locale strings");
+  localeStringsReady = true;
+}
+
+if (typeof window !== "undefined") {
+  window.EnlightenI18n = {
+    t,
+    language: () => activeTranslationKey,
+    locale: () => getTranslationConfig().locale,
+    stripeLocale: () => getTranslationConfig().stripeLocale,
+    isReady: () => localeStringsReady,
+  };
+}
 
 async function fetchJson(url, label) {
   const response = await fetch(url, { cache: "no-cache" });
@@ -165,9 +299,9 @@ function validatePassages(nextPassages, nextVersesById) {
 
 async function loadScriptureData() {
   const [nextBooks, nextPassages, nextVerses] = await Promise.all([
-    fetchJson(BOOKS_DATA_URL, "book data"),
-    fetchJson(PASSAGES_DATA_URL, "passage data"),
-    fetchJson(VERSES_DATA_URL, "KJV verse data"),
+    fetchJson(getScriptureDataUrl("books.json"), "book data"),
+    fetchJson(getScriptureDataUrl("passages.json"), "passage data"),
+    fetchJson(getScriptureDataUrl("verses.json"), `${getTranslationTag()} verse data`),
   ]);
 
   validateBooks(nextBooks);
@@ -192,10 +326,18 @@ function getPassageText(passage) {
 }
 
 const SHARE_URL = "https://www.enlighten-me.co";
+const APP_STORE_URL = "https://apps.apple.com/app/id6768472131";
+
+// Match the share link to the medium: shares from the native iOS app point
+// recipients to the App Store (they're almost certainly on a phone), while web
+// shares point to the website, which opens anywhere.
+function getShareDestinationUrl() {
+  return isNativeAppRuntime() ? APP_STORE_URL : SHARE_URL;
+}
 
 function getShareText() {
   if (!currentPassage) return "";
-  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (KJV)\n${SHARE_URL}`;
+  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (${getTranslationTag()})\n${getShareDestinationUrl()}`;
 }
 
 function getShareCardFileName() {
@@ -211,10 +353,102 @@ function isNativeAppRuntime() {
   return Boolean(window.Capacitor?.isNativePlatform?.());
 }
 
+function isLocalStaticOrigin() {
+  return ["localhost", "127.0.0.1"].includes(window.location.hostname);
+}
+
+function useLocalApiOverride() {
+  try {
+    return isLocalStaticOrigin() && new URLSearchParams(window.location.search).get("api") === "local";
+  } catch (_) {
+    return false;
+  }
+}
+
 const REMOTE_API_BASE = "https://www.enlighten-me.co";
 
 function apiUrl(path) {
-  return isNativeAppRuntime() ? `${REMOTE_API_BASE}${path}` : path;
+  return isNativeAppRuntime() || (isLocalStaticOrigin() && !useLocalApiOverride()) ? `${REMOTE_API_BASE}${path}` : path;
+}
+
+const MARKETING_UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+
+function cleanMarketingValue(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .replace(/[^\w .:/?&=+@|-]/g, "")
+    .trim()
+    .slice(0, 120);
+}
+
+function getMarketingContext(extra = {}) {
+  const context = {
+    language: activeTranslationKey,
+    path: window.location.pathname || "/",
+    ...extra,
+  };
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    for (const key of MARKETING_UTM_KEYS) {
+      const value = cleanMarketingValue(params.get(key));
+      if (value) context[key] = value;
+    }
+  } catch (_) {}
+
+  return Object.fromEntries(
+    Object.entries(context)
+      .map(([key, value]) => [key, typeof value === "string" ? cleanMarketingValue(value) : value])
+      .filter(([, value]) => value !== "" && value !== null && typeof value !== "undefined")
+  );
+}
+
+function shouldTrackMarketingEvents() {
+  return !isNativeAppRuntime()
+    && !isLocalStaticOrigin()
+    && ["http:", "https:"].includes(window.location.protocol);
+}
+
+function trackMarketingEvent(event, data = {}) {
+  if (!shouldTrackMarketingEvents()) return;
+
+  const body = JSON.stringify({ event, data: getMarketingContext(data) });
+  const url = apiUrl("/api/marketing-event");
+
+  try {
+    if (navigator.sendBeacon) {
+      const queued = navigator.sendBeacon(url, new Blob([body], { type: "application/json" }));
+      if (queued) return;
+    }
+  } catch (_) {}
+
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive: true,
+  }).catch(() => {});
+}
+
+function currentPassageMarketingData(extra = {}) {
+  return {
+    reference: currentPassage?.reference || "",
+    translation: getTranslationTag(),
+    ...extra,
+  };
+}
+
+function scheduleSearchTracking(query, resultCount) {
+  window.clearTimeout(searchTrackingTimer);
+  if (query.length < 2) return;
+
+  searchTrackingTimer = window.setTimeout(() => {
+    trackMarketingEvent("bible_search", {
+      query_length: query.length,
+      result_count: resultCount,
+      testament: activeTestament,
+    });
+  }, 800);
 }
 
 function hasImageSubscription() {
@@ -224,25 +458,170 @@ function hasImageSubscription() {
 function updateSubscriptionUi() {
   const active = hasImageSubscription();
   const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
-
   const sourceLabel = imageSubscription.source || nativeLabel;
+  const priceLabel = getImagePriceLabel();
 
   subscriptionPanel.classList.toggle("is-subscribed", active);
-  subscriptionStatusBadge.textContent = active ? "Image creation active" : "Image creation not active";
+  subscriptionStatusBadge.textContent = active ? t("subscription.status_active") : t("subscription.status_inactive");
   subscriptionStatusBadge.classList.toggle("is-active", active);
   subscriptionStatus.textContent = active
-    ? `Active via ${sourceLabel}. Renews monthly.`
-    : `${IMAGE_PRICE_LABEL} - unlocks unlimited image creation to bring your favorite verses to life`;
+    ? t("subscription.status_active_detail", { source: sourceLabel })
+    : t("subscription.status_inactive_detail", { price: priceLabel });
   subscribeButton.textContent = active
-    ? "Image Creation Active"
-    : `Subscribe for ${IMAGE_PRICE_LABEL}`;
+    ? t("subscription.button_active")
+    : t("subscription.button_subscribe", { price: priceLabel });
   subscribeButton.disabled = active;
+  restorePurchaseButton.textContent = t("subscription.button_restore");
   restorePurchaseButton.disabled = false;
   pictureButton.textContent = getPictureButtonLabel(active);
 }
 
 function getPictureButtonLabel(active = hasImageSubscription()) {
-  return active ? "Create Scripture Card" : "Unlock Image Creation";
+  return active ? t("button.create_card") : t("button.unlock_image");
+}
+
+function setElementText(element, key, vars) {
+  if (element) element.textContent = t(key, vars);
+}
+
+function setElementAttr(element, attr, key, vars) {
+  if (element) element.setAttribute(attr, t(key, vars));
+}
+
+function setElementHref(element, href) {
+  if (element) element.setAttribute("href", href);
+}
+
+function setMetaContent(selector, key) {
+  const element = document.querySelector(selector);
+  if (element) element.setAttribute("content", t(key));
+}
+
+function applyTranslations() {
+  document.documentElement.lang = t("_meta.lang");
+  document.title = t("doc.title");
+  setMetaContent('meta[name="description"]', "doc.description");
+  setMetaContent('meta[property="og:description"]', "doc.description");
+  setMetaContent('meta[property="og:image:alt"]', "doc.og_image_alt");
+  setMetaContent('meta[name="twitter:description"]', "doc.description");
+
+  setElementAttr(homeView, "aria-label", "home.aria");
+  setElementAttr(document.querySelector(".top-actions"), "aria-label", "home.actions_aria");
+  setElementText(document.querySelector(".home-view h1"), "home.brand");
+  setElementAttr(document.querySelector(".home-focal"), "aria-label", "home.scripture_aria");
+  setElementAttr(document.querySelector(".home-actions"), "aria-label", "home.scripture_actions_aria");
+  setElementAttr(document.querySelector(".utility-actions"), "aria-label", "home.passage_utilities_aria");
+  setElementText(enlightenButton, "button.enlighten");
+  setElementText(copyButton, "button.copy");
+  setElementText(shareCardButton, "button.share_card");
+  setElementText(closeCardButton, "card.button_close");
+  setElementText(saveCardButton, currentSavedCardId ? "card.button_saved" : "card.button_save");
+  setElementText(shareCardImageButton, "card.button_share");
+  setElementAttr(shareCardPanel, "aria-label", "card.aria_finished");
+  setElementAttr(shareCardPreview, "alt", "card.preview_alt");
+
+  setElementAttr(document.querySelector(".scripture-tools"), "aria-label", "search.aria_section");
+  setElementText(document.querySelector(".search-panel .tool-kicker"), "search.kicker");
+  setElementText(document.querySelector(".search-panel h2"), "search.title");
+  setElementText(document.querySelector('label[for="searchInput"]'), "search.sr_label");
+  setElementAttr(searchInput, "placeholder", "search.placeholder");
+  setElementAttr(testamentFilter, "aria-label", "search.filter_aria");
+  setElementText(testamentFilter.querySelector('[data-testament="all"]'), "search.filter_both");
+  setElementText(testamentFilter.querySelector('[data-testament="old"]'), "search.filter_old");
+  setElementText(testamentFilter.querySelector('[data-testament="new"]'), "search.filter_new");
+  setElementText(document.querySelector(".browse-panel .tool-kicker"), "browse.kicker");
+  setElementText(document.querySelector(".browse-panel h2"), "browse.title");
+  const browseLabels = document.querySelectorAll(".browse-controls label span");
+  setElementText(browseLabels[0], "browse.label_book");
+  setElementText(browseLabels[1], "browse.label_chapter");
+  setElementText(browseLabels[2], "browse.label_verse");
+
+  setElementAttr(libraryView, "aria-label", "library.aria");
+  setElementText(libraryBackButton, "nav.back_home");
+  setElementAttr(libraryBackButton, "aria-label", "nav.back_home_aria");
+  setElementText(document.querySelector(".library-header .eyebrow"), "library.eyebrow");
+  setElementText(document.querySelector(".library-header h1"), "library.title");
+  setElementText(document.querySelector("#libraryEmptyState .tool-kicker"), "library.empty_kicker");
+  setElementText(document.querySelector("#libraryEmptyState h2"), "library.empty_title");
+  setElementText(document.querySelector("#libraryEmptyState p:last-child"), "library.empty_body");
+  setElementAttr(libraryPrevButton, "aria-label", "library.prev_aria");
+  setElementAttr(libraryNextButton, "aria-label", "library.next_aria");
+  setElementAttr(libraryCardImage, "alt", "library.card_image_alt");
+  setElementText(libraryShareButton, "card.button_share");
+  setElementText(libraryDeleteButton, "card.button_delete");
+
+  setElementAttr(settingsView, "aria-label", "settings.aria");
+  setElementText(settingsBackButton, "nav.back_home");
+  setElementAttr(settingsBackButton, "aria-label", "nav.back_home_aria");
+  setElementAttr(settingsToggle, "aria-label", "nav.settings_aria");
+  setElementText(document.querySelector(".settings-view .settings-title .eyebrow"), "settings.eyebrow");
+  setElementText(document.querySelector(".settings-view .settings-title h1"), "settings.title");
+  setElementText(document.querySelector(".settings-view .settings-subtitle"), "settings.subtitle");
+  setElementText(document.querySelector('[aria-labelledby="subscriptionSettingsTitle"] .tool-kicker'), "subscription.kicker");
+  setElementText(document.getElementById("subscriptionSettingsTitle"), "subscription.section_title");
+  setElementAttr(subscriptionPanel, "aria-label", "subscription.aria");
+  const subscriptionSteps = document.querySelectorAll(".subscription-steps li");
+  setElementAttr(document.querySelector(".subscription-steps"), "aria-label", "subscription.steps_aria");
+  setElementText(subscriptionSteps[0]?.querySelector("h3"), "subscription.step_signin_title");
+  setElementText(subscriptionSteps[0]?.querySelector("p"), "subscription.step_signin_body");
+  setElementText(subscriptionSteps[1]?.querySelector("h3"), "subscription.step_checkout_title");
+  setElementText(subscriptionSteps[1]?.querySelector("p"), "subscription.step_checkout_body");
+  setElementText(subscriptionSteps[2]?.querySelector("h3"), "subscription.step_create_title");
+  setElementText(subscriptionSteps[2]?.querySelector("p"), "subscription.step_create_body");
+  setElementAttr(document.querySelector(".subscription-examples"), "aria-label", "subscription.examples_aria");
+  setElementText(document.querySelector(".subscription-examples-label"), "subscription.examples_label");
+  for (const [index, image] of Array.from(document.querySelectorAll(".subscription-examples img")).entries()) {
+    image.src = getExampleImageSrc(index + 1);
+    image.alt = t("subscription.example_alt");
+  }
+  setElementText(document.querySelector('[aria-labelledby="appSettingsTitle"] .tool-kicker'), "settings.section_app_kicker");
+  setElementText(document.getElementById("appSettingsTitle"), "settings.section_app_title");
+  const settingsRows = document.querySelectorAll("#appSettingsTitle + .settings-card .settings-row, [aria-labelledby='appSettingsTitle'] .settings-row");
+  setElementText(settingsRows[0]?.querySelector("h3"), "settings.row_language.title");
+  setElementText(settingsRows[0]?.querySelector("p"), "settings.row_language.body");
+  setElementAttr(languageSelect, "aria-label", "settings.language_aria");
+  if (languageSelect) {
+    languageSelect.value = activeTranslationKey;
+    const enOption = languageSelect.querySelector('option[value="en"]');
+    const esOption = languageSelect.querySelector('option[value="es-MX"]');
+    if (enOption) enOption.textContent = t("settings.language_en");
+    if (esOption) esOption.textContent = t("settings.language_es_mx");
+  }
+  setElementText(settingsRows[1]?.querySelector("h3"), "settings.row_share_cards.title");
+  setElementText(settingsRows[1]?.querySelector("p"), "settings.row_share_cards.body");
+  setElementText(settingsRows[1]?.querySelector(".settings-row-meta"), "settings.row_share_cards.tag");
+  setElementText(settingsRows[2]?.querySelector("h3"), "settings.row_image_creation.title");
+  setElementText(settingsRows[2]?.querySelector("p"), "settings.row_image_creation.body");
+  setElementText(settingsRows[2]?.querySelector(".settings-row-meta"), "settings.row_image_creation.tag");
+  setElementText(document.querySelector('[aria-labelledby="aboutSettingsTitle"] .tool-kicker'), "settings.section_about_kicker");
+  setElementText(document.getElementById("aboutSettingsTitle"), "settings.section_about_title");
+  const aboutRows = document.querySelectorAll('[aria-labelledby="aboutSettingsTitle"] .settings-row');
+  setElementText(aboutRows[0]?.querySelector("h3"), "settings.row_about.title");
+  setElementText(aboutRows[0]?.querySelector("p"), "settings.row_about.body");
+  setElementText(aboutRows[1]?.querySelector("h3"), "settings.row_saved.title");
+  setElementText(aboutRows[1]?.querySelector("p"), "settings.row_saved.body");
+  setElementText(aboutRows[2]?.querySelector("h3"), "settings.row_scripture.title");
+  setElementText(aboutRows[2]?.querySelector("p"), "settings.row_scripture.body");
+
+  const footerLinks = document.querySelectorAll(".footer-links a");
+  setElementText(footerLinks[0], "footer.privacy");
+  setElementHref(footerLinks[0], getLegalPath("privacy"));
+  setElementText(footerLinks[1], "footer.terms");
+  setElementHref(footerLinks[1], getLegalPath("terms"));
+  setElementText(footerLinks[2], "footer.refunds");
+  setElementHref(footerLinks[2], getLegalPath("refunds"));
+  setElementText(footerLinks[3], "footer.support");
+  setElementText(document.querySelector(".footer-meta"), "footer.meta");
+
+  updateSubscriptionUi();
+  updateLibraryButton();
+  renderSearchResults(searchVerses(normalizeSearchQuery(searchInput.value)), normalizeSearchQuery(searchInput.value));
+  if (!currentPassage) {
+    passageElement.textContent = t("home.loading");
+    referenceElement.textContent = "—";
+  }
+
+  window.dispatchEvent(new CustomEvent("enlighten:language-ready"));
 }
 
 function showView(viewName) {
@@ -265,10 +644,14 @@ function toggleSettings() {
 function openInitialViewFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view");
-  if (view !== "settings" && view !== "library") return;
   if (view === "settings") setSettingsOpen(true);
   if (view === "library") setLibraryOpen(true);
-  params.delete("view");
+
+  const cleanupKeys = ["view", "lang", "language", "locale"];
+  const shouldCleanUrl = cleanupKeys.some((key) => params.has(key));
+  if (!shouldCleanUrl) return;
+
+  for (const key of cleanupKeys) params.delete(key);
   const newSearch = params.toString();
   const newUrl = `${window.location.pathname}${newSearch ? `?${newSearch}` : ""}${window.location.hash}`;
   window.history.replaceState({}, "", newUrl);
@@ -359,7 +742,7 @@ async function loadSavedCards() {
   } catch (error) {
     console.error("Card library failed to load:", error);
     savedCards = [];
-    if (libraryStatus) libraryStatus.textContent = "Library storage is not available on this device.";
+    if (libraryStatus) libraryStatus.textContent = t("library.storage_unavailable");
   }
 
   renderLibrary();
@@ -367,13 +750,16 @@ async function loadSavedCards() {
 
 function formatSavedCardDate(value) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Saved on this device";
-  return `Saved ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+  if (Number.isNaN(date.getTime())) return t("library.date_unknown");
+  const formatted = date.toLocaleDateString(getTranslationConfig().locale, { month: "short", day: "numeric", year: "numeric" });
+  return t("library.date_template", { date: formatted });
 }
 
 function updateLibraryButton() {
   if (!libraryToggle) return;
-  libraryToggle.textContent = savedCards.length ? `Library (${savedCards.length})` : "Library";
+  libraryToggle.textContent = savedCards.length
+    ? t("nav.library_with_count", { count: savedCards.length })
+    : t("nav.library");
 }
 
 function renderLibrary() {
@@ -386,8 +772,8 @@ function renderLibrary() {
 
   if (librarySubtitle) {
     librarySubtitle.textContent = hasCards
-      ? `${savedCards.length} saved scripture card${savedCards.length === 1 ? "" : "s"} on this device.`
-      : "Saved scripture cards live on this device.";
+      ? t(savedCards.length === 1 ? "library.subtitle_one" : "library.subtitle_many", { count: savedCards.length })
+      : t("library.subtitle_default");
   }
 
   if (!hasCards) {
@@ -400,9 +786,13 @@ function renderLibrary() {
   activeLibraryIndex = Math.max(0, Math.min(activeLibraryIndex, savedCards.length - 1));
   const card = savedCards[activeLibraryIndex];
   libraryCardImage.src = card.dataUrl;
-  libraryCardImage.alt = `${card.reference} scripture card`;
-  libraryCardReference.textContent = card.reference || "Saved card";
-  libraryCardDate.textContent = `${formatSavedCardDate(card.createdAt)} · ${activeLibraryIndex + 1} of ${savedCards.length}`;
+  libraryCardImage.alt = t("library.card_image_alt_template", { reference: card.reference });
+  libraryCardReference.textContent = card.reference || t("library.card_reference_fallback");
+  libraryCardDate.textContent = t("library.card_meta_template", {
+    saved: formatSavedCardDate(card.createdAt),
+    index: activeLibraryIndex + 1,
+    total: savedCards.length,
+  });
   libraryPrevButton.disabled = activeLibraryIndex <= 0;
   libraryNextButton.disabled = activeLibraryIndex >= savedCards.length - 1;
   libraryShareButton.disabled = false;
@@ -464,6 +854,8 @@ if (typeof window !== "undefined") {
 }
 
 async function subscribeToImagePlan() {
+  trackMarketingEvent("subscribe_clicked", { source: isNativeAppRuntime() ? "ios" : "web" });
+
   try {
     if (window.EnlightenSubscriptions?.purchase) {
       imageSubscription = {
@@ -472,7 +864,7 @@ async function subscribeToImagePlan() {
         source: "StoreKit",
       };
     } else if (window.EnlightenWeb?.startSubscribe) {
-      setActionStatus("Redirecting to checkout…");
+      setActionStatus(t("subscription.redirecting"));
       await window.EnlightenWeb.startSubscribe();
       return;
     } else {
@@ -481,11 +873,11 @@ async function subscribeToImagePlan() {
     }
 
     updateSubscriptionUi();
-    setActionStatus("Image creation subscription is active.");
+    setActionStatus(t("subscription.activated"));
   } catch (error) {
     if (error?.name !== "AbortError") {
       console.error(error);
-      setActionStatus(error?.message || "Subscription could not be completed. Please try again.");
+      setActionStatus(error?.message || t("subscription.error_unknown"));
     }
   }
 }
@@ -515,22 +907,22 @@ async function restoreImagePlan() {
     if (hasImageSubscription()) {
       const exchangeError = imageSubscription.exchangeError;
       if (exchangeError) {
-        setActionStatus(`Subscription found, but server token failed: ${exchangeError}`);
+        setActionStatus(t("subscription.token_error", { error: exchangeError }));
       } else {
-        setActionStatus("Purchase restored.");
+        setActionStatus(t("subscription.restored"));
       }
     } else {
-      setActionStatus("No active subscription found.");
+      setActionStatus(t("subscription.no_active"));
     }
   } catch (error) {
     console.error(error);
-    setActionStatus(`Restore failed: ${error?.message || "Please try again."}`);
+    setActionStatus(t("subscription.restore_failed", { error: error?.message || t("subscription.restore_failed_generic") }));
   }
 }
 
 function showImageSubscriptionPrompt() {
   setSettingsOpen(true);
-  setActionStatus(`Image creation requires the ${IMAGE_PRICE_LABEL} subscription. Scripture features remain free.`);
+  setActionStatus(t("image.subscribe_prompt", { price: getImagePriceLabel() }));
 }
 
 function setActionStatus(message) {
@@ -563,7 +955,7 @@ function persistPassageDeck() {
       deckIndex,
       lastIndex,
     });
-    localStorage.setItem(DECK_STORAGE_KEY, payload);
+    localStorage.setItem(getDeckStorageKey(), payload);
   } catch (_) {
     // localStorage may be unavailable (private mode, quota); deck still works in memory
   }
@@ -572,7 +964,7 @@ function persistPassageDeck() {
 function restorePassageDeck() {
   try {
     if (typeof localStorage === "undefined") return;
-    const raw = localStorage.getItem(DECK_STORAGE_KEY);
+    const raw = localStorage.getItem(getDeckStorageKey());
     if (!raw) return;
     const saved = JSON.parse(raw);
     if (!saved || saved.poolSize !== passages.length) return;
@@ -634,8 +1026,9 @@ function resetImagePanel() {
 
 function setImageLoading(isLoading) {
   isGeneratingImage = isLoading;
+  if (isLoading) imageGenerationInterruptedByBackground = false;
   pictureButton.disabled = isLoading || !currentPassage;
-  pictureButton.textContent = isLoading ? "Creating…" : getPictureButtonLabel();
+  pictureButton.textContent = isLoading ? t("button.creating") : getPictureButtonLabel();
   imagePanel.classList.toggle("is-loading", isLoading);
 }
 
@@ -644,17 +1037,141 @@ function showPleaseWait() {
   imageStatus.hidden = false;
   imageStatus.innerHTML = `
     <span class="spinner-clock" aria-hidden="true"></span>
-    <span>Please wait — creating your illustration.</span>
+    <span>${t("image.please_wait")}</span>
   `;
 }
 
-function preloadImage(src) {
+function isAppForeground() {
+  return document.visibilityState !== "hidden";
+}
+
+function markImageGenerationInterrupted() {
+  if (isGeneratingImage) imageGenerationInterruptedByBackground = true;
+}
+
+function resolveAppResumeWaiters() {
+  if (!isAppForeground()) return;
+  const waiters = appResumeWaiters;
+  appResumeWaiters = [];
+  for (const resolve of waiters) resolve();
+}
+
+function waitForAppForeground() {
+  if (isAppForeground()) return Promise.resolve();
+  return new Promise((resolve) => {
+    appResumeWaiters.push(resolve);
+  });
+}
+
+function delay(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function isBackgroundLoadFailure(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return /load failed|failed to fetch|networkerror|network request failed|abort|cancel|offline|connection/.test(message);
+}
+
+async function waitForImageGenerationResume() {
+  await waitForAppForeground();
+  showPleaseWait();
+  imageGenerationInterruptedByBackground = false;
+  await delay(400);
+}
+
+function bindAppLifecycleEvents() {
+  document.addEventListener("visibilitychange", () => {
+    if (isAppForeground()) {
+      resolveAppResumeWaiters();
+    } else {
+      markImageGenerationInterrupted();
+    }
+  });
+  window.addEventListener("blur", markImageGenerationInterrupted);
+  window.addEventListener("pagehide", markImageGenerationInterrupted);
+  window.addEventListener("focus", resolveAppResumeWaiters);
+  window.addEventListener("pageshow", resolveAppResumeWaiters);
+}
+
+function loadImageElement(src, options = {}) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => resolve(src);
-    image.onerror = () => reject(new Error("The illustration could not be loaded. Please try again."));
+    if (options.crossOrigin) {
+      image.crossOrigin = options.crossOrigin;
+    }
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(t("image.load_failed")));
     image.src = src;
   });
+}
+
+async function loadImageWithResumeRetry(src, options = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= IMAGE_LOAD_RETRY_DELAYS_MS.length; attempt += 1) {
+    if (!isAppForeground()) await waitForImageGenerationResume();
+
+    try {
+      return await loadImageElement(src, options);
+    } catch (error) {
+      lastError = error;
+      const canRetry = isBackgroundLoadFailure(error) && attempt < IMAGE_LOAD_RETRY_DELAYS_MS.length;
+      if (!canRetry) break;
+      if (!isAppForeground() || imageGenerationInterruptedByBackground) await waitForImageGenerationResume();
+      await delay(IMAGE_LOAD_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+
+  throw lastError || new Error(t("image.load_failed"));
+}
+
+async function preloadImage(src) {
+  await loadImageWithResumeRetry(src);
+  return src;
+}
+
+function findImageSource(value, seen = new Set()) {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return /^https?:\/\//.test(trimmed) || /^data:image\//.test(trimmed) ? trimmed : "";
+  }
+
+  if (!value || typeof value !== "object" || seen.has(value)) return "";
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findImageSource(item, seen);
+      if (found) return found;
+    }
+    return "";
+  }
+
+  const preferredKeys = [
+    "imageDataUrl",
+    "imageUrl",
+    "image_url",
+    "url",
+    "image",
+    "images",
+    "generated",
+    "result",
+    "results",
+    "output",
+    "outputs",
+    "assets",
+    "download_url",
+    "signed_url",
+    "src",
+    "data",
+  ];
+
+  for (const key of preferredKeys) {
+    const found = findImageSource(value[key], seen);
+    if (found) return found;
+  }
+
+  return "";
 }
 
 function setCurrentPassage(passage, options = {}) {
@@ -686,16 +1203,16 @@ function createPassageFromVerse(verse) {
   return {
     id: verse.id,
     reference: verse.reference,
-    translation: "KJV",
+    translation: getTranslationTag(),
     verse_ids: [verse.id],
     passage_type: "single_verse",
-    source: "local_kjv_verse",
+    source: `local_${getTranslationConfig().dataDir}_verse`,
   };
 }
 
 function selectVerse(verse, options = {}) {
   setCurrentPassage(createPassageFromVerse(verse), {
-    status: options.status || `Selected ${verse.reference}.`,
+    status: options.status || t("status.selected", { reference: verse.reference }),
   });
 
   if (bookSelect.value !== verse.book_id) {
@@ -725,7 +1242,7 @@ function populateChapterSelect(bookId, selectedChapter = 1) {
 
   chapterSelect.innerHTML = Array.from({ length: book.chapters }, (_, index) => {
     const chapterNumber = index + 1;
-    return `<option value="${chapterNumber}">Chapter ${chapterNumber}</option>`;
+    return `<option value="${chapterNumber}">${escapeHtml(t("browse.option_chapter", { number: chapterNumber }))}</option>`;
   }).join("");
 
   chapterSelect.value = String(Math.min(selectedChapter, book.chapters));
@@ -736,7 +1253,7 @@ function populateVerseSelect(bookId, chapter, selectedVerse = 1) {
   const chapterVersesForSelection = versesByBookChapter.get(getChapterKey(bookId, chapter)) || [];
 
   verseSelect.innerHTML = chapterVersesForSelection
-    .map((verse) => `<option value="${verse.verse}">Verse ${verse.verse}</option>`)
+    .map((verse) => `<option value="${verse.verse}">${escapeHtml(t("browse.option_verse", { number: verse.verse }))}</option>`)
     .join("");
 
   const selectedVerseExists = chapterVersesForSelection.some((verse) => verse.verse === selectedVerse);
@@ -748,8 +1265,8 @@ function renderChapterVerses(bookId, chapter, activeVerseNumber = Number(verseSe
   const book = books.find((nextBook) => nextBook.id === bookId);
 
   browseMeta.textContent = book
-    ? `${book.name} ${chapter} — ${chapterVersesForSelection.length} verses. Tap a verse to use it.`
-    : "Select a book, chapter, and verse.";
+    ? t("browse.meta_chapter", { book: book.name, chapter, count: chapterVersesForSelection.length })
+    : t("browse.meta_select");
 
   chapterVerses.innerHTML = chapterVersesForSelection
     .map((verse) => `
@@ -773,6 +1290,15 @@ function normalizeSearchQuery(value) {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+function escapeSearchRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function createWholeTermSearchPattern(normalizedQuery) {
+  const escapedPhrase = normalizedQuery.split(" ").map(escapeSearchRegex).join("\\s+");
+  return new RegExp(`(^|[^a-z0-9])${escapedPhrase}(?=$|[^a-z0-9])`, "i");
+}
+
 function matchesTestament(verse, testament) {
   if (testament === "old") return verse.testament === "Old";
   if (testament === "new") return verse.testament === "New";
@@ -780,9 +1306,9 @@ function matchesTestament(verse, testament) {
 }
 
 function testamentLabel(testament) {
-  if (testament === "old") return "Old Testament";
-  if (testament === "new") return "New Testament";
-  return "KJV";
+  if (testament === "old") return t("search.scope_old");
+  if (testament === "new") return t("search.scope_new");
+  return t("search.scope_all");
 }
 
 function searchVerses(query, testament = activeTestament) {
@@ -791,13 +1317,11 @@ function searchVerses(query, testament = activeTestament) {
 
   const pool = testament === "all" ? verses : verses.filter((verse) => matchesTestament(verse, testament));
 
-  const exactReferenceMatches = pool.filter((verse) => verse.reference.toLowerCase() === normalizedQuery);
-  const textMatches = pool.filter((verse) => {
-    const haystack = `${verse.reference} ${verse.text}`.toLowerCase();
-    return haystack.includes(normalizedQuery);
-  });
+  const referenceMatches = pool.filter((verse) => verse.reference.toLowerCase().includes(normalizedQuery));
+  const searchPattern = createWholeTermSearchPattern(normalizedQuery);
+  const textMatches = pool.filter((verse) => searchPattern.test(verse.text));
 
-  return [...exactReferenceMatches, ...textMatches]
+  return [...referenceMatches, ...textMatches]
     .filter((verse, index, allMatches) => allMatches.findIndex((match) => match.id === verse.id) === index)
     .slice(0, MAX_SEARCH_RESULTS);
 }
@@ -807,26 +1331,27 @@ function renderSearchResults(results, query, testament = activeTestament) {
 
   if (!query) {
     searchMeta.textContent = testament === "all"
-      ? "Search all 31,102 KJV verses locally."
-      : `Searching ${scope} verses only.`;
+      ? t("search.meta_all_default", { count: verses.length.toLocaleString(getTranslationConfig().locale) })
+      : t("search.meta_filtered", { scope });
     searchResults.innerHTML = "";
     return;
   }
 
   if (query.length < 2) {
-    searchMeta.textContent = "Type at least 2 characters.";
+    searchMeta.textContent = t("search.meta_too_short");
     searchResults.innerHTML = "";
     return;
   }
 
   if (results.length === 0) {
-    searchMeta.textContent = `No ${scope} matches for “${query}”.`;
+    searchMeta.textContent = t("search.meta_no_match", { scope, query });
     searchResults.innerHTML = "";
     return;
   }
 
-  const cappedLabel = results.length === MAX_SEARCH_RESULTS ? `Top ${MAX_SEARCH_RESULTS}` : results.length;
-  searchMeta.textContent = `${cappedLabel} ${scope} match${results.length === 1 ? "" : "es"} for “${query}”.`;
+  searchMeta.textContent = results.length === MAX_SEARCH_RESULTS
+    ? t("search.meta_top", { count: MAX_SEARCH_RESULTS, scope, query })
+    : t(results.length === 1 ? "search.meta_one_match" : "search.meta_count", { count: results.length, scope, query });
   searchResults.innerHTML = results
     .map((verse) => `
       <button class="result-row" type="button" data-verse-id="${escapeHtml(verse.id)}">
@@ -839,7 +1364,9 @@ function renderSearchResults(results, query, testament = activeTestament) {
 
 function runSearch() {
   const query = normalizeSearchQuery(searchInput.value);
-  renderSearchResults(searchVerses(query), query);
+  const results = searchVerses(query);
+  renderSearchResults(results, query);
+  scheduleSearchTracking(query, results.length);
 }
 
 function setTestamentFilter(testament) {
@@ -856,10 +1383,10 @@ async function copyCurrentPassage() {
 
   try {
     await navigator.clipboard.writeText(getShareText());
-    setActionStatus("Copied passage to clipboard.");
+    setActionStatus(t("card.copied"));
   } catch (error) {
     console.error(error);
-    setActionStatus("Copy failed. Select and copy the passage manually.");
+    setActionStatus(t("card.copy_failed"));
   }
 }
 
@@ -882,7 +1409,7 @@ function resetShareCard() {
   setFocalCardVisible(false);
   closeCardButton.disabled = true;
   saveCardButton.disabled = true;
-  saveCardButton.textContent = "Save to Library";
+  saveCardButton.textContent = t("card.button_save");
   shareCardImageButton.disabled = true;
 }
 
@@ -955,19 +1482,11 @@ function drawShareCardText(context, text, reference, compact = false) {
 
   context.fillStyle = "#facc15";
   context.font = `700 ${referenceFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`;
-  context.fillText(`— ${reference} (KJV)`, 540, y + referenceGap, maxWidth);
+  context.fillText(`— ${reference} (${getTranslationTag()})`, 540, y + referenceGap, maxWidth);
 }
 
-function loadCanvasImage(src, options = {}) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    if (options.crossOrigin) {
-      img.crossOrigin = options.crossOrigin;
-    }
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Image load failed for canvas use."));
-    img.src = src;
-  });
+async function loadCanvasImage(src, options = {}) {
+  return await loadImageWithResumeRetry(src, options);
 }
 
 async function getImageForCanvas(src) {
@@ -1095,21 +1614,22 @@ async function renderShareCardCanvas(forceTextOnly = false) {
 async function showShareCard() {
   if (!currentPassage) return;
 
-  setActionStatus("Composing share card…");
+  setActionStatus(t("card.composing"));
   try {
     await renderShareCardCanvas();
-    setActionStatus("Share card ready.");
+    trackMarketingEvent("share_card_created", currentPassageMarketingData());
+    setActionStatus(t("card.ready"));
     scrollHomeFocalIntoView();
   } catch (error) {
     console.error("Share card render failed:", error);
-    setActionStatus("Could not create share card.");
+    setActionStatus(t("card.could_not_create"));
   }
 }
 
 function closeShareCard() {
   resetShareCard();
   imagePanel.hidden = true;
-  setActionStatus("Card closed.");
+  setActionStatus(t("card.closed"));
 }
 
 async function saveCurrentCardToLibrary() {
@@ -1132,14 +1652,15 @@ async function saveCurrentCardToLibrary() {
   saveCardButton.disabled = true;
   try {
     await writeSavedCard(card);
+    trackMarketingEvent("share_card_saved", currentPassageMarketingData());
     currentSavedCardId = id;
     await loadSavedCards();
-    saveCardButton.textContent = "Saved";
-    setActionStatus("Saved to Library.");
+    saveCardButton.textContent = t("card.button_saved");
+    setActionStatus(t("card.saved_to_library"));
   } catch (error) {
     console.error(error);
     saveCardButton.disabled = false;
-    setActionStatus("Could not save card to Library.");
+    setActionStatus(t("card.save_failed"));
   }
 }
 
@@ -1168,7 +1689,7 @@ async function shareDataUrlViaCapacitor(dataUrl, fileName, text) {
   if (Plugins.ImageShare?.shareImage) {
     await Plugins.ImageShare.shareImage({
       base64: dataUrlToBase64(dataUrl),
-      dialogTitle: "Share scripture card",
+      dialogTitle: t("card.dialog_title"),
       text: text || "",
     });
     return true;
@@ -1186,7 +1707,7 @@ async function shareDataUrlViaCapacitor(dataUrl, fileName, text) {
   });
   await Plugins.Share.share({
     files: [uri],
-    dialogTitle: "Share scripture card",
+    dialogTitle: t("card.dialog_title"),
   });
   return true;
 }
@@ -1196,7 +1717,7 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
     if (window.Capacitor?.isNativePlatform?.()) {
       const ok = await shareDataUrlViaCapacitor(dataUrl, fileName, text);
       if (ok) {
-        statusTarget("Share sheet opened with image card.");
+        statusTarget(t("card.share_with_image"));
         return;
       }
     }
@@ -1210,32 +1731,33 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
         text,
         files: [file],
       });
-      statusTarget("Share sheet opened with image card.");
+      statusTarget(t("card.share_with_image"));
     } else if (navigator.share) {
       await navigator.share({ title: "Enlighten-Me", text });
-      statusTarget("Image sharing is not available here, so text share opened.");
+      statusTarget(t("card.share_text_fallback"));
     } else {
       await navigator.clipboard.writeText(text);
-      statusTarget("Image sharing is not available here, so text was copied.");
+      statusTarget(t("card.share_copy_fallback"));
     }
   } catch (error) {
     if (error?.name !== "AbortError" && error?.message !== "Share canceled") {
       console.error(error);
-      statusTarget("Share image failed. Please try again.");
+      statusTarget(t("card.share_failed"));
     }
   }
 }
 
 async function shareCardImage() {
   if (!currentPassage) return;
+  trackMarketingEvent("share_card_share_started", currentPassageMarketingData());
   const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  await shareCardDataUrl(dataUrl, getShareCardFileName(), SHARE_URL);
+  await shareCardDataUrl(dataUrl, getShareCardFileName(), getShareDestinationUrl());
 }
 
 async function shareActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
-  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), SHARE_URL, (message) => {
+  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), getShareDestinationUrl(), (message) => {
     if (libraryStatus) libraryStatus.textContent = message;
   });
 }
@@ -1244,34 +1766,80 @@ async function deleteActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
 
-  const shouldDelete = window.confirm(`Delete the saved card for ${card.reference}?`);
+  const shouldDelete = window.confirm(t("card.delete_confirm", { reference: card.reference }));
   if (!shouldDelete) return;
 
   try {
     await removeSavedCard(card.id);
     if (currentSavedCardId === card.id) {
       currentSavedCardId = "";
-      saveCardButton.textContent = "Save to Library";
+      saveCardButton.textContent = t("card.button_save");
       saveCardButton.disabled = false;
     }
     savedCards = savedCards.filter((nextCard) => nextCard.id !== card.id);
     activeLibraryIndex = Math.max(0, activeLibraryIndex - 1);
     renderLibrary();
-    if (libraryStatus) libraryStatus.textContent = "Deleted saved card.";
+    if (libraryStatus) libraryStatus.textContent = t("card.deleted");
   } catch (error) {
     console.error(error);
-    if (libraryStatus) libraryStatus.textContent = "Could not delete saved card.";
+    if (libraryStatus) libraryStatus.textContent = t("card.delete_failed");
   }
+}
+
+async function fetchPersonalImageSourceWithResumeRetry() {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= IMAGE_REQUEST_RETRY_LIMIT; attempt += 1) {
+    if (attempt > 0) await waitForImageGenerationResume();
+
+    try {
+      const response = await fetch(apiUrl("/api/picture"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Enlighten-Product": IMAGE_PRODUCT_ID,
+          ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
+        },
+        body: JSON.stringify({
+          passage: getPassageText(currentPassage),
+          reference: currentPassage.reference,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || t("image.failed_generic"));
+      }
+
+      const imageSource = findImageSource(payload);
+      if (!imageSource) {
+        throw new Error(t("image.no_image_returned"));
+      }
+
+      return imageSource;
+    } catch (error) {
+      lastError = error;
+      const canRetry = imageGenerationInterruptedByBackground
+        && isBackgroundLoadFailure(error)
+        && attempt < IMAGE_REQUEST_RETRY_LIMIT;
+      if (!canRetry) break;
+    }
+  }
+
+  throw lastError || new Error(t("image.failed_generic"));
 }
 
 async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
   if (!hasImageSubscription()) {
+    trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
     showImageSubscriptionPrompt();
     return;
   }
 
+  trackMarketingEvent("personal_image_started", currentPassageMarketingData());
   setImageLoading(true);
   showPleaseWait();
   currentGeneratedImageSrc = "";
@@ -1282,30 +1850,7 @@ async function pictureThisMessage() {
   if (imagePrompt) imagePrompt.textContent = "";
 
   try {
-    const response = await fetch(apiUrl("/api/picture"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Enlighten-Product": IMAGE_PRODUCT_ID,
-        ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
-      },
-      body: JSON.stringify({
-        passage: getPassageText(currentPassage),
-        reference: currentPassage.reference,
-      }),
-    });
-
-    const payload = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(payload.error || "Image generation failed.");
-    }
-
-    const imageSource = payload.imageDataUrl || payload.imageUrl;
-    if (!imageSource) {
-      throw new Error("Image generation completed, but no image was returned.");
-    }
-
+    const imageSource = await fetchPersonalImageSourceWithResumeRetry();
     await preloadImage(imageSource);
 
     currentGeneratedImageSrc = imageSource;
@@ -1314,20 +1859,21 @@ async function pictureThisMessage() {
     messageImage.hidden = true;
     imagePanel.hidden = false;
     imageStatus.hidden = false;
-    imageStatus.textContent = "Composing scripture card…";
+    imageStatus.textContent = t("card.composing_scripture");
 
     if (imagePrompt) imagePrompt.textContent = "";
 
     shareCardPanel.hidden = true;
     shareCardPreview.hidden = true;
-    setActionStatus("Composing scripture card…");
+    setActionStatus(t("card.composing_scripture"));
 
     try {
       await renderShareCardCanvas();
       imageStatus.textContent = "";
       imageStatus.hidden = true;
       imagePanel.hidden = true;
-      setActionStatus("Scripture card ready. Save it, share it, or close it.");
+      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false }));
+      setActionStatus(t("card.ready_full"));
       scrollHomeFocalIntoView();
     } catch (cardError) {
       console.error("Scripture card render failed:", cardError);
@@ -1338,26 +1884,88 @@ async function pictureThisMessage() {
         imageStatus.textContent = "";
         imageStatus.hidden = true;
         imagePanel.hidden = true;
-        setActionStatus("Card ready without the illustration. Save it, share it, or close it.");
+        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true }));
+        setActionStatus(t("card.ready_text_only"));
         scrollHomeFocalIntoView();
       } catch (fallbackError) {
+        trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
         console.error("Text-only card render failed:", fallbackError);
         imagePanel.hidden = false;
         imageStatus.hidden = false;
-        imageStatus.textContent = "Could not create the finished card. Please try again.";
-        setActionStatus("Could not create scripture card.");
+        imageStatus.textContent = t("card.could_not_finish");
+        setActionStatus(t("card.could_not_create_scripture"));
       }
     }
   } catch (error) {
+    trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
     imagePanel.hidden = false;
     imageStatus.hidden = false;
-    imageStatus.textContent = error.message || "Image generation failed.";
+    imageStatus.textContent = error.message || t("image.failed_generic");
   } finally {
     setImageLoading(false);
   }
 }
 
+function setScriptureControlsDisabled(disabled) {
+  enlightenButton.disabled = disabled;
+  copyButton.disabled = disabled || !currentPassage;
+  shareCardButton.disabled = disabled || !currentPassage;
+  pictureButton.disabled = disabled || !currentPassage;
+  searchInput.disabled = disabled;
+  bookSelect.disabled = disabled;
+  chapterSelect.disabled = disabled;
+  verseSelect.disabled = disabled;
+  if (languageSelect) languageSelect.disabled = disabled;
+}
+
+function resetTestamentFilter() {
+  activeTestament = "all";
+  for (const pill of testamentFilter.querySelectorAll(".filter-pill")) {
+    pill.setAttribute("aria-pressed", pill.dataset.testament === activeTestament ? "true" : "false");
+  }
+}
+
+async function changeTranslation(nextTranslationKey) {
+  if (!TRANSLATIONS[nextTranslationKey] || nextTranslationKey === activeTranslationKey) return;
+
+  const previousTranslationKey = activeTranslationKey;
+  setScriptureControlsDisabled(true);
+  activeTranslationKey = nextTranslationKey;
+  persistActiveTranslationKey();
+  currentPassage = null;
+  passageElement.textContent = t("home.loading");
+  referenceElement.textContent = "—";
+  resetImagePanel();
+
+  try {
+    await loadLocaleStrings();
+    applyTranslations();
+    await loadScriptureData();
+    initializeBrowseControls();
+    resetTestamentFilter();
+    searchInput.value = "";
+    renderSearchResults([], "");
+    setScriptureControlsDisabled(false);
+    enlighten();
+    setActionStatus(t("status.language_changed"));
+    trackMarketingEvent("language_selected", {
+      previous_language: previousTranslationKey,
+      selected_language: activeTranslationKey,
+    });
+    window.dispatchEvent(new CustomEvent("enlighten:language-changed"));
+  } catch (error) {
+    console.error(error);
+    activeTranslationKey = previousTranslationKey;
+    persistActiveTranslationKey();
+    await loadLocaleStrings().catch(() => {});
+    applyTranslations();
+    setScriptureControlsDisabled(false);
+    setActionStatus(t("home.scripture_load_failed"));
+  }
+}
+
 function bindEvents() {
+  bindAppLifecycleEvents();
   enlightenButton.addEventListener("click", enlighten);
   copyButton.addEventListener("click", copyCurrentPassage);
   shareCardButton.addEventListener("click", showShareCard);
@@ -1373,6 +1981,10 @@ function bindEvents() {
     document.getElementById("refundFooterLink")?.remove();
   }
   settingsToggle.addEventListener("click", toggleSettings);
+  languageSelect?.addEventListener("change", () => changeTranslation(languageSelect.value));
+  document.getElementById("appStoreFooterLink")?.addEventListener("click", () => {
+    trackMarketingEvent("app_store_clicked", { source: "footer" });
+  });
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));
   libraryBackButton.addEventListener("click", () => setLibraryOpen(false));
@@ -1403,7 +2015,7 @@ function bindEvents() {
     if (!resultRow) return;
 
     const verse = versesById.get(resultRow.dataset.verseId);
-    if (verse) selectVerse(verse, { status: `Selected ${verse.reference} from search.` });
+    if (verse) selectVerse(verse, { status: t("status.selected_from_search", { reference: verse.reference }) });
   });
 
   bookSelect.addEventListener("change", () => {
@@ -1421,7 +2033,7 @@ function bindEvents() {
       .get(getChapterKey(bookSelect.value, Number(chapterSelect.value)))
       ?.find((nextVerse) => nextVerse.verse === Number(verseSelect.value));
 
-    if (verse) selectVerse(verse, { status: `Selected ${verse.reference} from browse.` });
+    if (verse) selectVerse(verse, { status: t("status.selected_from_browse", { reference: verse.reference }) });
   });
 
   chapterVerses.addEventListener("click", (event) => {
@@ -1429,7 +2041,7 @@ function bindEvents() {
     if (!verseRow) return;
 
     const verse = versesById.get(verseRow.dataset.verseId);
-    if (verse) selectVerse(verse, { status: `Selected ${verse.reference} from browse.` });
+    if (verse) selectVerse(verse, { status: t("status.selected_from_browse", { reference: verse.reference }) });
   });
 }
 
@@ -1447,14 +2059,18 @@ async function initializeApp() {
   bookSelect.disabled = true;
   chapterSelect.disabled = true;
   verseSelect.disabled = true;
-  passageElement.textContent = "Loading local KJV scripture…";
   referenceElement.textContent = "—";
 
   try {
+    persistActiveTranslationKey();
+    await loadLocaleStrings();
+    applyTranslations();
+    passageElement.textContent = t("home.loading");
     await loadScriptureData();
     await loadImageSubscription();
     await loadSavedCards();
     initializeBrowseControls();
+    renderSearchResults([], "");
     bindEvents();
     openInitialViewFromUrl();
 
@@ -1467,8 +2083,9 @@ async function initializeApp() {
     verseSelect.disabled = false;
 
     enlighten();
+    trackMarketingEvent("web_visit");
   } catch (error) {
-    passageElement.textContent = "Unable to load scripture data. Please refresh and try again.";
+    passageElement.textContent = t("home.scripture_load_failed");
     referenceElement.textContent = "—";
     console.error(error);
   }

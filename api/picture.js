@@ -86,10 +86,10 @@ async function writeIllustrationPrompt({ passage, reference }) {
           "You write image-generation prompts for reverent biblical illustrations.",
           "The style is ancient Old and New Testament / biblical, not modern or contemporary.",
           "Use cinematic sacred illustration language: parchment warmth, oil-painting depth, ancient Near Eastern and Judean landscapes, lamplight, robes, sandals, stone, olive trees, desert dawn, mountains, rivers, wilderness, humble faces, divine light.",
+          "Represent biblical people with historically plausible ancient Levantine, Near Eastern, North African, Mediterranean, and Ethiopian features; do not default to white European faces.",
+          "When a passage does not specify gender, age, or ethnicity, vary the subject intentionally across prompts and include women as often as men where the scene allows.",
           "The image may be a literal biblical scene, or it may be a symbolic/metaphorical visual interpretation of the passage when metaphor better captures the spiritual message.",
-          "People depicted must reflect the true ethnic diversity of the ancient Near East and surrounding regions: warm brown, olive, and deep complexions drawn from Semitic, African, and Mediterranean ancestries — never pale or European-featured by default.",
-          "When the passage does not specify a person's sex, freely include women; in crowd or group scenes, vary sex across figures so women are well-represented.",
-          "Do not include text, typography, captions, logos, watermarks, modern clothing, modern buildings, phones, cameras, neon, sci-fi, fantasy armor, or comic-book style.",
+          "Do not include text, typography, captions, logos, watermarks, modern clothing, modern buildings, phones, cameras, neon, sci-fi, fantasy armor, comic-book style, racial stereotypes, or caricature.",
           "Return only the final image prompt. No commentary. No markdown.",
         ].join(" "),
         messages: [
@@ -101,6 +101,7 @@ async function writeIllustrationPrompt({ passage, reference }) {
               "Write one evocative image-generation prompt that captures the tone, spiritual message, and emotional center of this passage.",
               "Choose either a literal biblical illustration or a metaphorical/symbolic biblical image, whichever best communicates the passage.",
               "Make it reverent, luminous, emotionally clear, and ancient-world in atmosphere.",
+              "If people appear and the passage does not define their identity, choose a historically plausible mix of skin tones, facial features, ages, and genders instead of centering white male figures by default.",
             ].join("\n"),
           },
         ],
@@ -147,25 +148,68 @@ function extractStatus(payload) {
   return String(payload?.data?.status || payload?.status || "").toUpperCase();
 }
 
-function extractImageUrl(payload) {
-  const candidates = [
-    payload?.data?.generated?.[0],
-    payload?.data?.generated?.[0]?.url,
-    payload?.data?.images?.[0],
-    payload?.data?.images?.[0]?.url,
-    payload?.data?.result?.url,
-    payload?.data?.url,
-    payload?.generated?.[0],
-    payload?.generated?.[0]?.url,
-    payload?.images?.[0],
-    payload?.images?.[0]?.url,
-    payload?.result?.url,
-    payload?.image_url,
-    payload?.url,
-  ].filter(Boolean);
+function looksLikeBase64Image(value) {
+  const compacted = String(value || "").replace(/\s+/g, "");
+  return compacted.length > 500 && /^[A-Za-z0-9+/]+={0,2}$/.test(compacted);
+}
 
-  const url = candidates.find((candidate) => typeof candidate === "string" && /^https?:\/\//.test(candidate));
-  return url || null;
+function normalizeImageReference(candidate) {
+  if (typeof candidate !== "string") return null;
+
+  const value = candidate.trim();
+  if (/^https?:\/\//.test(value) || /^data:image\//.test(value)) return value;
+  if (looksLikeBase64Image(value)) return `data:image/jpeg;base64,${value.replace(/\s+/g, "")}`;
+  return null;
+}
+
+function findImageReference(value, seen = new Set()) {
+  const direct = normalizeImageReference(value);
+  if (direct) return direct;
+
+  if (!value || typeof value !== "object" || seen.has(value)) return null;
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findImageReference(item, seen);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  const preferredKeys = [
+    "url",
+    "image_url",
+    "imageUrl",
+    "image",
+    "images",
+    "generated",
+    "result",
+    "results",
+    "output",
+    "outputs",
+    "assets",
+    "download_url",
+    "signed_url",
+    "src",
+    "base64",
+  ];
+
+  for (const key of preferredKeys) {
+    const found = findImageReference(value[key], seen);
+    if (found) return found;
+  }
+
+  for (const entry of Object.values(value)) {
+    const found = findImageReference(entry, seen);
+    if (found) return found;
+  }
+
+  return null;
+}
+
+function extractImageUrl(payload) {
+  return findImageReference(payload);
 }
 
 async function startFreepikImage(prompt) {
@@ -232,6 +276,8 @@ async function pollFreepikImage(taskId) {
 }
 
 async function imageUrlToDataUrl(imageUrl) {
+  if (/^data:image\//.test(imageUrl || "")) return imageUrl;
+
   try {
     const response = await fetch(imageUrl);
     if (!response.ok) return null;
@@ -311,6 +357,10 @@ module.exports = async function handler(req, res) {
     const image = started.immediateUrl
       ? { imageUrl: started.immediateUrl, payload: started.payload }
       : await pollFreepikImage(started.taskId);
+
+    if (!image?.imageUrl) {
+      throw new Error("Image generation completed, but the provider did not return an image.");
+    }
 
     const imageDataUrl = await imageUrlToDataUrl(image.imageUrl);
 
