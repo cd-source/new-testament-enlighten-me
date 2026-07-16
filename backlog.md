@@ -2,6 +2,10 @@
 
 Deferred work — not blocking current scope, pick up later.
 
+## Repo / deploy
+
+- **`release/1.2` predates the deploy-root fix** — it still has `lib/` at the repo root and no `.vercelignore`, so its previews still serve internal files (SSO-protected and noindex, so not urgent). Merging `main` in resolves both; the rename applies cleanly because the branch never touched `lib/` or `api/`. Its untracked local `api/marketing-event.js` still requires `../lib/entitlement.js` and would need repointing at `./_lib/` — `main`'s committed copy is already correct.
+
 ## Soft-launch pre-flight
 
 - **Cross-provider deliverability check** — Resend SMTP is live, verified end-to-end with one address. Send signup-confirm + password-reset to gmail / icloud / outlook / yahoo before public launch; confirm none spam-flag. DKIM is in place; if any provider flags, add DMARC (`v=DMARC1; p=none;` at `_dmarc`).
