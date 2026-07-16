@@ -511,14 +511,19 @@ function applyTranslations() {
   setElementText(aboutRows[2]?.querySelector("h3"), "settings.row_scripture.title");
   setElementText(aboutRows[2]?.querySelector("p"), "settings.row_scripture.body");
 
-  const footerLinks = document.querySelectorAll(".footer-links a");
-  setElementText(footerLinks[0], "footer.privacy");
-  setElementHref(footerLinks[0], getLegalPath("privacy"));
-  setElementText(footerLinks[1], "footer.terms");
-  setElementHref(footerLinks[1], getLegalPath("terms"));
-  setElementText(footerLinks[2], "footer.refunds");
-  setElementHref(footerLinks[2], getLegalPath("refunds"));
-  setElementText(footerLinks[3], "footer.support");
+  // Resolve footer links by id rather than position: the Refunds item is removed on iOS, and
+  // a positional lookup would then shift every later label onto the wrong link. The App Store
+  // link is deliberately absent here — Apple requires that name stay in English.
+  const privacyLink = document.getElementById("privacyFooterLink");
+  setElementText(privacyLink, "footer.privacy");
+  setElementHref(privacyLink, getLegalPath("privacy"));
+  const termsLink = document.getElementById("termsFooterLink");
+  setElementText(termsLink, "footer.terms");
+  setElementHref(termsLink, getLegalPath("terms"));
+  const refundsLink = document.querySelector("#refundFooterLink a");
+  setElementText(refundsLink, "footer.refunds");
+  setElementHref(refundsLink, getLegalPath("refunds"));
+  setElementText(document.getElementById("supportFooterLink"), "footer.support");
   setElementText(document.querySelector(".footer-meta"), "footer.meta");
 
   updateSubscriptionUi();
