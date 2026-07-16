@@ -19,6 +19,14 @@
     }
   </script>
 
+  <!-- Web-only chrome (the App Store badge) is gated on this class rather than removed once
+       script.js runs, so it never flashes inside the iOS app before init finishes. -->
+  <script>
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      document.documentElement.classList.add("is-web");
+    }
+  </script>
+
   <title>Enlighten-Me</title>
   <meta name="description" content="Read New Testament scripture and bring your favorite verses to life with AI-generated imagery. Save and share scripture cards." />
   <link rel="canonical" href="https://www.enlighten-me.co/" />
@@ -104,6 +112,13 @@
         </div>
 
         <p id="actionStatus" class="action-status" aria-live="polite"></p>
+
+        <div id="appStoreCta" class="app-store-cta">
+          <p id="appStoreCtaText" class="app-store-cta-text">Also available on iPhone and iPad</p>
+          <a id="appStoreBadgeLink" class="app-store-badge-link" href="https://apps.apple.com/app/id6768472131" target="_blank" rel="noopener noreferrer">
+            <img id="appStoreBadgeImage" class="app-store-badge" src="assets/app-store-badge/en.svg" alt="Download on the App Store" width="120" height="40" />
+          </a>
+        </div>
 
         <section class="scripture-tools" aria-label="Search and browse KJV scripture">
           <div class="tool-panel search-panel">
@@ -325,10 +340,10 @@
 
     <footer class="site-footer">
       <ul class="footer-links">
-        <li><a href="privacy.html">Privacy</a></li>
-        <li><a href="terms.html">Terms</a></li>
+        <li><a id="privacyFooterLink" href="privacy.html">Privacy</a></li>
+        <li><a id="termsFooterLink" href="terms.html">Terms</a></li>
         <li id="refundFooterLink"><a href="refund.html">Refunds</a></li>
-        <li><a href="mailto:help@enlighten-me.co">Support</a></li>
+        <li><a id="supportFooterLink" href="mailto:help@enlighten-me.co">Support</a></li>
         <li><a id="appStoreFooterLink" href="https://apps.apple.com/app/id6768472131" target="_blank" rel="noopener noreferrer">App Store</a></li>
       </ul>
       <p class="footer-meta">&copy; 2026 CJD Consulting LLC</p>

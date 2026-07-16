@@ -12,6 +12,7 @@ const ALLOWED_EVENTS = new Set([
   "personal_image_completed",
   "personal_image_failed",
   "subscribe_clicked",
+  "subscribe_completed",
   "app_store_clicked",
 ]);
 

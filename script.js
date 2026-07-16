@@ -11,6 +11,7 @@ const TRANSLATIONS = {
     stripeLocale: "en",
     exampleDir: "assets/examples",
     exampleExtension: "png",
+    appStoreBadge: "assets/app-store-badge/en.svg",
     legalPaths: {
       privacy: "privacy.html",
       terms: "terms.html",
@@ -24,6 +25,7 @@ const TRANSLATIONS = {
     stripeLocale: "es",
     exampleDir: "assets/examples/es-MX",
     exampleExtension: "png",
+    appStoreBadge: "assets/app-store-badge/es-MX.svg",
     legalPaths: {
       privacy: "privacy.es-MX.html",
       terms: "terms.es-MX.html",
@@ -218,6 +220,12 @@ function getLegalPath(name) {
 function getExampleImageSrc(index) {
   const config = getTranslationConfig();
   return `${config.exampleDir}/example-${index}.${config.exampleExtension}`;
+}
+
+// Apple ships the badge already localized and forbids rolling your own, so each language
+// points at its own official artwork file.
+function getAppStoreBadgeSrc() {
+  return getTranslationConfig().appStoreBadge;
 }
 
 function getScriptureDataUrl(fileName) {
@@ -427,8 +435,28 @@ function shouldTrackMarketingEvents() {
     && ["http:", "https:"].includes(window.location.protocol);
 }
 
+// Google Ads conversion tracking. The gtag tag (AW-18196936681) loads web-only in index.html.
+// Each label is the "conversion label" from Google Ads > Goals > the action's tag setup — the
+// part after the slash in its send_to. Leave a value "" to keep that conversion off: the fire is
+// a no-op until a real label is pasted in, so this is safe to ship before the actions exist.
+const GOOGLE_ADS_CONVERSION_ID = "AW-18196936681";
+const GOOGLE_ADS_CONVERSION_LABELS = {
+  subscribe_completed: "", // PRIMARY — a paid Stripe subscription actually completed
+  subscribe_clicked: "",   // secondary — the subscribe button was pressed (intent, not a sale)
+  app_store_clicked: "",   // secondary — the iOS App Store hand-off (home badge or footer)
+};
+
+function fireGoogleAdsConversion(event) {
+  const label = GOOGLE_ADS_CONVERSION_LABELS[event];
+  if (!label) return; // not a conversion event, or its label isn't filled in yet
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return; // tag absent (iOS webview)
+  window.gtag("event", "conversion", { send_to: `${GOOGLE_ADS_CONVERSION_ID}/${label}` });
+}
+
 function trackMarketingEvent(event, data = {}) {
   if (!shouldTrackMarketingEvents()) return;
+
+  fireGoogleAdsConversion(event);
 
   const body = JSON.stringify({ event, data: getMarketingContext(data) });
   const url = apiUrl("/api/marketing-event");
@@ -529,6 +557,12 @@ function applyTranslations() {
   setElementAttr(document.querySelector(".home-focal"), "aria-label", "home.scripture_aria");
   setElementAttr(document.querySelector(".home-actions"), "aria-label", "home.scripture_actions_aria");
   setElementAttr(document.querySelector(".utility-actions"), "aria-label", "home.passage_utilities_aria");
+  setElementText(document.getElementById("appStoreCtaText"), "app_store.tagline");
+  const appStoreBadge = document.getElementById("appStoreBadgeImage");
+  if (appStoreBadge) {
+    appStoreBadge.src = getAppStoreBadgeSrc();
+    appStoreBadge.alt = t("app_store.badge_alt");
+  }
   setElementText(enlightenButton, "button.enlighten");
   setElementText(copyButton, "button.copy");
   setElementText(shareCardButton, "button.share_card");
@@ -621,14 +655,19 @@ function applyTranslations() {
   setElementText(aboutRows[2]?.querySelector("h3"), "settings.row_scripture.title");
   setElementText(aboutRows[2]?.querySelector("p"), "settings.row_scripture.body");
 
-  const footerLinks = document.querySelectorAll(".footer-links a");
-  setElementText(footerLinks[0], "footer.privacy");
-  setElementHref(footerLinks[0], getLegalPath("privacy"));
-  setElementText(footerLinks[1], "footer.terms");
-  setElementHref(footerLinks[1], getLegalPath("terms"));
-  setElementText(footerLinks[2], "footer.refunds");
-  setElementHref(footerLinks[2], getLegalPath("refunds"));
-  setElementText(footerLinks[3], "footer.support");
+  // Resolve footer links by id rather than position: the Refunds item is removed on iOS, and
+  // a positional lookup would then shift every later label onto the wrong link. The App Store
+  // link is deliberately absent here — Apple requires that name stay in English.
+  const privacyLink = document.getElementById("privacyFooterLink");
+  setElementText(privacyLink, "footer.privacy");
+  setElementHref(privacyLink, getLegalPath("privacy"));
+  const termsLink = document.getElementById("termsFooterLink");
+  setElementText(termsLink, "footer.terms");
+  setElementHref(termsLink, getLegalPath("terms"));
+  const refundsLink = document.querySelector("#refundFooterLink a");
+  setElementText(refundsLink, "footer.refunds");
+  setElementHref(refundsLink, getLegalPath("refunds"));
+  setElementText(document.getElementById("supportFooterLink"), "footer.support");
   setElementText(document.querySelector(".footer-meta"), "footer.meta");
 
   updateSubscriptionUi();
@@ -869,6 +908,7 @@ async function loadImageSubscription() {
 
 if (typeof window !== "undefined") {
   window.refreshEnlightenSubscription = loadImageSubscription;
+  window.trackMarketingEvent = trackMarketingEvent;
 }
 
 async function subscribeToImagePlan() {
@@ -2002,6 +2042,9 @@ function bindEvents() {
   languageSelect?.addEventListener("change", () => changeTranslation(languageSelect.value));
   document.getElementById("appStoreFooterLink")?.addEventListener("click", () => {
     trackMarketingEvent("app_store_clicked", { source: "footer" });
+  });
+  document.getElementById("appStoreBadgeLink")?.addEventListener("click", () => {
+    trackMarketingEvent("app_store_clicked", { source: "home_badge" });
   });
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));

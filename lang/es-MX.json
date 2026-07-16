@@ -166,6 +166,8 @@
   "status.selected_from_search": "Seleccionado {reference} desde la búsqueda.",
   "status.selected_from_browse": "Seleccionado {reference} desde explorar.",
   "status.language_changed": "Idioma cambiado a Español (México).",
+  "app_store.tagline": "También disponible en iPhone y iPad",
+  "app_store.badge_alt": "Descárgalo en el App Store",
   "footer.privacy": "Privacidad",
   "footer.terms": "Términos",
   "footer.refunds": "Reembolsos",

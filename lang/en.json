@@ -166,6 +166,8 @@
   "status.selected_from_search": "Selected {reference} from search.",
   "status.selected_from_browse": "Selected {reference} from browse.",
   "status.language_changed": "Language changed to English.",
+  "app_store.tagline": "Also available on iPhone and iPad",
+  "app_store.badge_alt": "Download on the App Store",
   "footer.privacy": "Privacy",
   "footer.terms": "Terms",
   "footer.refunds": "Refunds",
