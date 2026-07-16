@@ -1,4 +1,4 @@
-const { setCorsHeaders } = require("../lib/entitlement.js");
+const { setCorsHeaders } = require("./_lib/entitlement.js");
 
 module.exports = function handler(req, res) {
   if (req.method === "OPTIONS") {

@@ -1,4 +1,4 @@
-const { setCorsHeaders } = require("../lib/entitlement.js");
+const { setCorsHeaders } = require("./_lib/entitlement.js");
 
 const ALLOWED_EVENTS = new Set([
   "web_visit",

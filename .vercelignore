@@ -1,0 +1,25 @@
+# vercel.json sets "outputDirectory": ".", which makes the repo root the web
+# root — anything deployed here is publicly served. So ignore the root by
+# default and allow only what the site serves or the build needs. New internal
+# files (notes, docs, plans) then stay private without anyone remembering to
+# add them here.
+/*
+
+!*.html
+!script.js
+!styles.css
+!web-subscribe.js
+!assets
+!data
+!lang
+
+# Vercel builds api/ into functions and never serves it statically, which is
+# why the server-only helpers live in api/_lib rather than at the root: they
+# cannot be excluded here, because functions need them at build time.
+!api
+
+# Needed to install function dependencies. Vercel keeps these out of the
+# static output on its own.
+!package.json
+!package-lock.json
+!vercel.json

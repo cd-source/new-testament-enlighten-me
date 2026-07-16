@@ -4,7 +4,7 @@ const {
   setCorsHeaders,
   verifyAppleJws,
   issueServerToken,
-} = require("../lib/entitlement.js");
+} = require("./_lib/entitlement.js");
 
 function json(req, res, status, body) {
   res.statusCode = status;

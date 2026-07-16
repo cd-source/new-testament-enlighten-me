@@ -1,11 +1,11 @@
-const { setCorsHeaders } = require("../../lib/entitlement.js");
+const { setCorsHeaders } = require("../_lib/entitlement.js");
 const {
   SUBSCRIPTION_PRODUCT_ID,
   getStripe,
   getSupabaseAdmin,
   verifySupabaseUserToken,
-} = require("../../lib/supabase-admin.js");
-const { captureException, flush } = require("../../lib/alerts.js");
+} = require("../_lib/supabase-admin.js");
+const { captureException, flush } = require("../_lib/alerts.js");
 
 function json(req, res, status, body) {
   res.statusCode = status;

@@ -1,9 +1,9 @@
-const { setCorsHeaders, verifyServerToken } = require("../lib/entitlement.js");
+const { setCorsHeaders, verifyServerToken } = require("./_lib/entitlement.js");
 const {
   countRecentImageGenerations,
   recordImageGeneration,
-} = require("../lib/supabase-admin.js");
-const { captureException, flush } = require("../lib/alerts.js");
+} = require("./_lib/supabase-admin.js");
+const { captureException, flush } = require("./_lib/alerts.js");
 
 const ANTHROPIC_MODELS = (process.env.ANTHROPIC_MODEL
   ? [process.env.ANTHROPIC_MODEL]
