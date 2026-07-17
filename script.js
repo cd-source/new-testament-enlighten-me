@@ -42,6 +42,8 @@ const LIBRARY_DB_NAME = "enlightenCardLibrary";
 const LIBRARY_DB_VERSION = 1;
 const LIBRARY_STORE_NAME = "cards";
 const DECK_STORAGE_KEY_PREFIX = "enlighten.passageDeck.v1";
+const DEVICE_ID_STORAGE_KEY = "enlighten.deviceId.v1";
+const FREE_IMAGE_STORAGE_KEY = "enlighten.freeImage.v1";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -573,6 +575,49 @@ function hasImageSubscription() {
   return Boolean(imageSubscription.isActive);
 }
 
+// Stable per-device id so the server can meter the one free (non-subscriber) image.
+function getDeviceId() {
+  try {
+    if (typeof localStorage === "undefined") return "";
+    let id = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+    if (!id) {
+      id = window.crypto?.randomUUID?.() || `dev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(DEVICE_ID_STORAGE_KEY, id);
+    }
+    return id;
+  } catch (error) {
+    return "";
+  }
+}
+
+// Web-only free taste: one image before the paywall. Native (StoreKit) keeps the hard
+// paywall, so this is always false inside the iOS app. The server enforces the real limit;
+// this just drives the button copy and an instant wall without a wasted round-trip.
+function isFreeImageAvailable() {
+  if (isNativeAppRuntime() || hasImageSubscription()) return false;
+  try {
+    if (typeof localStorage === "undefined") return true;
+    return localStorage.getItem(FREE_IMAGE_STORAGE_KEY) !== "used";
+  } catch (error) {
+    return true;
+  }
+}
+
+function markFreeImageUsed() {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(FREE_IMAGE_STORAGE_KEY, "used");
+    }
+  } catch (error) {
+    // private mode / quota — the server still enforces the one-image limit
+  }
+}
+
+function consumeFreeImageIfNeeded() {
+  if (isNativeAppRuntime() || hasImageSubscription()) return;
+  markFreeImageUsed();
+}
+
 function updateSubscriptionUi() {
   const active = hasImageSubscription();
   const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
@@ -595,7 +640,9 @@ function updateSubscriptionUi() {
 }
 
 function getPictureButtonLabel(active = hasImageSubscription()) {
-  return active ? t("button.create_card") : t("button.unlock_image");
+  if (active) return t("button.create_card");
+  if (isFreeImageAvailable()) return t("button.picture_this_free");
+  return t("button.unlock_image");
 }
 
 function setElementText(element, key, vars) {
@@ -1055,7 +1102,9 @@ async function restoreImagePlan() {
 
 function showImageSubscriptionPrompt() {
   setSettingsOpen(true);
-  setActionStatus(t("image.subscribe_prompt", { price: getImagePriceLabel() }));
+  const usedFreeTaste = !isNativeAppRuntime() && !hasImageSubscription() && !isFreeImageAvailable();
+  const promptKey = usedFreeTaste ? "image.subscribe_prompt_free_used" : "image.subscribe_prompt";
+  setActionStatus(t(promptKey, { price: getImagePriceLabel() }));
 }
 
 function setActionStatus(message) {
@@ -1932,6 +1981,7 @@ async function fetchPersonalImageSourceWithResumeRetry() {
           "Content-Type": "application/json",
           "X-Enlighten-Product": IMAGE_PRODUCT_ID,
           ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
+          ...(!isNativeAppRuntime() && !imageSubscription.entitlementToken ? { "X-Enlighten-Device": getDeviceId() } : {}),
         },
         body: JSON.stringify({
           passage: getPassageText(currentPassage),
@@ -1940,6 +1990,12 @@ async function fetchPersonalImageSourceWithResumeRetry() {
       });
 
       const payload = await response.json().catch(() => ({}));
+
+      if (response.status === 402) {
+        const limitError = new Error(payload.error || t("image.subscribe_prompt", { price: getImagePriceLabel() }));
+        limitError.code = "subscription_required";
+        throw limitError;
+      }
 
       if (!response.ok) {
         throw new Error(payload.error || t("image.failed_generic"));
@@ -1966,7 +2022,7 @@ async function fetchPersonalImageSourceWithResumeRetry() {
 async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
-  if (!hasImageSubscription()) {
+  if (!hasImageSubscription() && !isFreeImageAvailable()) {
     trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
     showImageSubscriptionPrompt();
     return;
@@ -1984,6 +2040,7 @@ async function pictureThisMessage() {
 
   try {
     const imageSource = await fetchPersonalImageSourceWithResumeRetry();
+    consumeFreeImageIfNeeded();
     await preloadImage(imageSource);
 
     currentGeneratedImageSrc = imageSource;
@@ -2030,10 +2087,16 @@ async function pictureThisMessage() {
       }
     }
   } catch (error) {
-    trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
-    imagePanel.hidden = false;
-    imageStatus.hidden = false;
-    imageStatus.textContent = error.message || t("image.failed_generic");
+    if (error?.code === "subscription_required") {
+      markFreeImageUsed();
+      trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
+      showImageSubscriptionPrompt();
+    } else {
+      trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
+      imagePanel.hidden = false;
+      imageStatus.hidden = false;
+      imageStatus.textContent = error.message || t("image.failed_generic");
+    }
   } finally {
     setImageLoading(false);
   }

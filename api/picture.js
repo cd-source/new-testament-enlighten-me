@@ -19,6 +19,10 @@ const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
 const REQUIRE_IMAGE_ENTITLEMENT = process.env.ENLIGHTEN_REQUIRE_IMAGE_ENTITLEMENT === "true";
 const IMAGE_DAILY_LIMIT = Number.parseInt(process.env.IMAGE_DAILY_LIMIT || "50", 10);
 const RATE_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
+// Non-subscribers get one free image ("taste before the paywall"), metered per device
+// through the same Supabase counter. The window is effectively "ever" so it's one-time.
+const FREE_IMAGE_LIMIT = Number.parseInt(process.env.FREE_IMAGE_LIMIT || "1", 10);
+const FREE_IMAGE_WINDOW_MS = 365 * 24 * 60 * 60 * 1000;
 
 function json(req, res, status, body) {
   res.statusCode = status;
@@ -44,20 +48,35 @@ function authenticateRequest(req) {
   const product = req.headers["x-enlighten-product"];
   const token = req.headers["x-enlighten-entitlement"];
 
-  if (product !== IMAGE_PRODUCT_ID) return { authenticated: false };
+  // A valid subscription entitlement token wins — unlimited within the daily cap.
+  if (product === IMAGE_PRODUCT_ID && token) {
+    const decoded = verifyServerToken(token, IMAGE_PRODUCT_ID);
+    // Prefer the explicit subject claim; fall back to otid for tokens issued
+    // before the rate-limit rollout (≤24h transitional window).
+    const userId = decoded && (decoded.sub || decoded.otid);
+    if (userId) {
+      return {
+        authenticated: true,
+        identity: { userId: String(userId), source: decoded.src || "web" },
+      };
+    }
+  }
 
-  const decoded = verifyServerToken(token, IMAGE_PRODUCT_ID);
-  if (!decoded) return { authenticated: false };
+  // No subscription token: grant a metered free tier keyed to the caller's device id.
+  // Web-only — the native (StoreKit) client never sends this header, so iOS keeps its
+  // hard paywall. The one-image limit is enforced in the handler via the usage counter.
+  const device = compact(req.headers["x-enlighten-device"]);
+  if (device) {
+    return {
+      authenticated: true,
+      // source must be 'web' or 'ios' per the image_generations CHECK constraint;
+      // the `free:` userId prefix + `free` flag mark the tier, so keep source valid or
+      // recordImageGeneration silently drops the row and the 1-image cap never engages.
+      identity: { userId: `free:${device}`, source: "web", free: true },
+    };
+  }
 
-  // Prefer the explicit subject claim; fall back to otid for tokens issued
-  // before the rate-limit rollout (≤24h transitional window).
-  const userId = decoded.sub || decoded.otid;
-  if (!userId) return { authenticated: false };
-
-  return {
-    authenticated: true,
-    identity: { userId: String(userId), source: decoded.src || "web" },
-  };
+  return { authenticated: false };
 }
 
 async function readBody(req) {
@@ -318,10 +337,21 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  if (auth.identity && IMAGE_DAILY_LIMIT > 0) {
+  const isFreeTier = auth.identity?.free === true;
+  const usageLimit = isFreeTier ? FREE_IMAGE_LIMIT : IMAGE_DAILY_LIMIT;
+  const usageWindowMs = isFreeTier ? FREE_IMAGE_WINDOW_MS : RATE_LIMIT_WINDOW_MS;
+
+  if (auth.identity && usageLimit > 0) {
     try {
-      const recent = await countRecentImageGenerations(auth.identity.userId, RATE_LIMIT_WINDOW_MS);
-      if (recent >= IMAGE_DAILY_LIMIT) {
+      const recent = await countRecentImageGenerations(auth.identity.userId, usageWindowMs);
+      if (recent >= usageLimit) {
+        if (isFreeTier) {
+          // Free taste already spent — 402 tells the web client to show the upgrade prompt.
+          return json(req, res, 402, {
+            error: "Your free image has been used. Subscribe to keep creating.",
+            freeLimitReached: true,
+          });
+        }
         res.setHeader("Retry-After", String(RATE_LIMIT_WINDOW_MS / 1000));
         return json(req, res, 429, {
           error: `Daily image limit reached (${IMAGE_DAILY_LIMIT} per 24 hours). Please try again later.`,
