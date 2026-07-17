@@ -16,7 +16,11 @@
     if (!window.Capacitor?.isNativePlatform?.()) {
       var gtagScript = document.createElement("script");
       gtagScript.async = true;
-      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=" + (window.GA4_MEASUREMENT_ID || "AW-18196936681");
+      // Anchor the loader to the permanent Ads ID (always 200). A new or mistyped GA4 ID can 404
+      // here, and if the loader URL 404s gtag.js never loads — which would silently take the Ads
+      // tag down with it. So never key the loader off GA4_MEASUREMENT_ID; GA4 rides along as the
+      // second gtag("config") call below and is a harmless no-op until its ID actually resolves.
+      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=AW-18196936681";
       document.head.appendChild(gtagScript);
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { dataLayer.push(arguments); };
