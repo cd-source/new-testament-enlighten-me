@@ -4,18 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Google Ads tag (AW-18196936681) — web only. Guarded so it never loads inside the
-       Capacitor iOS build; index.html is copied verbatim into the native app bundle. -->
+  <!-- GA4 Measurement ID (G-XXXXXXXXXX). Web-only, loaded through the same gtag.js as the Ads tag.
+       Leave "" to keep GA4 off: the config call below and every GA4 event in script.js are no-ops
+       until a real ID is pasted here, so this is safe to ship before the property exists. This is
+       the single place to fill in — script.js reads window.GA4_MEASUREMENT_ID. -->
+  <script>window.GA4_MEASUREMENT_ID = "";</script>
+
+  <!-- Google Ads tag (AW-18196936681) + optional GA4 — web only. Guarded so it never loads inside
+       the Capacitor iOS build; index.html is copied verbatim into the native app bundle. -->
   <script>
     if (!window.Capacitor?.isNativePlatform?.()) {
       var gtagScript = document.createElement("script");
       gtagScript.async = true;
-      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=AW-18196936681";
+      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=" + (window.GA4_MEASUREMENT_ID || "AW-18196936681");
       document.head.appendChild(gtagScript);
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { dataLayer.push(arguments); };
       gtag("js", new Date());
       gtag("config", "AW-18196936681");
+      if (window.GA4_MEASUREMENT_ID) gtag("config", window.GA4_MEASUREMENT_ID);
     }
   </script>
 

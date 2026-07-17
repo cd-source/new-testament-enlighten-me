@@ -453,12 +453,84 @@ function fireGoogleAdsConversion(event) {
   window.gtag("event", "conversion", { send_to: `${GOOGLE_ADS_CONVERSION_ID}/${label}` });
 }
 
+// GA4 (web-only). The tag + Measurement ID live in index.html (window.GA4_MEASUREMENT_ID); an empty
+// ID means GA4 is off and every call here is a no-op, so this ships safely before the property
+// exists. GA4 auto-captures page_view + user_engagement (its own engaged-session timer) once the ID
+// is set — that is what turns "bounce" into a real number — while these forwarded events give Google
+// Ads a conversion (subscribe_completed) it can import and optimize bidding against.
+function ga4Enabled() {
+  return typeof window !== "undefined"
+    && typeof window.gtag === "function"
+    && Boolean(window.GA4_MEASUREMENT_ID);
+}
+
+function fireGa4Event(name, params = {}) {
+  if (!ga4Enabled()) return;
+  window.gtag("event", name, { send_to: window.GA4_MEASUREMENT_ID, ...params });
+}
+
+// Vercel Web Analytics counts a "bounce" as a single-pageview visit, and this whole app is one URL,
+// so every engaged session looks like a bounce until we register more pageviews. Vercel only counts
+// a pageview when the pathname changes, but its manual API (va("pageview", {route})) fires one without
+// touching the real URL — no routing, no 404-on-refresh. We emit one when the visitor reaches a
+// distinct view or takes a meaningful action, so bounce reflects "landed and left", not "is an SPA".
+const VIRTUAL_PAGEVIEW_ROUTES = {
+  bible_search: "/search",
+  share_card_created: "/card",
+  share_card_saved: "/card",
+  personal_image_started: "/image",
+  personal_image_completed: "/image",
+  subscribe_clicked: "/subscribe",
+  subscribe_completed: "/subscribe/complete",
+  app_store_clicked: "/app-store",
+};
+
+let lastVirtualRoute = "/"; // Vercel auto-tracks the initial "/" pageview on load
+
+function trackVirtualPageview(route) {
+  if (!route || route === lastVirtualRoute) return; // mirror Vercel: only a genuine route change counts
+  if (!shouldTrackMarketingEvents()) return;
+  if (typeof window === "undefined" || typeof window.va !== "function") return;
+  lastVirtualRoute = route;
+  window.va("pageview", { route, path: route });
+}
+
+// A visit that stays visible for 15s is genuinely engaged (mirrors GA4's engaged-session idea), so a
+// reader who never clicks a tracked control still is not counted as a bounce.
+function armEngagementSignal() {
+  if (!shouldTrackMarketingEvents()) return;
+  let timer = null;
+  let done = false;
+  const fire = () => {
+    if (done) return;
+    done = true;
+    document.removeEventListener("visibilitychange", onVisibility);
+    trackVirtualPageview("/engaged");
+    fireGa4Event("engaged_session");
+  };
+  function onVisibility() {
+    if (done) return;
+    if (document.visibilityState === "visible") {
+      if (timer === null) timer = window.setTimeout(fire, 15000);
+    } else if (timer !== null) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+  }
+  document.addEventListener("visibilitychange", onVisibility);
+  if (document.visibilityState === "visible") timer = window.setTimeout(fire, 15000);
+}
+
 function trackMarketingEvent(event, data = {}) {
   if (!shouldTrackMarketingEvents()) return;
 
-  fireGoogleAdsConversion(event);
+  const context = getMarketingContext(data);
 
-  const body = JSON.stringify({ event, data: getMarketingContext(data) });
+  fireGoogleAdsConversion(event);
+  fireGa4Event(event, context);
+  trackVirtualPageview(VIRTUAL_PAGEVIEW_ROUTES[event]);
+
+  const body = JSON.stringify({ event, data: context });
   const url = apiUrl("/api/marketing-event");
 
   try {
@@ -681,6 +753,8 @@ function applyTranslations() {
   window.dispatchEvent(new CustomEvent("enlighten:language-ready"));
 }
 
+const VIEW_ROUTES = { home: "/", settings: "/settings", library: "/library" };
+
 function showView(viewName) {
   const showingHome = viewName === "home";
   homeView.hidden = !showingHome;
@@ -688,6 +762,7 @@ function showView(viewName) {
   libraryView.hidden = viewName !== "library";
   settingsToggle.setAttribute("aria-expanded", String(viewName === "settings"));
   window.scrollTo({ top: 0, behavior: "smooth" });
+  trackVirtualPageview(VIEW_ROUTES[viewName]);
 }
 
 function setSettingsOpen(isOpen) {
@@ -2145,6 +2220,7 @@ async function initializeApp() {
 
     enlighten();
     trackMarketingEvent("web_visit");
+    armEngagementSignal();
   } catch (error) {
     passageElement.textContent = t("home.scripture_load_failed");
     referenceElement.textContent = "—";
