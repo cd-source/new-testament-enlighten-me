@@ -618,6 +618,14 @@ function consumeFreeImageIfNeeded() {
   markFreeImageUsed();
 }
 
+// Which audience is attempting an image, so GA4 can separate the one free taste from paid
+// usage. Sent as `tier` on the image funnel events and gates the dedicated free_image_* events.
+function imageAudienceTier() {
+  if (hasImageSubscription()) return "subscriber";
+  if (isNativeAppRuntime()) return "native";
+  return "free";
+}
+
 function updateSubscriptionUi() {
   const active = hasImageSubscription();
   const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
@@ -2023,12 +2031,13 @@ async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
   if (!hasImageSubscription() && !isFreeImageAvailable()) {
-    trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
+    if (imageAudienceTier() === "free") trackMarketingEvent("free_image_wall", currentPassageMarketingData());
+    trackMarketingEvent("personal_image_locked", currentPassageMarketingData({ tier: imageAudienceTier() }));
     showImageSubscriptionPrompt();
     return;
   }
 
-  trackMarketingEvent("personal_image_started", currentPassageMarketingData());
+  trackMarketingEvent("personal_image_started", currentPassageMarketingData({ tier: imageAudienceTier() }));
   setImageLoading(true);
   showPleaseWait();
   currentGeneratedImageSrc = "";
@@ -2041,6 +2050,7 @@ async function pictureThisMessage() {
   try {
     const imageSource = await fetchPersonalImageSourceWithResumeRetry();
     consumeFreeImageIfNeeded();
+    if (imageAudienceTier() === "free") trackMarketingEvent("free_image_generated", currentPassageMarketingData());
     await preloadImage(imageSource);
 
     currentGeneratedImageSrc = imageSource;
@@ -2062,7 +2072,7 @@ async function pictureThisMessage() {
       imageStatus.textContent = "";
       imageStatus.hidden = true;
       imagePanel.hidden = true;
-      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false }));
+      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false, tier: imageAudienceTier() }));
       setActionStatus(t("card.ready_full"));
       scrollHomeFocalIntoView();
     } catch (cardError) {
@@ -2074,7 +2084,7 @@ async function pictureThisMessage() {
         imageStatus.textContent = "";
         imageStatus.hidden = true;
         imagePanel.hidden = true;
-        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true }));
+        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true, tier: imageAudienceTier() }));
         setActionStatus(t("card.ready_text_only"));
         scrollHomeFocalIntoView();
       } catch (fallbackError) {
@@ -2089,7 +2099,8 @@ async function pictureThisMessage() {
   } catch (error) {
     if (error?.code === "subscription_required") {
       markFreeImageUsed();
-      trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
+      if (imageAudienceTier() === "free") trackMarketingEvent("free_image_wall", currentPassageMarketingData());
+      trackMarketingEvent("personal_image_locked", currentPassageMarketingData({ tier: imageAudienceTier() }));
       showImageSubscriptionPrompt();
     } else {
       trackMarketingEvent("personal_image_failed", currentPassageMarketingData());

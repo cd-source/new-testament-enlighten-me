@@ -11,6 +11,8 @@ const ALLOWED_EVENTS = new Set([
   "personal_image_started",
   "personal_image_completed",
   "personal_image_failed",
+  "free_image_generated",
+  "free_image_wall",
   "subscribe_clicked",
   "subscribe_completed",
   "app_store_clicked",
@@ -30,6 +32,7 @@ const STRING_FIELDS = new Set([
   "reference",
   "translation",
   "source",
+  "tier",
 ]);
 
 const NUMBER_FIELDS = new Set(["query_length", "result_count"]);
