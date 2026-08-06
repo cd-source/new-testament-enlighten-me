@@ -11,6 +11,8 @@
   --bg: #0b1020;
   --gold: #facc15;
   --ink: #f8fafc;
+  --muted: #cbd5e1;
+  --muted-2: #94a3b8;
 }
 
 html,
@@ -19,11 +21,11 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
   color: var(--ink);
   background:
-    radial-gradient(1100px 520px at 12% -10%, rgba(250, 204, 21, 0.14), transparent 60%),
-    radial-gradient(900px 520px at 95% 110%, rgba(59, 130, 246, 0.2), transparent 60%),
+    radial-gradient(circle at top left, rgba(250, 204, 21, 0.22), transparent 34rem),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 34rem),
     var(--bg);
   min-height: 100dvh;
 }
@@ -32,22 +34,30 @@ body {
    links into the app (/?view=settings) since settings live on index. */
 .settings-link {
   position: fixed;
-  top: calc(12px + env(safe-area-inset-top));
-  right: 14px;
+  top: calc(18px + env(safe-area-inset-top));
+  right: 18px;
   z-index: 50;
-  font-size: 18px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
   line-height: 1;
   text-decoration: none;
-  color: rgba(248, 250, 252, 0.72);
-  border: 1px solid rgba(248, 250, 252, 0.25);
-  border-radius: 999px;
-  padding: 9px 11px;
-  background: rgba(15, 23, 42, 0.5);
+  color: rgba(248, 250, 252, 0.86);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.34);
+  opacity: 0.82;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .settings-link:hover {
+  background: rgba(250, 204, 21, 0.13);
+  border-color: rgba(250, 204, 21, 0.48);
   color: var(--gold);
-  border-color: rgba(250, 204, 21, 0.45);
+  transform: translateY(-1px);
 }
 
 .stage {
@@ -104,24 +114,24 @@ body.deck-ready .card-stage {
 
 .utility-button {
   appearance: none;
-  border: none;
-  background: none;
-  color: rgba(248, 250, 252, 0.82);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 4px;
+  background: transparent;
+  color: rgba(203, 213, 225, 0.88);
+  font: 800 0.88rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 8px;
+  transition: color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
 }
 
 .utility-button:hover {
   color: var(--gold);
-  background: rgba(250, 204, 21, 0.1);
+  transform: translateY(-1px);
 }
 
 .utility-divider {
-  color: rgba(248, 250, 252, 0.35);
+  color: rgba(203, 213, 225, 0.46);
+  font: 800 1.05rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* --- Press area --- */
@@ -135,34 +145,29 @@ body.deck-ready .card-stage {
 
 .press-me {
   appearance: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 3px;
-  color: #1c1917;
-  background: linear-gradient(180deg, #fde047, #facc15 55%, #eab308);
+  border: 0;
   border-radius: 999px;
-  padding: 16px 44px;
-  box-shadow:
-    0 10px 26px rgba(250, 204, 21, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  padding: 16px 28px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  font: 800 1rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(34, 197, 94, 0.3);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
 
 .press-me:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(34, 197, 94, 0.4);
 }
 
 .press-me:active {
-  transform: translateY(1px) scale(0.98);
-  box-shadow: 0 5px 14px rgba(250, 204, 21, 0.3);
+  transform: translateY(0);
 }
 
 .press-hint {
   font-size: 12px;
-  color: rgba(248, 250, 252, 0.55);
+  color: var(--muted-2);
   letter-spacing: 0.4px;
 }
 
@@ -170,6 +175,9 @@ body.deck-ready .card-stage {
 
 .site-footer {
   margin-top: 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.85rem;
+  color: var(--muted-2);
   text-align: center;
 }
 
@@ -178,24 +186,26 @@ body.deck-ready .card-stage {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 6px 16px;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
 }
 
 .footer-links a {
-  font-size: 12px;
-  color: rgba(248, 250, 252, 0.55);
+  color: var(--muted);
   text-decoration: none;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.18);
 }
 
 .footer-links a:hover {
   color: var(--gold);
-  text-decoration: underline;
+  border-bottom-color: var(--gold);
 }
 
 .footer-meta {
-  margin-top: 6px;
-  font-size: 11px;
-  color: rgba(248, 250, 252, 0.35);
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted-2);
 }
 
 /* --- Create prompt --- */
@@ -252,15 +262,20 @@ body.deck-ready .card-stage {
 
 .create-button {
   appearance: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  color: #1c1917;
-  background: linear-gradient(180deg, #fde047, #eab308);
+  border: 0;
   border-radius: 999px;
-  padding: 11px 20px;
+  padding: 14px 20px;
+  color: #171717;
+  background: linear-gradient(135deg, var(--gold), #fde68a);
+  font: 800 0.92rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(250, 204, 21, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.create-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(250, 204, 21, 0.32);
 }
 
 .dismiss-button {
