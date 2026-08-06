@@ -3,6 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google Ads tag (AW-18196936681) + GA4 (G-XBBDF32F32) — web only. Guarded so it never
+       loads inside the Capacitor iOS build; index.html is copied verbatim into the native app
+       bundle. Loader stays anchored on the AW id: the G- loader URL 404s for this property
+       while collection still works through the shared gtag.js. -->
+  <script>
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      var gtagScript = document.createElement("script");
+      gtagScript.async = true;
+      gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=AW-18196936681";
+      document.head.appendChild(gtagScript);
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { dataLayer.push(arguments); };
+      gtag("js", new Date());
+      gtag("config", "AW-18196936681");
+      gtag("config", "G-XBBDF32F32");
+    }
+  </script>
+
   <title>Enlighten-Me</title>
   <meta name="description" content="Read New Testament scripture and bring your favorite verses to life with AI-generated imagery. Save and share scripture cards." />
   <link rel="canonical" href="https://www.enlighten-me.co/" />
@@ -68,8 +87,8 @@
 
         <div class="home-actions" aria-label="Scripture actions">
           <div class="primary-actions">
-            <button id="enlightenButton" class="button button-primary" type="button">
-              Enlighten-Me
+            <button id="enlightenButton" class="button button-primary button-press-me" type="button" aria-label="Press me for another scripture verse">
+              PRESS ME
             </button>
             <button id="pictureButton" class="button button-premium" type="button" disabled>
               Unlock Image Creation
@@ -313,6 +332,7 @@
         <li><a id="termsFooterLink" href="terms.html">Terms</a></li>
         <li id="refundFooterLink"><a href="refund.html">Refunds</a></li>
         <li><a id="supportFooterLink" href="mailto:help@enlighten-me.co">Support</a></li>
+        <li><a id="appStoreFooterLink" href="https://apps.apple.com/app/id6768472131" target="_blank" rel="noopener noreferrer">App Store</a></li>
       </ul>
       <p class="footer-meta">&copy; 2026 CJD Consulting LLC</p>
     </footer>

@@ -2,7 +2,7 @@ if (typeof window !== "undefined" && window.Capacitor?.Plugins?.EnlightenSubscri
   window.EnlightenSubscriptions = window.Capacitor.Plugins.EnlightenSubscriptions;
 }
 
-const TRANSLATION_STORAGE_KEY = "enlighten.translation.v1";
+const TRANSLATION_STORAGE_KEY = "enlighten.translation.v3";
 const TRANSLATIONS = {
   en: {
     dataDir: "kjv",
@@ -118,7 +118,12 @@ let imageSubscription = {
   entitlementToken: "",
 };
 let isGeneratingImage = false;
+let imageGenerationInterruptedByBackground = false;
+let appResumeWaiters = [];
 let actionStatusTimer = null;
+let searchTrackingTimer = null;
+const IMAGE_LOAD_RETRY_DELAYS_MS = [250, 750, 1500];
+const IMAGE_REQUEST_RETRY_LIMIT = 1;
 let activeTranslationKey = resolveInitialTranslationKey();
 let localeStrings = {};
 let localeStringsReady = false;
@@ -154,13 +159,30 @@ function getUrlTranslationKey() {
   }
 }
 
+function getBrowserTranslationKey() {
+  try {
+    if (typeof navigator === "undefined") return "";
+    const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
+    for (const raw of preferred) {
+      const lower = String(raw || "").toLowerCase();
+      // Match any regional Spanish (es, es-MX, es-ES, es-419, …) to our es-MX bundle.
+      if (lower.startsWith("es")) return "es-MX";
+      if (lower.startsWith("en")) return "en";
+    }
+    return "";
+  } catch (_) {
+    return "";
+  }
+}
+
 function resolveInitialTranslationKey() {
   const requested = getUrlTranslationKey();
   if (requested) return requested;
   const stored = normalizeTranslationKey(getStoredTranslationKey());
   if (stored) return stored;
-  const browserLanguage = String(navigator.language || "").toLowerCase();
-  return browserLanguage.startsWith("es") ? "es-MX" : DEFAULT_TRANSLATION_KEY;
+  const browser = getBrowserTranslationKey();
+  if (browser) return browser;
+  return DEFAULT_TRANSLATION_KEY;
 }
 
 function persistActiveTranslationKey() {
@@ -322,10 +344,18 @@ function getPassageText(passage) {
 }
 
 const SHARE_URL = "https://www.enlighten-me.co";
+const APP_STORE_URL = "https://apps.apple.com/app/id6768472131";
+
+// Match the share link to the medium: shares from the native iOS app point
+// recipients to the App Store (they're almost certainly on a phone), while web
+// shares point to the website, which opens anywhere.
+function getShareDestinationUrl() {
+  return isNativeAppRuntime() ? APP_STORE_URL : SHARE_URL;
+}
 
 function getShareText() {
   if (!currentPassage) return "";
-  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (${getTranslationTag()})\n${SHARE_URL}`;
+  return `${getPassageText(currentPassage)}\n\n— ${currentPassage.reference} (${getTranslationTag()})\n${getShareDestinationUrl()}`;
 }
 
 function getShareCardFileName() {
@@ -357,6 +387,92 @@ const REMOTE_API_BASE = "https://www.enlighten-me.co";
 
 function apiUrl(path) {
   return isNativeAppRuntime() || (isLocalStaticOrigin() && !useLocalApiOverride()) ? `${REMOTE_API_BASE}${path}` : path;
+}
+
+const MARKETING_UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+
+function cleanMarketingValue(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .replace(/[^\w .:/?&=+@|-]/g, "")
+    .trim()
+    .slice(0, 120);
+}
+
+function getMarketingContext(extra = {}) {
+  const context = {
+    language: activeTranslationKey,
+    path: window.location.pathname || "/",
+    ...extra,
+  };
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    for (const key of MARKETING_UTM_KEYS) {
+      const value = cleanMarketingValue(params.get(key));
+      if (value) context[key] = value;
+    }
+  } catch (_) {}
+
+  return Object.fromEntries(
+    Object.entries(context)
+      .map(([key, value]) => [key, typeof value === "string" ? cleanMarketingValue(value) : value])
+      .filter(([, value]) => value !== "" && value !== null && typeof value !== "undefined")
+  );
+}
+
+function shouldTrackMarketingEvents() {
+  return !isNativeAppRuntime()
+    && !isLocalStaticOrigin()
+    && ["http:", "https:"].includes(window.location.protocol);
+}
+
+function trackMarketingEvent(event, data = {}) {
+  if (!shouldTrackMarketingEvents()) return;
+
+  const context = getMarketingContext(data);
+
+  try {
+    window.gtag?.("event", event.toLowerCase(), context);
+  } catch (_) {}
+
+  const body = JSON.stringify({ event, data: context });
+  const url = apiUrl("/api/marketing-event");
+
+  try {
+    if (navigator.sendBeacon) {
+      const queued = navigator.sendBeacon(url, new Blob([body], { type: "application/json" }));
+      if (queued) return;
+    }
+  } catch (_) {}
+
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    keepalive: true,
+  }).catch(() => {});
+}
+
+function currentPassageMarketingData(extra = {}) {
+  return {
+    reference: currentPassage?.reference || "",
+    translation: getTranslationTag(),
+    ...extra,
+  };
+}
+
+function scheduleSearchTracking(query, resultCount) {
+  window.clearTimeout(searchTrackingTimer);
+  if (query.length < 2) return;
+
+  searchTrackingTimer = window.setTimeout(() => {
+    trackMarketingEvent("bible_search", {
+      query_length: query.length,
+      result_count: resultCount,
+      testament: activeTestament,
+    });
+  }, 800);
 }
 
 function hasImageSubscription() {
@@ -767,6 +883,8 @@ if (typeof window !== "undefined") {
 }
 
 async function subscribeToImagePlan() {
+  trackMarketingEvent("subscribe_clicked", { source: isNativeAppRuntime() ? "ios" : "web" });
+
   try {
     if (window.EnlightenSubscriptions?.purchase) {
       imageSubscription = {
@@ -937,6 +1055,7 @@ function resetImagePanel() {
 
 function setImageLoading(isLoading) {
   isGeneratingImage = isLoading;
+  if (isLoading) imageGenerationInterruptedByBackground = false;
   pictureButton.disabled = isLoading || !currentPassage;
   pictureButton.textContent = isLoading ? t("button.creating") : getPictureButtonLabel();
   imagePanel.classList.toggle("is-loading", isLoading);
@@ -951,13 +1070,93 @@ function showPleaseWait() {
   `;
 }
 
-function preloadImage(src) {
+function isAppForeground() {
+  return document.visibilityState !== "hidden";
+}
+
+function markImageGenerationInterrupted() {
+  if (isGeneratingImage) imageGenerationInterruptedByBackground = true;
+}
+
+function resolveAppResumeWaiters() {
+  if (!isAppForeground()) return;
+  const waiters = appResumeWaiters;
+  appResumeWaiters = [];
+  for (const resolve of waiters) resolve();
+}
+
+function waitForAppForeground() {
+  if (isAppForeground()) return Promise.resolve();
+  return new Promise((resolve) => {
+    appResumeWaiters.push(resolve);
+  });
+}
+
+function delay(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function isBackgroundLoadFailure(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return /load failed|failed to fetch|networkerror|network request failed|abort|cancel|offline|connection/.test(message);
+}
+
+async function waitForImageGenerationResume() {
+  await waitForAppForeground();
+  showPleaseWait();
+  imageGenerationInterruptedByBackground = false;
+  await delay(400);
+}
+
+function bindAppLifecycleEvents() {
+  document.addEventListener("visibilitychange", () => {
+    if (isAppForeground()) {
+      resolveAppResumeWaiters();
+    } else {
+      markImageGenerationInterrupted();
+    }
+  });
+  window.addEventListener("blur", markImageGenerationInterrupted);
+  window.addEventListener("pagehide", markImageGenerationInterrupted);
+  window.addEventListener("focus", resolveAppResumeWaiters);
+  window.addEventListener("pageshow", resolveAppResumeWaiters);
+}
+
+function loadImageElement(src, options = {}) {
   return new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => resolve(src);
+    if (options.crossOrigin) {
+      image.crossOrigin = options.crossOrigin;
+    }
+    image.onload = () => resolve(image);
     image.onerror = () => reject(new Error(t("image.load_failed")));
     image.src = src;
   });
+}
+
+async function loadImageWithResumeRetry(src, options = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= IMAGE_LOAD_RETRY_DELAYS_MS.length; attempt += 1) {
+    if (!isAppForeground()) await waitForImageGenerationResume();
+
+    try {
+      return await loadImageElement(src, options);
+    } catch (error) {
+      lastError = error;
+      const canRetry = isBackgroundLoadFailure(error) && attempt < IMAGE_LOAD_RETRY_DELAYS_MS.length;
+      if (!canRetry) break;
+      if (!isAppForeground() || imageGenerationInterruptedByBackground) await waitForImageGenerationResume();
+      await delay(IMAGE_LOAD_RETRY_DELAYS_MS[attempt]);
+    }
+  }
+
+  throw lastError || new Error(t("image.load_failed"));
+}
+
+async function preloadImage(src) {
+  await loadImageWithResumeRetry(src);
+  return src;
 }
 
 function findImageSource(value, seen = new Set()) {
@@ -1025,8 +1224,14 @@ function setCurrentPassage(passage, options = {}) {
   }
 }
 
-function enlighten() {
+function showRandomPassage() {
   setCurrentPassage(getRandomPassage());
+}
+
+function enlighten() {
+  const eventData = currentPassageMarketingData();
+  trackMarketingEvent("press_me", eventData);
+  showRandomPassage();
 }
 
 function createPassageFromVerse(verse) {
@@ -1120,6 +1325,15 @@ function normalizeSearchQuery(value) {
   return value.trim().replace(/\s+/g, " ").toLowerCase();
 }
 
+function escapeSearchRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function createWholeTermSearchPattern(normalizedQuery) {
+  const escapedPhrase = normalizedQuery.split(" ").map(escapeSearchRegex).join("\\s+");
+  return new RegExp(`(^|[^a-z0-9])${escapedPhrase}(?=$|[^a-z0-9])`, "i");
+}
+
 function matchesTestament(verse, testament) {
   if (testament === "old") return verse.testament === "Old";
   if (testament === "new") return verse.testament === "New";
@@ -1138,13 +1352,11 @@ function searchVerses(query, testament = activeTestament) {
 
   const pool = testament === "all" ? verses : verses.filter((verse) => matchesTestament(verse, testament));
 
-  const exactReferenceMatches = pool.filter((verse) => verse.reference.toLowerCase() === normalizedQuery);
-  const textMatches = pool.filter((verse) => {
-    const haystack = `${verse.reference} ${verse.text}`.toLowerCase();
-    return haystack.includes(normalizedQuery);
-  });
+  const referenceMatches = pool.filter((verse) => verse.reference.toLowerCase().includes(normalizedQuery));
+  const searchPattern = createWholeTermSearchPattern(normalizedQuery);
+  const textMatches = pool.filter((verse) => searchPattern.test(verse.text));
 
-  return [...exactReferenceMatches, ...textMatches]
+  return [...referenceMatches, ...textMatches]
     .filter((verse, index, allMatches) => allMatches.findIndex((match) => match.id === verse.id) === index)
     .slice(0, MAX_SEARCH_RESULTS);
 }
@@ -1187,7 +1399,9 @@ function renderSearchResults(results, query, testament = activeTestament) {
 
 function runSearch() {
   const query = normalizeSearchQuery(searchInput.value);
-  renderSearchResults(searchVerses(query), query);
+  const results = searchVerses(query);
+  renderSearchResults(results, query);
+  scheduleSearchTracking(query, results.length);
 }
 
 function setTestamentFilter(testament) {
@@ -1306,16 +1520,8 @@ function drawShareCardText(context, text, reference, compact = false) {
   context.fillText(`— ${reference} (${getTranslationTag()})`, 540, y + referenceGap, maxWidth);
 }
 
-function loadCanvasImage(src, options = {}) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    if (options.crossOrigin) {
-      img.crossOrigin = options.crossOrigin;
-    }
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error(t("image.load_failed")));
-    img.src = src;
-  });
+async function loadCanvasImage(src, options = {}) {
+  return await loadImageWithResumeRetry(src, options);
 }
 
 async function getImageForCanvas(src) {
@@ -1446,6 +1652,7 @@ async function showShareCard() {
   setActionStatus(t("card.composing"));
   try {
     await renderShareCardCanvas();
+    trackMarketingEvent("share_card_created", currentPassageMarketingData());
     setActionStatus(t("card.ready"));
     scrollHomeFocalIntoView();
   } catch (error) {
@@ -1480,6 +1687,7 @@ async function saveCurrentCardToLibrary() {
   saveCardButton.disabled = true;
   try {
     await writeSavedCard(card);
+    trackMarketingEvent("share_card_saved", currentPassageMarketingData());
     currentSavedCardId = id;
     await loadSavedCards();
     saveCardButton.textContent = t("card.button_saved");
@@ -1576,14 +1784,15 @@ async function shareCardDataUrl(dataUrl, fileName, text, statusTarget = setActio
 
 async function shareCardImage() {
   if (!currentPassage) return;
+  trackMarketingEvent("share_card_share_started", currentPassageMarketingData());
   const dataUrl = currentShareCardDataUrl || (await renderShareCardCanvas());
-  await shareCardDataUrl(dataUrl, getShareCardFileName(), SHARE_URL);
+  await shareCardDataUrl(dataUrl, getShareCardFileName(), getShareDestinationUrl());
 }
 
 async function shareActiveLibraryCard() {
   const card = getActiveLibraryCard();
   if (!card) return;
-  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), SHARE_URL, (message) => {
+  await shareCardDataUrl(card.dataUrl, getLibraryCardFileName(card), getShareDestinationUrl(), (message) => {
     if (libraryStatus) libraryStatus.textContent = message;
   });
 }
@@ -1612,14 +1821,60 @@ async function deleteActiveLibraryCard() {
   }
 }
 
+async function fetchPersonalImageSourceWithResumeRetry() {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= IMAGE_REQUEST_RETRY_LIMIT; attempt += 1) {
+    if (attempt > 0) await waitForImageGenerationResume();
+
+    try {
+      const response = await fetch(apiUrl("/api/picture"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Enlighten-Product": IMAGE_PRODUCT_ID,
+          ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
+        },
+        body: JSON.stringify({
+          passage: getPassageText(currentPassage),
+          reference: currentPassage.reference,
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(payload.error || t("image.failed_generic"));
+      }
+
+      const imageSource = findImageSource(payload);
+      if (!imageSource) {
+        throw new Error(t("image.no_image_returned"));
+      }
+
+      return imageSource;
+    } catch (error) {
+      lastError = error;
+      const canRetry = imageGenerationInterruptedByBackground
+        && isBackgroundLoadFailure(error)
+        && attempt < IMAGE_REQUEST_RETRY_LIMIT;
+      if (!canRetry) break;
+    }
+  }
+
+  throw lastError || new Error(t("image.failed_generic"));
+}
+
 async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
   if (!hasImageSubscription()) {
+    trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
     showImageSubscriptionPrompt();
     return;
   }
 
+  trackMarketingEvent("personal_image_started", currentPassageMarketingData());
   setImageLoading(true);
   showPleaseWait();
   currentGeneratedImageSrc = "";
@@ -1630,30 +1885,7 @@ async function pictureThisMessage() {
   if (imagePrompt) imagePrompt.textContent = "";
 
   try {
-    const response = await fetch(apiUrl("/api/picture"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Enlighten-Product": IMAGE_PRODUCT_ID,
-        ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
-      },
-      body: JSON.stringify({
-        passage: getPassageText(currentPassage),
-        reference: currentPassage.reference,
-      }),
-    });
-
-    const payload = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(payload.error || t("image.failed_generic"));
-    }
-
-    const imageSource = findImageSource(payload);
-    if (!imageSource) {
-      throw new Error(t("image.no_image_returned"));
-    }
-
+    const imageSource = await fetchPersonalImageSourceWithResumeRetry();
     await preloadImage(imageSource);
 
     currentGeneratedImageSrc = imageSource;
@@ -1675,6 +1907,7 @@ async function pictureThisMessage() {
       imageStatus.textContent = "";
       imageStatus.hidden = true;
       imagePanel.hidden = true;
+      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false }));
       setActionStatus(t("card.ready_full"));
       scrollHomeFocalIntoView();
     } catch (cardError) {
@@ -1686,9 +1919,11 @@ async function pictureThisMessage() {
         imageStatus.textContent = "";
         imageStatus.hidden = true;
         imagePanel.hidden = true;
+        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true }));
         setActionStatus(t("card.ready_text_only"));
         scrollHomeFocalIntoView();
       } catch (fallbackError) {
+        trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
         console.error("Text-only card render failed:", fallbackError);
         imagePanel.hidden = false;
         imageStatus.hidden = false;
@@ -1697,6 +1932,7 @@ async function pictureThisMessage() {
       }
     }
   } catch (error) {
+    trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
     imagePanel.hidden = false;
     imageStatus.hidden = false;
     imageStatus.textContent = error.message || t("image.failed_generic");
@@ -1745,8 +1981,12 @@ async function changeTranslation(nextTranslationKey) {
     searchInput.value = "";
     renderSearchResults([], "");
     setScriptureControlsDisabled(false);
-    enlighten();
+    showRandomPassage();
     setActionStatus(t("status.language_changed"));
+    trackMarketingEvent("language_selected", {
+      previous_language: previousTranslationKey,
+      selected_language: activeTranslationKey,
+    });
     window.dispatchEvent(new CustomEvent("enlighten:language-changed"));
   } catch (error) {
     console.error(error);
@@ -1760,6 +2000,7 @@ async function changeTranslation(nextTranslationKey) {
 }
 
 function bindEvents() {
+  bindAppLifecycleEvents();
   enlightenButton.addEventListener("click", enlighten);
   copyButton.addEventListener("click", copyCurrentPassage);
   shareCardButton.addEventListener("click", showShareCard);
@@ -1776,6 +2017,9 @@ function bindEvents() {
   }
   settingsToggle.addEventListener("click", toggleSettings);
   languageSelect?.addEventListener("change", () => changeTranslation(languageSelect.value));
+  document.getElementById("appStoreFooterLink")?.addEventListener("click", () => {
+    trackMarketingEvent("app_store_clicked", { source: "footer" });
+  });
   settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));
   libraryBackButton.addEventListener("click", () => setLibraryOpen(false));
@@ -1873,7 +2117,8 @@ async function initializeApp() {
     chapterSelect.disabled = false;
     verseSelect.disabled = false;
 
-    enlighten();
+    showRandomPassage();
+    trackMarketingEvent("web_visit");
   } catch (error) {
     passageElement.textContent = t("home.scripture_load_failed");
     referenceElement.textContent = "—";
