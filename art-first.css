@@ -28,19 +28,26 @@ body {
   min-height: 100dvh;
 }
 
-.proto-badge {
+/* Settings gear — same affordance as the app's top-right toggle, but here it
+   links into the app (/?view=settings) since settings live on index. */
+.settings-link {
   position: fixed;
-  top: 12px;
-  right: 12px;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 14px;
   z-index: 50;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: rgba(248, 250, 252, 0.6);
+  font-size: 18px;
+  line-height: 1;
+  text-decoration: none;
+  color: rgba(248, 250, 252, 0.72);
   border: 1px solid rgba(248, 250, 252, 0.25);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 9px 11px;
   background: rgba(15, 23, 42, 0.5);
+}
+
+.settings-link:hover {
+  color: var(--gold);
+  border-color: rgba(250, 204, 21, 0.45);
 }
 
 .stage {
@@ -157,6 +164,38 @@ body.deck-ready .card-stage {
   font-size: 12px;
   color: rgba(248, 250, 252, 0.55);
   letter-spacing: 0.4px;
+}
+
+/* --- Footer (mirrors index.html's site-footer) --- */
+
+.site-footer {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+}
+
+.footer-links a {
+  font-size: 12px;
+  color: rgba(248, 250, 252, 0.55);
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.footer-meta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(248, 250, 252, 0.35);
 }
 
 /* --- Create prompt --- */

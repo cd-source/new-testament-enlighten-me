@@ -831,8 +831,16 @@ function toggleSettings() {
 function openInitialViewFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view");
-  if (view === "settings") setSettingsOpen(true);
+  if (view === "settings" || view === "subscribe") setSettingsOpen(true);
   if (view === "library") setLibraryOpen(true);
+  if (view === "subscribe") {
+    // Deep link from the art-first paywall: land on the subscription panel
+    // itself, not just the settings screen. Delayed so it wins over the
+    // scroll-to-top that showView kicks off.
+    window.setTimeout(() => {
+      document.getElementById("subscriptionPanel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350);
+  }
 
   const cleanupKeys = ["view", "lang", "language", "locale"];
   const shouldCleanUrl = cleanupKeys.some((key) => params.has(key));

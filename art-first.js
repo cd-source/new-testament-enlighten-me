@@ -586,11 +586,14 @@ createErrorClose.addEventListener("click", () => {
 });
 paywallSignup.addEventListener("click", () => {
   track("paywall_signup_clicked", {});
-  window.location.href = "/";
+  window.location.href = "/?view=subscribe";
 });
 paywallClose.addEventListener("click", () => {
   paywallModal.hidden = true;
   track("paywall_dismissed", {});
+});
+document.getElementById("appStoreLink")?.addEventListener("click", () => {
+  track("app_store_clicked", {});
 });
 
 document.addEventListener("keydown", (event) => {
