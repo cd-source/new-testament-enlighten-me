@@ -7,4 +7,4 @@ dist
 .env
 .env.local
 supabase/.temp
-.env*.local
+.env*

@@ -520,6 +520,46 @@ h1 {
   font: 700 0.9rem/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Apple's Marketing Resources and Identity Guidelines govern this badge: it is official
+   artwork that must not be recoloured, angled, animated, or shown below 40px tall onscreen,
+   and it needs clear space on every side of at least a quarter of its height. The 48px badge
+   plus the 12px link padding hold that clear space, so keep them in step if either changes. */
+.app-store-cta {
+  display: none;
+}
+
+.is-web .app-store-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 26px 0 0;
+}
+
+.app-store-cta-text {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.85rem;
+  color: var(--muted-2);
+}
+
+.app-store-badge-link {
+  display: inline-block;
+  padding: 12px;
+  border-radius: 14px;
+  line-height: 0;
+}
+
+.app-store-badge-link:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.7);
+}
+
+.app-store-badge {
+  display: block;
+  width: auto;
+  height: 48px;
+}
+
 .subscription-panel,
 .share-card-panel,
 .scripture-tools {

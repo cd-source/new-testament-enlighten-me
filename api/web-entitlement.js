@@ -3,11 +3,11 @@ const {
   SERVER_TOKEN_TTL_SECONDS,
   setCorsHeaders,
   issueServerToken,
-} = require("../lib/entitlement.js");
+} = require("./_lib/entitlement.js");
 const {
   getSupabaseAdmin,
   verifySupabaseUserToken,
-} = require("../lib/supabase-admin.js");
+} = require("./_lib/supabase-admin.js");
 
 function json(req, res, status, body) {
   res.statusCode = status;

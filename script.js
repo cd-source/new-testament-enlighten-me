@@ -11,6 +11,7 @@ const TRANSLATIONS = {
     stripeLocale: "en",
     exampleDir: "assets/examples",
     exampleExtension: "png",
+    appStoreBadge: "assets/app-store-badge/en.svg",
     legalPaths: {
       privacy: "privacy.html",
       terms: "terms.html",
@@ -24,6 +25,7 @@ const TRANSLATIONS = {
     stripeLocale: "es",
     exampleDir: "assets/examples/es-MX",
     exampleExtension: "png",
+    appStoreBadge: "assets/app-store-badge/es-MX.svg",
     legalPaths: {
       privacy: "privacy.es-MX.html",
       terms: "terms.es-MX.html",
@@ -40,6 +42,8 @@ const LIBRARY_DB_NAME = "enlightenCardLibrary";
 const LIBRARY_DB_VERSION = 1;
 const LIBRARY_STORE_NAME = "cards";
 const DECK_STORAGE_KEY_PREFIX = "enlighten.passageDeck.v1";
+const DEVICE_ID_STORAGE_KEY = "enlighten.deviceId.v1";
+const FREE_IMAGE_STORAGE_KEY = "enlighten.freeImage.v1";
 
 const passageElement = document.getElementById("passage");
 const referenceElement = document.getElementById("reference");
@@ -218,6 +222,12 @@ function getLegalPath(name) {
 function getExampleImageSrc(index) {
   const config = getTranslationConfig();
   return `${config.exampleDir}/example-${index}.${config.exampleExtension}`;
+}
+
+// Apple ships the badge already localized and forbids rolling your own, so each language
+// points at its own official artwork file.
+function getAppStoreBadgeSrc() {
+  return getTranslationConfig().appStoreBadge;
 }
 
 function getScriptureDataUrl(fileName) {
@@ -427,14 +437,100 @@ function shouldTrackMarketingEvents() {
     && ["http:", "https:"].includes(window.location.protocol);
 }
 
+// Google Ads conversion tracking. The gtag tag (AW-18196936681) loads web-only in index.html.
+// Each label is the "conversion label" from Google Ads > Goals > the action's tag setup — the
+// part after the slash in its send_to. Leave a value "" to keep that conversion off: the fire is
+// a no-op until a real label is pasted in, so this is safe to ship before the actions exist.
+const GOOGLE_ADS_CONVERSION_ID = "AW-18196936681";
+const GOOGLE_ADS_CONVERSION_LABELS = {
+  subscribe_completed: "", // PRIMARY — a paid Stripe subscription actually completed
+  subscribe_clicked: "",   // secondary — the subscribe button was pressed (intent, not a sale)
+  app_store_clicked: "",   // secondary — the iOS App Store hand-off (home badge or footer)
+};
+
+function fireGoogleAdsConversion(event) {
+  const label = GOOGLE_ADS_CONVERSION_LABELS[event];
+  if (!label) return; // not a conversion event, or its label isn't filled in yet
+  if (typeof window === "undefined" || typeof window.gtag !== "function") return; // tag absent (iOS webview)
+  window.gtag("event", "conversion", { send_to: `${GOOGLE_ADS_CONVERSION_ID}/${label}` });
+}
+
+// GA4 (web-only). The tag + Measurement ID live in index.html (window.GA4_MEASUREMENT_ID); an empty
+// ID means GA4 is off and every call here is a no-op, so this ships safely before the property
+// exists. GA4 auto-captures page_view + user_engagement (its own engaged-session timer) once the ID
+// is set — that is what turns "bounce" into a real number — while these forwarded events give Google
+// Ads a conversion (subscribe_completed) it can import and optimize bidding against.
+function ga4Enabled() {
+  return typeof window !== "undefined"
+    && typeof window.gtag === "function"
+    && Boolean(window.GA4_MEASUREMENT_ID);
+}
+
+function fireGa4Event(name, params = {}) {
+  if (!ga4Enabled()) return;
+  window.gtag("event", name, { send_to: window.GA4_MEASUREMENT_ID, ...params });
+}
+
+// Vercel Web Analytics counts a "bounce" as a single-pageview visit, and this whole app is one URL,
+// so every engaged session looks like a bounce until we register more pageviews. Vercel only counts
+// a pageview when the pathname changes, but its manual API (va("pageview", {route})) fires one without
+// touching the real URL — no routing, no 404-on-refresh. We emit one when the visitor reaches a
+// distinct view or takes a meaningful action, so bounce reflects "landed and left", not "is an SPA".
+const VIRTUAL_PAGEVIEW_ROUTES = {
+  bible_search: "/search",
+  share_card_created: "/card",
+  share_card_saved: "/card",
+  personal_image_started: "/image",
+  personal_image_completed: "/image",
+  subscribe_clicked: "/subscribe",
+  subscribe_completed: "/subscribe/complete",
+  app_store_clicked: "/app-store",
+};
+
+let lastVirtualRoute = "/"; // Vercel auto-tracks the initial "/" pageview on load
+
+function trackVirtualPageview(route) {
+  if (!route || route === lastVirtualRoute) return; // mirror Vercel: only a genuine route change counts
+  if (!shouldTrackMarketingEvents()) return;
+  if (typeof window === "undefined" || typeof window.va !== "function") return;
+  lastVirtualRoute = route;
+  window.va("pageview", { route, path: route });
+}
+
+// A visit that stays visible for 15s is genuinely engaged (mirrors GA4's engaged-session idea), so a
+// reader who never clicks a tracked control still is not counted as a bounce.
+function armEngagementSignal() {
+  if (!shouldTrackMarketingEvents()) return;
+  let timer = null;
+  let done = false;
+  const fire = () => {
+    if (done) return;
+    done = true;
+    document.removeEventListener("visibilitychange", onVisibility);
+    trackVirtualPageview("/engaged");
+    fireGa4Event("engaged_session");
+  };
+  function onVisibility() {
+    if (done) return;
+    if (document.visibilityState === "visible") {
+      if (timer === null) timer = window.setTimeout(fire, 15000);
+    } else if (timer !== null) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+  }
+  document.addEventListener("visibilitychange", onVisibility);
+  if (document.visibilityState === "visible") timer = window.setTimeout(fire, 15000);
+}
+
 function trackMarketingEvent(event, data = {}) {
   if (!shouldTrackMarketingEvents()) return;
 
   const context = getMarketingContext(data);
 
-  try {
-    window.gtag?.("event", event.toLowerCase(), context);
-  } catch (_) {}
+  fireGoogleAdsConversion(event);
+  fireGa4Event(event, context);
+  trackVirtualPageview(VIRTUAL_PAGEVIEW_ROUTES[event]);
 
   const body = JSON.stringify({ event, data: context });
   const url = apiUrl("/api/marketing-event");
@@ -479,6 +575,57 @@ function hasImageSubscription() {
   return Boolean(imageSubscription.isActive);
 }
 
+// Stable per-device id so the server can meter the one free (non-subscriber) image.
+function getDeviceId() {
+  try {
+    if (typeof localStorage === "undefined") return "";
+    let id = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+    if (!id) {
+      id = window.crypto?.randomUUID?.() || `dev-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      localStorage.setItem(DEVICE_ID_STORAGE_KEY, id);
+    }
+    return id;
+  } catch (error) {
+    return "";
+  }
+}
+
+// Web-only free taste: one image before the paywall. Native (StoreKit) keeps the hard
+// paywall, so this is always false inside the iOS app. The server enforces the real limit;
+// this just drives the button copy and an instant wall without a wasted round-trip.
+function isFreeImageAvailable() {
+  if (isNativeAppRuntime() || hasImageSubscription()) return false;
+  try {
+    if (typeof localStorage === "undefined") return true;
+    return localStorage.getItem(FREE_IMAGE_STORAGE_KEY) !== "used";
+  } catch (error) {
+    return true;
+  }
+}
+
+function markFreeImageUsed() {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(FREE_IMAGE_STORAGE_KEY, "used");
+    }
+  } catch (error) {
+    // private mode / quota — the server still enforces the one-image limit
+  }
+}
+
+function consumeFreeImageIfNeeded() {
+  if (isNativeAppRuntime() || hasImageSubscription()) return;
+  markFreeImageUsed();
+}
+
+// Which audience is attempting an image, so GA4 can separate the one free taste from paid
+// usage. Sent as `tier` on the image funnel events and gates the dedicated free_image_* events.
+function imageAudienceTier() {
+  if (hasImageSubscription()) return "subscriber";
+  if (isNativeAppRuntime()) return "native";
+  return "free";
+}
+
 function updateSubscriptionUi() {
   const active = hasImageSubscription();
   const nativeLabel = isNativeAppRuntime() ? "StoreKit" : "web preview";
@@ -501,7 +648,9 @@ function updateSubscriptionUi() {
 }
 
 function getPictureButtonLabel(active = hasImageSubscription()) {
-  return active ? t("button.create_card") : t("button.unlock_image");
+  if (active) return t("button.create_card");
+  if (isFreeImageAvailable()) return t("button.picture_this_free");
+  return t("button.unlock_image");
 }
 
 function setElementText(element, key, vars) {
@@ -535,6 +684,12 @@ function applyTranslations() {
   setElementAttr(document.querySelector(".home-focal"), "aria-label", "home.scripture_aria");
   setElementAttr(document.querySelector(".home-actions"), "aria-label", "home.scripture_actions_aria");
   setElementAttr(document.querySelector(".utility-actions"), "aria-label", "home.passage_utilities_aria");
+  setElementText(document.getElementById("appStoreCtaText"), "app_store.tagline");
+  const appStoreBadge = document.getElementById("appStoreBadgeImage");
+  if (appStoreBadge) {
+    appStoreBadge.src = getAppStoreBadgeSrc();
+    appStoreBadge.alt = t("app_store.badge_alt");
+  }
   setElementText(enlightenButton, "button.enlighten");
   setElementText(copyButton, "button.copy");
   setElementText(shareCardButton, "button.share_card");
@@ -653,6 +808,8 @@ function applyTranslations() {
   window.dispatchEvent(new CustomEvent("enlighten:language-ready"));
 }
 
+const VIEW_ROUTES = { home: "/", settings: "/settings", library: "/library" };
+
 function showView(viewName) {
   const showingHome = viewName === "home";
   homeView.hidden = !showingHome;
@@ -660,6 +817,7 @@ function showView(viewName) {
   libraryView.hidden = viewName !== "library";
   settingsToggle.setAttribute("aria-expanded", String(viewName === "settings"));
   window.scrollTo({ top: 0, behavior: "smooth" });
+  trackVirtualPageview(VIEW_ROUTES[viewName]);
 }
 
 function setSettingsOpen(isOpen) {
@@ -670,13 +828,27 @@ function toggleSettings() {
   setSettingsOpen(true);
 }
 
+// Set when the visitor arrived from /art-first (settings gear or paywall
+// deep link): "Back to Home" should return them to the card flow they left,
+// not strand them on the main app home.
+let returnToArtFirst = false;
+
 function openInitialViewFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view");
-  if (view === "settings") setSettingsOpen(true);
+  returnToArtFirst = params.get("return") === "art-first";
+  if (view === "settings" || view === "subscribe") setSettingsOpen(true);
   if (view === "library") setLibraryOpen(true);
+  if (view === "subscribe") {
+    // Deep link from the art-first paywall: land on the subscription panel
+    // itself, not just the settings screen. Delayed so it wins over the
+    // scroll-to-top that showView kicks off.
+    window.setTimeout(() => {
+      document.getElementById("subscriptionPanel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350);
+  }
 
-  const cleanupKeys = ["view", "lang", "language", "locale"];
+  const cleanupKeys = ["view", "lang", "language", "locale", "return"];
   const shouldCleanUrl = cleanupKeys.some((key) => params.has(key));
   if (!shouldCleanUrl) return;
 
@@ -880,6 +1052,7 @@ async function loadImageSubscription() {
 
 if (typeof window !== "undefined") {
   window.refreshEnlightenSubscription = loadImageSubscription;
+  window.trackMarketingEvent = trackMarketingEvent;
 }
 
 async function subscribeToImagePlan() {
@@ -951,7 +1124,9 @@ async function restoreImagePlan() {
 
 function showImageSubscriptionPrompt() {
   setSettingsOpen(true);
-  setActionStatus(t("image.subscribe_prompt", { price: getImagePriceLabel() }));
+  const usedFreeTaste = !isNativeAppRuntime() && !hasImageSubscription() && !isFreeImageAvailable();
+  const promptKey = usedFreeTaste ? "image.subscribe_prompt_free_used" : "image.subscribe_prompt";
+  setActionStatus(t(promptKey, { price: getImagePriceLabel() }));
 }
 
 function setActionStatus(message) {
@@ -1224,14 +1399,9 @@ function setCurrentPassage(passage, options = {}) {
   }
 }
 
-function showRandomPassage() {
-  setCurrentPassage(getRandomPassage());
-}
-
 function enlighten() {
-  const eventData = currentPassageMarketingData();
-  trackMarketingEvent("press_me", eventData);
-  showRandomPassage();
+  trackMarketingEvent("press_me", currentPassageMarketingData());
+  setCurrentPassage(getRandomPassage());
 }
 
 function createPassageFromVerse(verse) {
@@ -1834,6 +2004,7 @@ async function fetchPersonalImageSourceWithResumeRetry() {
           "Content-Type": "application/json",
           "X-Enlighten-Product": IMAGE_PRODUCT_ID,
           ...(imageSubscription.entitlementToken ? { "X-Enlighten-Entitlement": imageSubscription.entitlementToken } : {}),
+          ...(!isNativeAppRuntime() && !imageSubscription.entitlementToken ? { "X-Enlighten-Device": getDeviceId() } : {}),
         },
         body: JSON.stringify({
           passage: getPassageText(currentPassage),
@@ -1842,6 +2013,12 @@ async function fetchPersonalImageSourceWithResumeRetry() {
       });
 
       const payload = await response.json().catch(() => ({}));
+
+      if (response.status === 402) {
+        const limitError = new Error(payload.error || t("image.subscribe_prompt", { price: getImagePriceLabel() }));
+        limitError.code = "subscription_required";
+        throw limitError;
+      }
 
       if (!response.ok) {
         throw new Error(payload.error || t("image.failed_generic"));
@@ -1868,13 +2045,14 @@ async function fetchPersonalImageSourceWithResumeRetry() {
 async function pictureThisMessage() {
   if (!currentPassage || isGeneratingImage) return;
 
-  if (!hasImageSubscription()) {
-    trackMarketingEvent("personal_image_locked", currentPassageMarketingData());
+  if (!hasImageSubscription() && !isFreeImageAvailable()) {
+    if (imageAudienceTier() === "free") trackMarketingEvent("free_image_wall", currentPassageMarketingData());
+    trackMarketingEvent("personal_image_locked", currentPassageMarketingData({ tier: imageAudienceTier() }));
     showImageSubscriptionPrompt();
     return;
   }
 
-  trackMarketingEvent("personal_image_started", currentPassageMarketingData());
+  trackMarketingEvent("personal_image_started", currentPassageMarketingData({ tier: imageAudienceTier() }));
   setImageLoading(true);
   showPleaseWait();
   currentGeneratedImageSrc = "";
@@ -1886,6 +2064,8 @@ async function pictureThisMessage() {
 
   try {
     const imageSource = await fetchPersonalImageSourceWithResumeRetry();
+    consumeFreeImageIfNeeded();
+    if (imageAudienceTier() === "free") trackMarketingEvent("free_image_generated", currentPassageMarketingData());
     await preloadImage(imageSource);
 
     currentGeneratedImageSrc = imageSource;
@@ -1907,7 +2087,7 @@ async function pictureThisMessage() {
       imageStatus.textContent = "";
       imageStatus.hidden = true;
       imagePanel.hidden = true;
-      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false }));
+      trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: false, tier: imageAudienceTier() }));
       setActionStatus(t("card.ready_full"));
       scrollHomeFocalIntoView();
     } catch (cardError) {
@@ -1919,7 +2099,7 @@ async function pictureThisMessage() {
         imageStatus.textContent = "";
         imageStatus.hidden = true;
         imagePanel.hidden = true;
-        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true }));
+        trackMarketingEvent("personal_image_completed", currentPassageMarketingData({ fallback: true, tier: imageAudienceTier() }));
         setActionStatus(t("card.ready_text_only"));
         scrollHomeFocalIntoView();
       } catch (fallbackError) {
@@ -1932,10 +2112,17 @@ async function pictureThisMessage() {
       }
     }
   } catch (error) {
-    trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
-    imagePanel.hidden = false;
-    imageStatus.hidden = false;
-    imageStatus.textContent = error.message || t("image.failed_generic");
+    if (error?.code === "subscription_required") {
+      markFreeImageUsed();
+      if (imageAudienceTier() === "free") trackMarketingEvent("free_image_wall", currentPassageMarketingData());
+      trackMarketingEvent("personal_image_locked", currentPassageMarketingData({ tier: imageAudienceTier() }));
+      showImageSubscriptionPrompt();
+    } else {
+      trackMarketingEvent("personal_image_failed", currentPassageMarketingData());
+      imagePanel.hidden = false;
+      imageStatus.hidden = false;
+      imageStatus.textContent = error.message || t("image.failed_generic");
+    }
   } finally {
     setImageLoading(false);
   }
@@ -1981,7 +2168,7 @@ async function changeTranslation(nextTranslationKey) {
     searchInput.value = "";
     renderSearchResults([], "");
     setScriptureControlsDisabled(false);
-    showRandomPassage();
+    enlighten();
     setActionStatus(t("status.language_changed"));
     trackMarketingEvent("language_selected", {
       previous_language: previousTranslationKey,
@@ -2020,7 +2207,16 @@ function bindEvents() {
   document.getElementById("appStoreFooterLink")?.addEventListener("click", () => {
     trackMarketingEvent("app_store_clicked", { source: "footer" });
   });
-  settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
+  document.getElementById("appStoreBadgeLink")?.addEventListener("click", () => {
+    trackMarketingEvent("app_store_clicked", { source: "home_badge" });
+  });
+  settingsBackButton.addEventListener("click", () => {
+    if (returnToArtFirst) {
+      window.location.href = "/art-first";
+      return;
+    }
+    setSettingsOpen(false);
+  });
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));
   libraryBackButton.addEventListener("click", () => setLibraryOpen(false));
   libraryPrevButton.addEventListener("click", () => showLibraryOffset(-1));
@@ -2117,8 +2313,9 @@ async function initializeApp() {
     chapterSelect.disabled = false;
     verseSelect.disabled = false;
 
-    showRandomPassage();
+    enlighten();
     trackMarketingEvent("web_visit");
+    armEngagementSignal();
   } catch (error) {
     passageElement.textContent = t("home.scripture_load_failed");
     referenceElement.textContent = "—";

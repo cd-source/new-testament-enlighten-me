@@ -26,6 +26,8 @@ const entries = [
   "assets/examples/es-MX/example-1.png",
   "assets/examples/es-MX/example-2.png",
   "assets/examples/es-MX/example-3.png",
+  "assets/app-store-badge/en.svg",
+  "assets/app-store-badge/es-MX.svg",
   "privacy.html",
   "terms.html",
   "refund.html",

@@ -3,8 +3,8 @@ const {
   getStripe,
   getSupabaseAdmin,
   extractCurrentPeriodEnd,
-} = require("../../lib/supabase-admin.js");
-const { captureException, flush } = require("../../lib/alerts.js");
+} = require("../_lib/supabase-admin.js");
+const { captureException, flush } = require("../_lib/alerts.js");
 
 async function readRawBody(req) {
   const chunks = [];

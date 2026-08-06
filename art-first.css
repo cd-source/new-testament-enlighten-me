@@ -1,0 +1,371 @@
+/* Card-first prototype: the hero is the app's real share card (1080×1350),
+   rendered through the production canvas pipeline and shown as an image. */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0b1020;
+  --gold: #facc15;
+  --ink: #f8fafc;
+  --muted: #cbd5e1;
+  --muted-2: #94a3b8;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(250, 204, 21, 0.22), transparent 34rem),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 34rem),
+    var(--bg);
+  min-height: 100dvh;
+}
+
+/* Settings gear — same affordance as the app's top-right toggle, but here it
+   links into the app (/?view=settings) since settings live on index. */
+.settings-link {
+  position: fixed;
+  top: calc(18px + env(safe-area-inset-top));
+  right: 18px;
+  z-index: 50;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+  text-decoration: none;
+  color: rgba(248, 250, 252, 0.86);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.34);
+  opacity: 0.82;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.settings-link:hover {
+  background: rgba(250, 204, 21, 0.13);
+  border-color: rgba(250, 204, 21, 0.48);
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.stage {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+}
+
+/* --- Card --- */
+
+.card-stage {
+  position: relative;
+  width: min(92vw, calc(66dvh * 0.8));
+  aspect-ratio: 1080 / 1350;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(250, 204, 21, 0.18);
+  background: #111827;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+body.deck-ready .card-stage {
+  opacity: 1;
+}
+
+.card-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+
+.card-layer.visible {
+  opacity: 1;
+}
+
+/* --- Utility actions --- */
+
+.utility-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.utility-button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 4px;
+  background: transparent;
+  color: rgba(203, 213, 225, 0.88);
+  font: 800 0.88rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: color 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.utility-button:hover {
+  color: var(--gold);
+  transform: translateY(-1px);
+}
+
+.utility-divider {
+  color: rgba(203, 213, 225, 0.46);
+  font: 800 1.05rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* --- Press area --- */
+
+.press-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.press-me {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 16px 28px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  font: 800 1rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(34, 197, 94, 0.3);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.press-me:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(34, 197, 94, 0.4);
+}
+
+.press-me:active {
+  transform: translateY(0);
+}
+
+.press-hint {
+  font-size: 12px;
+  color: var(--muted-2);
+  letter-spacing: 0.4px;
+}
+
+/* --- Footer (mirrors index.html's site-footer) --- */
+
+.site-footer {
+  margin-top: 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.85rem;
+  color: var(--muted-2);
+  text-align: center;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-links a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.18);
+}
+
+.footer-links a:hover {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.footer-meta {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted-2);
+}
+
+/* --- Create prompt --- */
+
+.create-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(92vw, 420px);
+  animation: rise 0.45s ease both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.create-prompt-inner {
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  border-radius: 16px;
+  padding: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+.create-prompt-title {
+  font-family: Georgia, serif;
+  font-size: 19px;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.create-prompt-body {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(248, 250, 252, 0.85);
+  margin-bottom: 14px;
+}
+
+.create-prompt-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.create-button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 20px;
+  color: #171717;
+  background: linear-gradient(135deg, var(--gold), #fde68a);
+  font: 800 0.92rem/1 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(250, 204, 21, 0.24);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.create-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(250, 204, 21, 0.32);
+}
+
+.dismiss-button {
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: rgba(248, 250, 252, 0.6);
+  padding: 8px;
+}
+
+/* --- Create modal --- */
+
+.create-modal[hidden],
+.create-prompt[hidden] {
+  display: none;
+}
+
+.create-modal .dismiss-button {
+  display: block;
+  margin: 10px auto 0;
+}
+
+.create-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 6, 16, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.create-modal-card {
+  width: min(92vw, 440px);
+  background: rgba(15, 23, 42, 0.97);
+  border: 1px solid rgba(250, 204, 21, 0.3);
+  border-radius: 18px;
+  padding: 26px;
+  text-align: center;
+}
+
+.create-progress .shimmer {
+  height: 200px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: linear-gradient(
+    100deg,
+    rgba(148, 163, 184, 0.12) 30%,
+    rgba(250, 204, 21, 0.22) 50%,
+    rgba(148, 163, 184, 0.12) 70%
+  );
+  background-size: 220% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
+}
+
+.create-status {
+  font-size: 14px;
+  color: rgba(248, 250, 252, 0.8);
+}
+
+.create-done-title {
+  font-family: Georgia, serif;
+  font-size: 20px;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+.create-done-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: rgba(248, 250, 252, 0.82);
+  margin-bottom: 18px;
+}
+
+@media (max-height: 640px) {
+  .card-stage {
+    width: min(92vw, calc(58dvh * 0.8));
+  }
+}

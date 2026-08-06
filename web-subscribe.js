@@ -202,6 +202,10 @@
 
     if (!justSubscribed) return;
 
+    // A Stripe subscription just completed — the real revenue conversion. Route it through the
+    // shared tracker so it lands in both the Vercel funnel and Google Ads (gtag) at once.
+    window.trackMarketingEvent?.("subscribe_completed", { source: "web" });
+
     const message = document.getElementById("webSignInMessage");
     if (message) {
       message.textContent = t("web_signin.activating");

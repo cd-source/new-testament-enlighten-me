@@ -4,21 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Google Ads tag (AW-18196936681) + GA4 (G-XBBDF32F32) — web only. Guarded so it never
-       loads inside the Capacitor iOS build; index.html is copied verbatim into the native app
-       bundle. Loader stays anchored on the AW id: the G- loader URL 404s for this property
-       while collection still works through the shared gtag.js. -->
+  <!-- GA4 Measurement ID (G-XXXXXXXXXX). Web-only, loaded through the same gtag.js as the Ads tag.
+       Leave "" to keep GA4 off: the config call below and every GA4 event in script.js are no-ops
+       until a real ID is pasted here, so this is safe to ship before the property exists. This is
+       the single place to fill in — script.js reads window.GA4_MEASUREMENT_ID. -->
+  <script>window.GA4_MEASUREMENT_ID = "G-XBBDF32F32";</script>
+
+  <!-- Google Ads tag (AW-18196936681) + optional GA4 — web only. Guarded so it never loads inside
+       the Capacitor iOS build; index.html is copied verbatim into the native app bundle. -->
   <script>
     if (!window.Capacitor?.isNativePlatform?.()) {
       var gtagScript = document.createElement("script");
       gtagScript.async = true;
+      // Anchor the loader to the permanent Ads ID (always 200). A new or mistyped GA4 ID can 404
+      // here, and if the loader URL 404s gtag.js never loads — which would silently take the Ads
+      // tag down with it. So never key the loader off GA4_MEASUREMENT_ID; GA4 rides along as the
+      // second gtag("config") call below and is a harmless no-op until its ID actually resolves.
       gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=AW-18196936681";
       document.head.appendChild(gtagScript);
       window.dataLayer = window.dataLayer || [];
       window.gtag = function () { dataLayer.push(arguments); };
       gtag("js", new Date());
       gtag("config", "AW-18196936681");
-      gtag("config", "G-XBBDF32F32");
+      if (window.GA4_MEASUREMENT_ID) gtag("config", window.GA4_MEASUREMENT_ID);
+    }
+  </script>
+
+  <!-- Web-only chrome (the App Store badge) is gated on this class rather than removed once
+       script.js runs, so it never flashes inside the iOS app before init finishes. -->
+  <script>
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      document.documentElement.classList.add("is-web");
     }
   </script>
 
@@ -107,6 +123,13 @@
         </div>
 
         <p id="actionStatus" class="action-status" aria-live="polite"></p>
+
+        <div id="appStoreCta" class="app-store-cta">
+          <p id="appStoreCtaText" class="app-store-cta-text">Also available on iPhone and iPad</p>
+          <a id="appStoreBadgeLink" class="app-store-badge-link" href="https://apps.apple.com/app/id6768472131" target="_blank" rel="noopener noreferrer">
+            <img id="appStoreBadgeImage" class="app-store-badge" src="assets/app-store-badge/en.svg" alt="Download on the App Store" width="120" height="40" />
+          </a>
+        </div>
 
         <section class="scripture-tools" aria-label="Search and browse KJV scripture">
           <div class="tool-panel search-panel">
@@ -338,6 +361,23 @@
     </footer>
   </main>
 
+  <script>
+    (function () {
+      var productionHosts = new Set(["enlighten-me.co", "www.enlighten-me.co"]);
+      if (!productionHosts.has(window.location.hostname)) {
+        return;
+      }
+
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+
+      var script = document.createElement("script");
+      script.defer = true;
+      script.src = "/_vercel/insights/script.js";
+      script.dataset.sdkn = "@vercel/analytics";
+      script.dataset.sdkv = "2.0.1";
+      document.head.appendChild(script);
+    }());
+  </script>
   <script src="script.js"></script>
   <script src="web-subscribe.js" defer></script>
 </body>
