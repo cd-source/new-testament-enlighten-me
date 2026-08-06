@@ -8,7 +8,7 @@ Deferred work — not blocking current scope, pick up later.
 
 ## Soft-launch pre-flight
 
-- **Cross-provider deliverability check** — in progress 2026-08-06. mail-tester scored the real signup-confirm email **10/10** (SpamAssassin clean, no blocklists, no broken links). One defect found: the `_dmarc` TXT record contains a stray SPF string (`v=spf1 -all`) instead of a DMARC policy — Clive to replace it with `v=DMARC1; p=none; rua=mailto:help@enlighten-me.co` in Cloudflare (rua gives Yahoo/Microsoft/Gmail aggregate visibility without inboxes there). Still open: iCloud inbox-placement spot check via Clive's address. Note: signup test created an unconfirmed Supabase user `test-99b2whhbz@srv1.mail-tester.com` — harmless, can be deleted from Supabase Auth.
+- **Cross-provider deliverability check** — in progress 2026-08-06. mail-tester scored the real signup-confirm email **10/10** (SpamAssassin clean, no blocklists, no broken links). DMARC fixed 2026-08-06: Clive used Cloudflare's DMARC Management wizard (not a manual DNS edit) — `_dmarc` now serves `v=DMARC1; p=none; rua=mailto:…@dmarc-reports.cloudflare.net`, so aggregate Yahoo/Microsoft/Gmail reports land in Cloudflare's Email Security → DMARC Management dashboard (charts, not raw XML to help@). Verified live via dig. Still open: iCloud inbox-placement spot check via Clive's address. Note: signup test created an unconfirmed Supabase user `test-99b2whhbz@srv1.mail-tester.com` — harmless, can be deleted from Supabase Auth.
 
 ## Web UI / UX
 
