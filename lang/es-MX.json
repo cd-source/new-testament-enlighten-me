@@ -194,7 +194,7 @@
   "web_signin.error_google_generic": "Falló el inicio de sesión con Google.",
   "web_signin.error_create_account": "No se pudo crear la cuenta: {error}",
   "web_signin.error_account_exists": "Ya existe una cuenta para {email}. Inicia sesión o escribe a help@enlighten-me.co para restablecer tu contraseña.",
-  "web_signin.account_created": "Cuenta creada. Revisa {email} para confirmar el enlace y vuelve aquí para iniciar sesión.",
+  "web_signin.account_created": "Cuenta creada. Enviamos un enlace de confirmación a {email}; si no lo ves, revisa tu carpeta de spam o correo no deseado. Luego vuelve aquí para iniciar sesión.",
   "web_signin.error_signin": "No se pudo iniciar sesión: {error}",
   "web_signin.error_signin_generic": "Falló el inicio de sesión.",
   "web_signin.error_checkout_generic": "No se pudo iniciar el pago.",
