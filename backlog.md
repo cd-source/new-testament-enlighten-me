@@ -55,3 +55,9 @@ The image+URL combination was intentional (commit 80b4194) — iMessage unfurls 
 5. Try sharing while the subscription modal is open → does it fail gracefully?
 
 **If mixed-type share sheet is the issue:** remove the URL from `activityItems` (pass empty `text` to `shareImage`) and instead re-add the URL to the card image footer. The card canvas already had a footer (removed in 6139ed9) — restoring it would achieve the same discoverability without polluting the share sheet.
+
+## Art-first landing flow (/art-first) — live 2026-08-05
+- **Paywall CTA is a blunt handoff** — "Sign up & subscribe" navigates to `/`, but the subscribe panel lives inside settings with no deep link. Add a query/hash deep link (e.g. `/?subscribe=1`) that opens the subscription panel, and point the art-first paywall at it.
+- **Decide the promotion path** — /art-first is a standalone noindex page. Once web efficacy looks good: point resumed Google Ads traffic at it, and/or make it the default landing experience on `/`.
+- **iOS follow-up** — port the art-first flow into the Capacitor app and submit an update once web numbers validate it (per Clive, web first).
+- **Deck refresh** — `node scripts/generate-art-first-deck.js` regenerates the 8 curated backgrounds through the prod pipeline (needs fresh `.env.local` via `vercel env pull`; images then need `sips --resampleWidth 1400`). Consider rotating/expanding the deck later.
