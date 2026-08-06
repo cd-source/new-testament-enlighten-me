@@ -828,9 +828,15 @@ function toggleSettings() {
   setSettingsOpen(true);
 }
 
+// Set when the visitor arrived from /art-first (settings gear or paywall
+// deep link): "Back to Home" should return them to the card flow they left,
+// not strand them on the main app home.
+let returnToArtFirst = false;
+
 function openInitialViewFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const view = params.get("view");
+  returnToArtFirst = params.get("return") === "art-first";
   if (view === "settings" || view === "subscribe") setSettingsOpen(true);
   if (view === "library") setLibraryOpen(true);
   if (view === "subscribe") {
@@ -842,7 +848,7 @@ function openInitialViewFromUrl() {
     }, 350);
   }
 
-  const cleanupKeys = ["view", "lang", "language", "locale"];
+  const cleanupKeys = ["view", "lang", "language", "locale", "return"];
   const shouldCleanUrl = cleanupKeys.some((key) => params.has(key));
   if (!shouldCleanUrl) return;
 
@@ -2203,7 +2209,13 @@ function bindEvents() {
   document.getElementById("appStoreBadgeLink")?.addEventListener("click", () => {
     trackMarketingEvent("app_store_clicked", { source: "home_badge" });
   });
-  settingsBackButton.addEventListener("click", () => setSettingsOpen(false));
+  settingsBackButton.addEventListener("click", () => {
+    if (returnToArtFirst) {
+      window.location.href = "/art-first";
+      return;
+    }
+    setSettingsOpen(false);
+  });
   libraryToggle.addEventListener("click", () => setLibraryOpen(true));
   libraryBackButton.addEventListener("click", () => setLibraryOpen(false));
   libraryPrevButton.addEventListener("click", () => showLibraryOffset(-1));

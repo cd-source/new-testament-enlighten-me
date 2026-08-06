@@ -57,6 +57,11 @@ const CREATE_PROMPT_AFTER_PRESSES = 3;
 // Shared with script.js so metering and identity are one story across pages:
 // a visitor who spends the free image here is walled on index.html too.
 const FREE_IMAGE_STORAGE_KEY = "enlighten.freeImage.v1";
+// Flow state survives same-tab round trips (settings gear, subscribe deep
+// link → Back) so returning lands on the card the visitor left, not a reset
+// deck handing out three more free art cards. Session-scoped on purpose: a
+// fresh visit starts the experience over.
+const SESSION_STORAGE_KEY = "enlighten.artFirst.session.v1";
 const DEVICE_ID_STORAGE_KEY = "enlighten.deviceId.v1";
 const IMAGE_PRODUCT_ID = "enlighten_ai_images_monthly";
 const PRODUCTION_ORIGIN = "https://www.enlighten-me.co";
@@ -89,6 +94,52 @@ let showingTextOnly = false;
 let freeArtUsed = false;
 let pressesSinceFreeArt = 0;
 let isGenerating = false;
+
+function saveSession() {
+  try {
+    if (typeof sessionStorage === "undefined" || !deckOrder.length) return;
+    const state = { deckOrder, deckPosition, pressCount, freeArtUsed, pressesSinceFreeArt, showingTextOnly };
+    const generated = DECK.find((card) => card.generatedSrc);
+    try {
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ ...state, generatedRef: generated?.reference, generatedSrc: generated?.generatedSrc }));
+    } catch (error) {
+      // The generated image data URL can blow the storage quota — keep the
+      // flow position even if the artwork itself can't ride along.
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(state));
+    }
+  } catch (error) {
+    // private mode / quota — worst case the flow restarts, as before
+  }
+}
+
+// Returns { textOnly } when a saved session was restored, false otherwise.
+// Must run before prerenderDeck so a restored generatedSrc is what renders.
+function restoreSession() {
+  try {
+    if (typeof sessionStorage === "undefined") return false;
+    const raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved.deckOrder) || saved.deckOrder.length !== DECK.length) return false;
+    deckOrder = saved.deckOrder;
+    deckPosition = Math.min(Math.max(saved.deckPosition || 0, 0), DECK.length - 1);
+    pressCount = saved.pressCount || 0;
+    freeArtUsed = Boolean(saved.freeArtUsed);
+    pressesSinceFreeArt = saved.pressesSinceFreeArt || 0;
+    if (saved.generatedRef && saved.generatedSrc) {
+      const card = DECK.find((entry) => entry.reference === saved.generatedRef);
+      if (card) card.generatedSrc = saved.generatedSrc;
+    }
+    // If the visitor left while looking at their generated card but the image
+    // didn't fit in storage, fall back to verse-only rather than showing
+    // curated art they no longer have free access to.
+    let textOnly = Boolean(saved.showingTextOnly);
+    if (!textOnly && freeArtUsed && !currentCard().generatedSrc) textOnly = true;
+    return { textOnly };
+  } catch (error) {
+    return false;
+  }
+}
 
 function isLocalStaticOrigin() {
   return ["localhost", "127.0.0.1"].includes(window.location.hostname);
@@ -426,6 +477,7 @@ function press() {
       track("create_prompt_shown", { after_presses: pressCount });
     }
   }
+  saveSession();
 }
 
 function flashLabel(button, label) {
@@ -549,6 +601,7 @@ async function openCreateModal() {
     showCard(card, true);
     createProgress.hidden = true;
     createDone.hidden = false;
+    saveSession();
   } catch (error) {
     createProgress.hidden = true;
     if (error.code === "free_used") {
@@ -568,6 +621,9 @@ async function openCreateModal() {
 }
 
 pressMeButton.addEventListener("click", press);
+// Fires on every same-tab departure (settings gear, subscribe handoff, tab
+// close) — the belt to the per-mutation braces above.
+window.addEventListener("pagehide", saveSession);
 copyButton.addEventListener("click", copyVerse);
 saveButton.addEventListener("click", saveCard);
 shareButton.addEventListener("click", shareCard);
@@ -586,7 +642,7 @@ createErrorClose.addEventListener("click", () => {
 });
 paywallSignup.addEventListener("click", () => {
   track("paywall_signup_clicked", {});
-  window.location.href = "/?view=subscribe";
+  window.location.href = "/?view=subscribe&return=art-first";
 });
 paywallClose.addEventListener("click", () => {
   paywallModal.hidden = true;
@@ -604,9 +660,10 @@ document.addEventListener("keydown", (event) => {
 });
 
 (async () => {
-  deckOrder = shuffle(DECK.map((_, i) => i));
+  const restored = restoreSession();
+  if (!restored) deckOrder = shuffle(DECK.map((_, i) => i));
   await prerenderDeck();
-  showCard(currentCard(), false);
+  showCard(currentCard(), false, restored ? restored.textOnly : false);
   document.body.classList.add("deck-ready");
-  track("web_visit", { source: "art-first" });
+  track("web_visit", { source: "art-first", restored: Boolean(restored) });
 })();
