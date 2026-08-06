@@ -4,7 +4,7 @@ Deferred work — not blocking current scope, pick up later.
 
 ## Repo / deploy
 
-- **`release/1.2` predates the deploy-root fix** — it still has `lib/` at the repo root and no `.vercelignore`, so its previews still serve internal files (SSO-protected and noindex, so not urgent). Merging `main` in resolves both; the rename applies cleanly because the branch never touched `lib/` or `api/`. Its untracked local `api/marketing-event.js` still requires `../lib/entitlement.js` and would need repointing at `./_lib/` — `main`'s committed copy is already correct.
+- ~~`release/1.2` predates the deploy-root fix~~ — done 2026-08-06: `main` merged into `release/1.2` (5405265) and pushed; branch now has `.vercelignore`, `api/_lib/`, green button, free-first paywall, and art-first. In-progress iOS work was committed first (fcc52ca); the worktree's stale untracked art-first prototype files were backed up to `~/Documents/Gee/cos/release12-untracked-backup-2026-08-06/`.
 
 ## Soft-launch pre-flight
 
@@ -57,6 +57,7 @@ The image+URL combination was intentional (commit 80b4194) — iMessage unfurls 
 **If mixed-type share sheet is the issue:** remove the URL from `activityItems` (pass empty `text` to `shareImage`) and instead re-add the URL to the card image footer. The card canvas already had a footer (removed in 6139ed9) — restoring it would achieve the same discoverability without polluting the share sheet.
 
 ## Art-first landing flow (/art-first) — live 2026-08-05
-- **Decide the promotion path** — /art-first is a standalone noindex page. Once web efficacy looks good: point resumed Google Ads traffic at it, and/or make it the default landing experience on `/`.
+- **Ads test LIVE 2026-08-06** — `EM_WEB_GS_ARTFIRST` (Search, US/EN, $15/day, id 24111391619) enabled via the Ads API, pending Google ad review. Read-out: `~/Documents/Gee/cos/ga4-report/art_first_funnel.py --sources`; baseline to beat is 11.8% press rate.
+- **Decide the promotion path** — once the test reads out: make /art-first the default landing on `/` (and/or keep it the ads destination), then import the GA4 conversion into Google Ads.
 - **iOS follow-up** — port the art-first flow into the Capacitor app and submit an update once web numbers validate it (per Clive, web first).
 - **Deck refresh** — `node scripts/generate-art-first-deck.js` regenerates the 8 curated backgrounds through the prod pipeline (needs fresh `.env.local` via `vercel env pull`; images then need `sips --resampleWidth 1400`). Consider rotating/expanding the deck later.
