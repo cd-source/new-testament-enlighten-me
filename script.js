@@ -1400,6 +1400,7 @@ function setCurrentPassage(passage, options = {}) {
 }
 
 function enlighten() {
+  trackMarketingEvent("press_me", currentPassageMarketingData());
   setCurrentPassage(getRandomPassage());
 }
 
