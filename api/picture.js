@@ -422,3 +422,10 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
+// Reused by scripts/generate-art-first-deck.js so the curated art-first deck
+// ships images from this exact prompt-writer + Freepik pipeline — the landing
+// art can't drift in style from what subscribers generate live.
+module.exports.writeIllustrationPrompt = writeIllustrationPrompt;
+module.exports.startFreepikImage = startFreepikImage;
+module.exports.pollFreepikImage = pollFreepikImage;

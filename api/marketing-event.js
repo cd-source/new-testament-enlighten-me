@@ -16,6 +16,16 @@ const ALLOWED_EVENTS = new Set([
   "subscribe_clicked",
   "subscribe_completed",
   "app_store_clicked",
+  // Art-first landing flow (art-first.html)
+  "press_me",
+  "create_prompt_shown",
+  "create_prompt_dismissed",
+  "create_clicked",
+  "create_failed",
+  "card_copied",
+  "paywall_shown",
+  "paywall_dismissed",
+  "paywall_signup_clicked",
 ]);
 
 const STRING_FIELDS = new Set([
@@ -33,10 +43,11 @@ const STRING_FIELDS = new Set([
   "translation",
   "source",
   "tier",
+  "page",
 ]);
 
-const NUMBER_FIELDS = new Set(["query_length", "result_count"]);
-const BOOLEAN_FIELDS = new Set(["fallback"]);
+const NUMBER_FIELDS = new Set(["query_length", "result_count", "press_count", "after_presses"]);
+const BOOLEAN_FIELDS = new Set(["fallback", "verse_only"]);
 
 function json(req, res, status, body) {
   res.statusCode = status;

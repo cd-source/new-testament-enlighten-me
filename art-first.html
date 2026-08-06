@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Landing-flow experiment: kept out of search results while we measure it. -->
+  <meta name="robots" content="noindex" />
+  <title>Enlighten-Me — Scripture Cards</title>
+
+  <script>window.GA4_MEASUREMENT_ID = "G-XBBDF32F32";</script>
+  <!-- Same AW-anchored gtag loader as index.html: the loader URL must key off the
+       permanent Ads ID (always 200) — a bad GA4 ID would 404 and kill both tags. -->
+  <script>
+    var gtagScript = document.createElement("script");
+    gtagScript.async = true;
+    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=AW-18196936681";
+    document.head.appendChild(gtagScript);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { dataLayer.push(arguments); };
+    gtag("js", new Date());
+    gtag("config", "AW-18196936681");
+    if (window.GA4_MEASUREMENT_ID) gtag("config", window.GA4_MEASUREMENT_ID);
+  </script>
+  <script>
+    (function () {
+      if (["localhost", "127.0.0.1"].includes(window.location.hostname)) return;
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+      var script = document.createElement("script");
+      script.defer = true;
+      script.src = "/_vercel/insights/script.js";
+      script.dataset.sdkn = "@vercel/analytics";
+      script.dataset.sdkv = "2.0.1";
+      document.head.appendChild(script);
+    }());
+  </script>
+
+  <link rel="stylesheet" href="art-first.css" />
+</head>
+<body>
+  <main class="stage" aria-label="Scripture card">
+    <div class="card-stage">
+      <img id="cardA" class="card-layer visible" alt="Enlighten-Me scripture card" />
+      <img id="cardB" class="card-layer" alt="" aria-hidden="true" />
+    </div>
+
+    <div class="utility-row">
+      <button id="copyButton" class="utility-button" type="button">Copy</button>
+      <span class="utility-divider" aria-hidden="true">·</span>
+      <button id="saveButton" class="utility-button" type="button">Save</button>
+      <span class="utility-divider" aria-hidden="true">·</span>
+      <button id="shareButton" class="utility-button" type="button">Share Card</button>
+    </div>
+
+    <footer class="press-area">
+      <button id="pressMeButton" class="press-me" type="button" aria-label="Press me for another scripture card">
+        PRESS ME
+      </button>
+      <p class="press-hint">Every press, a new verse and new art</p>
+    </footer>
+
+    <aside id="createPrompt" class="create-prompt" hidden>
+      <div class="create-prompt-inner">
+        <p class="create-prompt-title">Make this verse your own</p>
+        <p class="create-prompt-body">Create a one-of-a-kind artwork for the verse you're looking at — your first is free.</p>
+        <div class="create-prompt-actions">
+          <button id="createButton" class="create-button" type="button">Create my card — free</button>
+          <button id="dismissPrompt" class="dismiss-button" type="button" aria-label="Not now">Not now</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div id="createModal" class="create-modal" hidden>
+    <div class="create-modal-card">
+      <div id="createProgress" class="create-progress">
+        <div class="shimmer"></div>
+        <p id="createStatus" class="create-status">Creating your artwork… this takes about 20 seconds.</p>
+      </div>
+      <div id="createDone" class="create-done" hidden>
+        <p class="create-done-title">Your artwork is ready.</p>
+        <p class="create-done-body">Close this to see your card — it's yours to save and share.</p>
+        <button id="closeModal" class="create-button" type="button">See my card</button>
+      </div>
+      <div id="createError" class="create-done" hidden>
+        <p class="create-done-title">Something went wrong</p>
+        <p id="createErrorBody" class="create-done-body"></p>
+        <button id="createErrorClose" class="dismiss-button" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="paywallModal" class="create-modal" hidden>
+    <div class="create-modal-card">
+      <div class="create-done">
+        <p class="create-done-title">Keep creating</p>
+        <p class="create-done-body">You've used your free creation. Sign up to make a one-of-a-kind card for any verse, whenever you want.</p>
+        <button id="paywallSignup" class="create-button" type="button">Sign up &amp; subscribe</button>
+        <button id="paywallClose" class="dismiss-button" type="button">Not now</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="art-first.js"></script>
+</body>
+</html>
