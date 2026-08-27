@@ -357,7 +357,7 @@ function renderSearchResults(query) {
   }
 
   setContentBusy(false);
-  track("scripture_search", {
+  track("bible_search", {
     query_length: String(query).trim().length,
     result_count: matches.length,
     exact_reference: false,
@@ -378,12 +378,12 @@ function runSearch(query, source = "search") {
       const verse = findVerse(cleaned);
       if (verse) {
         renderPassage(verse, source);
-        track("scripture_search", { query_length: cleaned.length, result_count: 1, exact_reference: true });
+        track("bible_search", { query_length: cleaned.length, result_count: 1, exact_reference: true });
         return;
       }
     } else {
       renderChapter(parsed.book, parsed.chapter, source);
-      track("scripture_search", { query_length: cleaned.length, result_count: 1, exact_reference: true, chapter_query: true });
+      track("bible_search", { query_length: cleaned.length, result_count: 1, exact_reference: true, chapter_query: true });
       return;
     }
   }

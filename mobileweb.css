@@ -16,6 +16,13 @@
   box-sizing: border-box;
 }
 
+/* Author `display` rules outrank the UA stylesheet's `[hidden] { display: none }`,
+   so elements toggled via element.hidden (.art-offer, .generation-progress)
+   never actually hide. This restores the intent. */
+[hidden] {
+  display: none !important;
+}
+
 html {
   background: var(--navy);
 }
